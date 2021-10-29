@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import Actions from './pages/Actions.vue';
+import Actions from './views/Actions.vue';
 import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
 

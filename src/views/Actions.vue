@@ -21,25 +21,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>uni.FTSE | 19-10-2021	</td>
-                                    <td>125 у.е</td>
-                                    <td>10</td>
-                                </tr>
-                                <tr>
-                                    <td>uni.FTSE | 19-10-2021	</td>
-                                    <td>125 у.е</td>
-                                    <td>10</td>
-                                </tr>
-                                <tr>
-                                    <td>uni.FTSE | 19-10-2021	</td>
-                                    <td>125 у.е</td>
-                                    <td>10</td>
-                                </tr>
-                                <tr>
-                                    <td>uni.FTSE | 19-10-2021	</td>
-                                    <td>125 у.е</td>
-                                    <td>10</td>
+                                <tr v-for="(instrument, index) in instruments" :key="index" @click="getTableItem(instrument)">
+                                    <td>{{ instrument.Name }}</td>
+                                    <td>{{ instrument.Price }}</td>
+                                    <td>{{ instrument.Rewards }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -59,45 +44,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>uni.FTSE | 19-10-2021	</td>
-                                    <td>-</td>
-                                    <td>51 300</td>
-                                    <td>51 300</td>
-                                    <td>100</td>
-                                    <td>3000</td>
-                                </tr>
-                                <tr>
-                                    <td>uni.FTSE | 19-10-2021	</td>
-                                    <td>-</td>
-                                    <td>51 300</td>
-                                    <td>51 300</td>
-                                    <td>100</td>
-                                    <td>3000</td>
-                                </tr>
-                                <tr>
-                                    <td>uni.FTSE | 19-10-2021	</td>
-                                    <td>-</td>
-                                    <td>51 300</td>
-                                    <td>51 300</td>
-                                    <td>100</td>
-                                    <td>3000</td>
-                                </tr>
-                                <tr>
-                                    <td>uni.FTSE | 19-10-2021	</td>
-                                    <td>-</td>
-                                    <td>51 300</td>
-                                    <td>51 300</td>
-                                    <td>100</td>
-                                    <td>3000</td>
-                                </tr>
-                                <tr>
-                                    <td>uni.FTSE | 19-10-2021	</td>
-                                    <td>-</td>
-                                    <td>51 300</td>
-                                    <td>51 300</td>
-                                    <td>100</td>
-                                    <td>3000</td>
+                                <tr v-for="(portfolios, index) in portfolio" :key="index" @click="getTableItem(portfolios)">
+                                    <td>{{ portfolios.Name }}</td>
+                                    <td>{{ portfolios.Status }}</td>
+                                    <td>{{ portfolios.Number }}</td>
+                                    <td>{{ portfolios.Value }}</td>
+                                    <td>{{ portfolios.GT }}</td>
+                                    <td>{{ portfolios.OPIUM }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -319,6 +272,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'Actions',
   props: {
@@ -326,11 +281,28 @@ export default {
   },
   data(){
       return {
-          instruments: []
+          instruments: [],
+          portfolio: []
       }
   },
   methods: {
-
+      async getJsonData() {
+          try {
+              const instrumnentsJson = await axios.get('./static/json/unisx_instruments.json');
+              const portfolioJson = await axios.get('./static/json/unisx_portfolio.json');
+              
+              this.instruments = instrumnentsJson.data;
+              this.portfolio = portfolioJson.data;
+          } catch(e) {
+              console.error(e);
+          }
+      },
+      getTableItem(item) {
+          console.log(item);
+      }
+  },
+  mounted() {
+      this.getJsonData();
   }
 }
 </script>
