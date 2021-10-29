@@ -5,7 +5,8 @@
                 <div class="col-md-12">
                     <div class="h2_flex">
                         <h2>{{ h2 }}</h2>
-                        <button class="orangebut">Connect Wallet</button>
+                        <p class="account-id" v-if="networkId && userAccount">{{ networkId }} {{ userAccount }}</p>
+                        <button class="orangebut" @click="connectWallet">Connect Wallet</button>
                     </div>
                 </div>
             </div>
@@ -282,27 +283,128 @@ export default {
   data(){
       return {
           instruments: [],
-          portfolio: []
+          portfolio: [],
+          provider: window.detectEthereumProvider(),
+          userAccount: '',
+          networkId: ''
       }
   },
   methods: {
-      async getJsonData() {
-          try {
-              const instrumnentsJson = await axios.get('./static/json/unisx_instruments.json');
-              const portfolioJson = await axios.get('./static/json/unisx_portfolio.json');
-              
-              this.instruments = instrumnentsJson.data;
-              this.portfolio = portfolioJson.data;
-          } catch(e) {
-              console.error(e);
-          }
-      },
-      getTableItem(item) {
-          console.log(item);
-      }
+    async fillTables() {
+        this.instruments = await this.getJSONdata('./static/json/unisx_instruments.json');
+        this.portfolio = await this.getJSONdata('./static/json/unisx_portfolio.json');
+    },
+      
+    getTableItem(item) {
+        console.log(item);
+    },
+
+    async connectWallet() {
+        /* Подключение кошелька */
+        if (this.provider) {
+            if (typeof window.ethereum !== 'undefined') {
+                /* Если тип кошелька MetaMask - подключиться */
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const account = accounts[0];
+                console.log('MetaMask Connected = ', window.ethereum);
+                localStorage.setItem('userAccount', account);
+                localStorage.setItem('networkId', this.getNetworkId());
+                this.userAccount = account;
+                this.networkId = this.getNetworkId();
+                this.getPortfolioList(account);
+
+                /* Где-то здесь будем подключать и друие кошельки */
+            } else {
+                console.log('No MetaMask Installed...');
+            }
+        } else {
+            console.log('No Web3 Detected...'); 
+        }
+    },
+
+    getNetworkId () {
+        const chainId =Number(window.ethereum.chainId);
+        let chainType = [0, 'Ethereum Main Network (Mainnet): ', 2, 'Ropsten Test Network: ',
+                            'Rinkeby Test Network: ', 'Goerli Test Network: ',6,7,8,9,10,11,12,13,14,15,
+                            16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,
+                            40,41,'Kovan Test Network: '];
+        return (chainType[chainId]);
+    },
+
+    async getJSONdata(url) {
+        try {
+            const res = await axios.get(url);
+            return res.data;
+        } catch(e) {
+            console.error(e);
+            return '';
+        }
+    },
+
+    async getPortfolioList(walletAddress) {
+        /* Перебор всех возможных токенов */
+        /*      Проверить количество каждого токена по userAccount */
+        /*      Если количество токенов > 0 то занести токен и его количество в массив */
+        /*          - в отдельные элементы в зависимости от состояния. */
+
+        const defi_tokens = await this.getJSONdata('./static/json/defi_tokens.json');
+        const stablecoins = await this.getJSONdata('./static/json/stablecoins.json');
+        const dex_lp = await this.getJSONdata('./static/json/dex_lp.json');   
+        const tokenAddress =  [].concat(defi_tokens, stablecoins); 
+
+        if (dex_lp.length) {
+            for(let i=0; i<dex_lp.length; i++) {   
+                tokenAddress.push({token:dex_lp[i].token,decimals:dex_lp[i].decimals,address:dex_lp[i].address});      
+            }
+        }
+        
+        // Баланс ETH
+        let balanceETH = Number(await window.ethereum.request({ 
+            method: 'eth_getBalance',
+            params: [walletAddress, 'latest']
+        }));
+        let decimals = 18;
+        balanceETH = balanceETH / (10**decimals);
+        console.log('Balance of ETH = ', balanceETH);
+
+        let e = {};
+        e.Name = "ETH";
+        e.Status = "-";
+        e.Number = balanceETH;
+        e.Value = 0;
+        e.GT = 0;
+        e.UMA = 0;
+        e.Instrument = "";
+
+        // Баланс токенов ERC20
+        for (let i of tokenAddress) {
+            let a = {};
+            let balance = await window.ethereum.request({
+                method: 'eth_getBalance',
+                params: [i.address,'latest']
+            });
+            balance = balance / (10**i.decimals);
+            console.log('Balance of ',i.token, ' = ', Number(balance));
+            // Проверить статус - в кошельке, пул или стейк
+            a.Name = i.token;
+            a.Status = "-";
+            a.Number = balance;
+            a.Value = 0;
+            a.GT = 0;
+            a.UMA = 0;
+            a.Instrument = "";
+        }
+
+    }
   },
   mounted() {
-      this.getJsonData();
+      this.fillTables();
   }
 }
 </script>
+<style scoped>
+    p.account-id {
+        color: #fff;
+        margin: 0 20px 0 auto;
+    }
+</style>
