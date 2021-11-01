@@ -9,9 +9,6 @@
             <tbody>
                 <tr v-for="(instrument, index) in tableData" :key="index" @click="getTableItem(instrument)">
                     <td v-for="(row) in tableRows" :key="instrument[row[0]]">{{ instrument[row] }}</td>
-                    <!-- <td>{{ instrument.Name }}</td>
-                    <td>{{ instrument.Price }}</td>
-                    <td>{{ instrument.Rewards }}</td> -->
                 </tr>
             </tbody>
         </table>
