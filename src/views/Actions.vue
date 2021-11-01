@@ -5,57 +5,27 @@
                 <div class="col-md-12">
                     <div class="h2_flex">
                         <h2>{{ h2 }}</h2>
-                        <p class="account-id" v-if="networkId && userAccount">{{ networkId }} {{ userAccount }}</p>
+                        <p class="account-id" v-if="NETWORK_ID && USER_ACCOUNT">{{ NETWORK_ID }} {{ USER_ACCOUNT }}</p>
                         <button class="orangebut" @click="connectWallet">Connect Wallet</button>
                     </div>
                 </div>
             </div>
             <div class="row flex cards" data-aos="fade-up" data-aos-delay="1000" data-aos-duration="800">
                 <div class="col-md-5 col-sm-12 col-xs-12">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                           <thead>
-                                <tr>
-                                <th scope="col">Instrument</th>
-                                <th scope="col">Price, USD</th>
-                                <th scope="col">Rewards APY</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(instrument, index) in instruments" :key="index" @click="getTableItem(instrument)">
-                                    <td>{{ instrument.Name }}</td>
-                                    <td>{{ instrument.Price }}</td>
-                                    <td>{{ instrument.Rewards }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <v-table 
+                        :tableData="INSTRUMENTS"
+                        :tableHeaders="['Instrument', 'Price, USD', 'Rewards APY']"
+                        :tableRows="['Name', 'Price', 'Rewards']"
+                        @getTableItem="getTableItem"
+                    />
                 </div>
                 <div class="col-md-7 col-sm-12 col-xs-12">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                           <thead>
-                                <tr>
-                                <th scope="col">Portfolio</th>
-                                <th scope="col">Status</th>
-                                <th scope="col">Number</th>
-                                <th>Value</th>
-                                <th>GT</th>
-                                <th>OPIUM</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(portfolios, index) in portfolio" :key="index" @click="getTableItem(portfolios)">
-                                    <td>{{ portfolios.Name }}</td>
-                                    <td>{{ portfolios.Status }}</td>
-                                    <td>{{ portfolios.Number }}</td>
-                                    <td>{{ portfolios.Value }}</td>
-                                    <td>{{ portfolios.GT }}</td>
-                                    <td>{{ portfolios.OPIUM }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <v-table 
+                        :tableData="PORTFOLIO"
+                        :tableHeaders="['Portfolio', 'Number', 'Value, USD', 'Rewards']"
+                        :tableRows="['Name', 'Number', 'Value', 'Rewards']"
+                        @getTableItem="getTableItem"
+                    />
                 </div>
             </div>
             
@@ -65,7 +35,6 @@
                         <li role="presentation" class="active"><a href="#cardtab1" role="tab" data-toggle="tab">Instrument</a></li>
                         <li role="presentation"><a href="#cardtab2" role="tab" data-toggle="tab">POOL</a></li>
                         <li role="presentation"><a href="#cardtab3" role="tab" data-toggle="tab">STAKE</a></li>
-                        <li role="presentation"><a href="#cardtab4" role="tab" data-toggle="tab">VOTE</a></li>
                     </ul>
                     <div class="cards_in_tab">
                         <div class="tab-content">
@@ -224,46 +193,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div role="tabpanel" class="tab-pane fade" id="cardtab4">
-                                <h2>Voting Interface</h2>
-                                <div class="tab1_elems">
-                                    <div class="row flex cards">
-                                        <div class="col-md-5 col-sm-5 col-xs-12">
-                                            <select>
-                                                <option value="">Choose DEX</option>
-                                                <option value="">Choose DEX</option>
-                                                <option value="">Choose DEX</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-7 col-sm-7 col-xs-12">
-                                            <textarea placeholder="Question text"></textarea>
-                                        </div>
-                                    </div>
-                                    
-                                </div>
-                                
-                                <h4>Text heading h4</h4>
-                                <div class="row flex cards choose_option">
-                                    <div class="col-md-3 col-sm-4 col-xs-12">
-                                        <div class="option_elem checked">Yes</div>
-                                    </div>
-                                    <div class="col-md-3 col-sm-4 col-xs-12">
-                                        <div class="option_elem">No</div>
-                                    </div>
-                                </div>
-                                
-                                
-                                <div class="row flex cards button_flex">
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <button class="orangebut">Burn</button>
-                                        </div>
-                                        <div class="col-md-9 col-sm-8 col-xs-12">
-                                            <div class="but_flex">
-                                                <button class="cancelbut">Cancel</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -273,27 +202,28 @@
 </template>
 
 <script>
-import axios from 'axios';
+import getJSONdata from '../helpers';
+import {mapActions, mapGetters} from 'vuex';
+import vTable from '../components/elements/v-table.vue';
 
 export default {
   name: 'Actions',
   props: {
       h2: String
   },
+  components: {
+      vTable
+  },
   data(){
-      return {
-          instruments: [],
-          portfolio: [],
-          provider: window.detectEthereumProvider(),
-          userAccount: '',
-          networkId: ''
-      }
+      return {}
   },
   methods: {
-    async fillTables() {
-        this.instruments = await this.getJSONdata('./static/json/unisx_instruments.json');
-        this.portfolio = await this.getJSONdata('./static/json/unisx_portfolio.json');
-    },
+    ...mapActions([
+        'GET_INSTRUMENTS_FROM_API',
+        'GET_PORTFOLIO_FROM_API',
+        'GET_USER_ACCOUNT',
+        'GET_NETWORK_ID'
+    ]),
       
     getTableItem(item) {
         console.log(item);
@@ -301,16 +231,16 @@ export default {
 
     async connectWallet() {
         /* Подключение кошелька */
-        if (this.provider) {
+        if (window.detectEthereumProvider()) {
             if (typeof window.ethereum !== 'undefined') {
                 /* Если тип кошелька MetaMask - подключиться */
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 const account = accounts[0];
                 console.log('MetaMask Connected = ', window.ethereum);
                 localStorage.setItem('userAccount', account);
-                localStorage.setItem('networkId', this.getNetworkId());
-                this.userAccount = account;
-                this.networkId = this.getNetworkId();
+                localStorage.setItem('networkId', this.NETWORK_ID);
+
+                this.GET_USER_ACCOUNT(account);
                 this.getPortfolioList(account);
 
                 /* Где-то здесь будем подключать и друие кошельки */
@@ -322,34 +252,15 @@ export default {
         }
     },
 
-    getNetworkId () {
-        const chainId =Number(window.ethereum.chainId);
-        let chainType = [0, 'Ethereum Main Network (Mainnet): ', 2, 'Ropsten Test Network: ',
-                            'Rinkeby Test Network: ', 'Goerli Test Network: ',6,7,8,9,10,11,12,13,14,15,
-                            16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,
-                            40,41,'Kovan Test Network: '];
-        return (chainType[chainId]);
-    },
-
-    async getJSONdata(url) {
-        try {
-            const res = await axios.get(url);
-            return res.data;
-        } catch(e) {
-            console.error(e);
-            return '';
-        }
-    },
-
     async getPortfolioList(walletAddress) {
         /* Перебор всех возможных токенов */
         /*      Проверить количество каждого токена по userAccount */
         /*      Если количество токенов > 0 то занести токен и его количество в массив */
         /*          - в отдельные элементы в зависимости от состояния. */
+        const defi_tokens = await getJSONdata('./static/json/defi_tokens.json');
+        const stablecoins = await getJSONdata('./static/json/stablecoins.json');
+        const dex_lp = await getJSONdata('./static/json/dex_lp.json');
 
-        const defi_tokens = await this.getJSONdata('./static/json/defi_tokens.json');
-        const stablecoins = await this.getJSONdata('./static/json/stablecoins.json');
-        const dex_lp = await this.getJSONdata('./static/json/dex_lp.json');   
         const tokenAddress =  [].concat(defi_tokens, stablecoins); 
 
         if (dex_lp.length) {
@@ -397,8 +308,15 @@ export default {
 
     }
   },
+  computed: {
+      ...mapGetters([
+          'INSTRUMENTS', 'PORTFOLIO', 'USER_ACCOUNT', 'NETWORK_ID'
+      ]),
+  },
   mounted() {
-      this.fillTables();
+      this.GET_INSTRUMENTS_FROM_API();
+      this.GET_PORTFOLIO_FROM_API();
+      this.GET_NETWORK_ID();
   }
 }
 </script>
