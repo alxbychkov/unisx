@@ -4,8 +4,8 @@
             <div class="row" data-aos="fade-up" data-aos-delay="600" data-aos-duration="800">
                 <div class="col-md-12">
                     <div class="h2_flex">
-                        <h2>{{ h2 }}</h2>
-                        <p class="account-id" v-if="NETWORK_ID && USER_ACCOUNT">{{ NETWORK_ID }} {{ USER_ACCOUNT }}</p>
+                        <div><h2 v-if="NETWORK_ID">{{ NETWORK_ID }}</h2></div>
+                        <p class="account-id" v-if="USER_ACCOUNT">{{ USER_ACCOUNT }}</p>
                         <button class="orangebut" @click="connectWallet">Connect Wallet</button>
                     </div>
                 </div>
@@ -21,7 +21,7 @@
                 </div>
                 <div class="col-md-7 col-sm-12 col-xs-12">
                     <v-table 
-                        :tableData="PORTFOLIO"
+                        :tableData="portfolio"
                         :tableHeaders="['Portfolio', 'Number', 'Value, USD', 'Rewards']"
                         :tableRows="['Name', 'Number', 'Value', 'Rewards']"
                         @getTableItem="getTableItem"
@@ -39,156 +39,120 @@
                     <div class="cards_in_tab">
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane fade in active" id="cardtab1">
-                                <h2>Minting Interface</h2>
-                                <div class="tab1_elems">
-                                    <div class="row flex cards">
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <input type="text" placeholder="Ticker">
+                                <div class="row flex cards j-between">
+                                    <div class="col-md-3 col-sm-4 col-xs-12 flex-collumn">
+                                        <h4>SYTHETIC</h4>
+                                        <div class="flex mb-10 flex-row-2 flex j-between">
+                                            <input type="text" placeholder="0.000" class="mb-10">
+                                            <input type="text" placeholder="Token" :value="selectedItem.Name">
                                         </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <input type="text" placeholder="Ticker">
+                                        <div class="flex mb-10 flex-row-2 flex j-between">
+                                            <input type="text" placeholder="0.000" class="mb-10">
+                                            <input type="text" placeholder="Token" :value="selectedItem.Name">
                                         </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <input type="text" value="UMA Estimated" disabled>
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12 mobide">
-                                            
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <select>
-                                                <option value="">USDC</option>
-                                                <option value="">USDC</option>
-                                                <option value="">USDC</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <input type="text" placeholder="Collateral (calculated)">
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12 mobide">
-                                            
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12 mobide">
-                                            
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <input type="text" placeholder="Number">
+                                        <div class="but_flex mt-auto">
+                                            <button class="cancelbut">Mint</button>
+                                            <button class="blueb">Burn</button>
                                         </div>
                                     </div>
-                                    
-                                    <div class="row flex cards button_flex">
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <button class="orangebut">Burn</button>
+                                    <div class="col-md-5 col-sm-4 col-xs-12 flex-collumn">
+                                        <div data-type="widget" class="mb-auto"></div>
+                                        <div class="description mb-10" v-if="selectedItem.Description">{{ selectedItem.Description }}</div>
+                                        <div class="flex mb-10 flex-row-2 flex j-between">
+                                            <input type="text" value="" placeholder="0.0000 UNSX" class="mb-10">
+                                            <input type="text" value="" placeholder="0.0000 UMA">
                                         </div>
-                                        <div class="col-md-9 col-sm-8 col-xs-12">
-                                            <div class="but_flex">
-                                                <button class="cancelbut">Cancel</button>
-                                                <button class="blueb">Mint</button>
-                                            </div>
+                                        <button class="orangebut lr-auto">Claim Rewards</button>
+                                    </div>
+                                    <div class="col-md-3 col-sm-4 col-xs-12">
+                                        <h4>COLLATERAL</h4>
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                                            <span>Collateral Ratio</span>
+                                            <input type="text" placeholder="0.000">
+                                        </div>
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                                            <span>Liquidation Price</span>
+                                            <input type="text" placeholder="0.000">
+                                        </div>
+                                        <div class="flex mb-10 flex-row-2 flex j-between">
+                                            <input type="text" placeholder="0.000" class="mb-10">
+                                            <input type="text" placeholder="Token" :value="selectedItem.Name">
+                                        </div>
+                                        <div class="but_flex">
+                                            <button class="cancelbut">Supply</button>
+                                            <button class="blueb">Withdraw</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="cardtab2">
-                                <h2>Pooling Interface</h2>
-                                <div class="tab1_elems">
-                                    <div class="row flex cards">
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <select>
-                                                <option value="">Choose DEX</option>
-                                                <option value="">Choose DEX</option>
-                                                <option value="">Choose DEX</option>
-                                            </select>
+                                <div class="row flex cards j-between">
+                                    <div class="col-md-7 col-sm-7 col-xs-12">
+                                        <div class="flex mb-10 flex-row">
+                                            <input type="text" placeholder="0.000" class="mr-10">
+                                            <input type="text" placeholder="Token" :value="selectedItem.Name">
+                                            <input type="text" placeholder="0.000" class="ml-a">
                                         </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <select>
-                                                <option value="">USDC</option>
-                                                <option value="">USDC</option>
-                                                <option value="">USDC</option>
-                                            </select>
+                                        <div class="flex mb-10 flex-row">
+                                            <input type="text" placeholder="0.000" class="mr-10">
+                                            <div class="select-wrapp">
+                                                <select>
+                                                    <option value="" disabled selected>Stable Coin</option>
+                                                    <option 
+                                                        v-for="coin in stableCoinsTypes"
+                                                        :key="coin"
+                                                        :value="coin">{{ coin }}</option>
+                                                </select>
+                                            </div>
+                                            <input type="text" placeholder="0.000" class="ml-a">
                                         </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12 mobide">
-                                            
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12 mobide">
-                                            
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <select disabled>
-                                                <option value="">Token</option>
-                                                <option value="">Token</option>
-                                                <option value="">Token</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <input type="text" placeholder="Collateral (calculated)">
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12 mobide">
-                                            
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12 mobide">
-                                            
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <input type="text" placeholder="Number">
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <input type="text" placeholder="Required Number">
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
+                                        <div class="mt-20 half-row">
+                                            <div class="radios mb-10">
+                                                <span>Commision</span>
+                                                <input type="radio" name="commision" value="0.05" id="005" checked="">
+                                                <label for="005">0.05%</label>
+                                                <input type="radio" name="commision" value="0.3" id="03">
+                                                <label for="03">0.3%</label>
+                                                <input type="radio" name="commision" value="1" id="1">
+                                                <label for="1">1%</label>
+                                            </div>
                                             <input type="text" placeholder="LP Estimated">
                                         </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <input type="text" placeholder="Comission Estimated">
+                                        <div class="but_flex ml-0">
+                                            <button class="cancelbut">UnPool</button>
+                                            <button class="blueb">Pool</button>
                                         </div>
                                     </div>
-                                    
-                                    <div class="row flex cards button_flex">
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <button class="orangebut">Burn</button>
-                                        </div>
-                                        <div class="col-md-9 col-sm-8 col-xs-12">
-                                            <div class="but_flex">
-                                                <button class="cancelbut">Cancel</button>
-                                                <button class="blueb">Pool</button>
-                                            </div>
-                                        </div>
+                                    <div class="col-md-5 col-sm-5 col-xs-12">
+
                                     </div>
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="cardtab3">
-                                <h2>Staking Interface</h2>
-                                <div class="tab1_elems">
-                                    <div class="row flex cards">
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <input type="text" placeholder="Token">
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12 mobide">
-                                            
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12 mobide">
-                                            
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12 mobide">
-                                            
-                                        </div>
-                                        
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <input type="text" placeholder="Number">
-                                        </div>
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <input type="text" value="GT Estimated" disabled>
+                                <div class="row flex cards j-between">
+                                    <div class="col-md-3 col-sm-4 col-xs-12">
+                                        <input type="text" placeholder="0.000" class="mb-10">
+                                        <input type="text" placeholder="Token" :value="selectedItem.Name">
+                                        <div class="but_flex">
+                                            <button class="cancelbut">UnStake</button>
+                                            <button class="blueb">Stake</button>
                                         </div>
                                     </div>
-                                    
-                                    <div class="row flex cards button_flex">
-                                        <div class="col-md-3 col-sm-4 col-xs-12">
-                                            <button class="orangebut">Burn</button>
+                                    <div class="col-md-3 col-sm-4 col-xs-12 flex-collumn">
+                                        <input type="text" value="" placeholder="0.0000 UNSX">
+                                        <button class="orangebut mt-auto">Claim Rewards</button>
+                                    </div>
+                                    <div class="col-md-3 col-sm-4 col-xs-12">
+                                        <input type="text" placeholder="0.000" class="mb-10">
+                                        <div class="select-wrapp">
+                                            <select>
+                                                <option value="" selected disabled>Choose DEX</option>
+                                                <option v-for="dex in dexLP" :key="dex" :value="dex">{{ dex }}</option>
+                                            </select>
                                         </div>
-                                        <div class="col-md-9 col-sm-8 col-xs-12">
-                                            <div class="but_flex">
-                                                <button class="cancelbut">Cancel</button>
-                                                <button class="blueb">Pool</button>
-                                            </div>
+                                        <div class="but_flex">
+                                            <button class="cancelbut">UnStake</button>
+                                            <button class="blueb">Stake</button>
                                         </div>
                                     </div>
                                 </div>
@@ -202,7 +166,7 @@
 </template>
 
 <script>
-import getJSONdata from '../helpers';
+import {getUnicCoins} from '../helpers';
 import {mapActions, mapGetters} from 'vuex';
 import vTable from '../components/elements/v-table.vue';
 
@@ -215,18 +179,24 @@ export default {
       vTable
   },
   data(){
-      return {}
+      return {
+          portfolio: localStorage.getItem('portfolioList') ? JSON.parse(localStorage.getItem('portfolioList')) : [],
+          selectedItem: ''
+      }
   },
   methods: {
     ...mapActions([
         'GET_INSTRUMENTS_FROM_API',
         'GET_PORTFOLIO_FROM_API',
         'GET_USER_ACCOUNT',
-        'GET_NETWORK_ID'
+        'GET_NETWORK_ID',
+        'GET_STABLECOINS_FROM_API',
+        'GET_DEX_LP_FROM_API',
+        'GET_DEFI_TOKENS_FROM_API'
     ]),
       
     getTableItem(item) {
-        console.log(item);
+        this.selectedItem = item;
     },
 
     async connectWallet() {
@@ -238,10 +208,9 @@ export default {
                 const account = accounts[0];
                 console.log('MetaMask Connected = ', window.ethereum);
                 localStorage.setItem('userAccount', account);
-                localStorage.setItem('networkId', this.NETWORK_ID);
-
                 this.GET_USER_ACCOUNT(account);
-                this.getPortfolioList(account);
+                this.portfolio = await this.getPortfolioList(account);
+                localStorage.setItem('portfolioList', JSON.stringify(this.portfolio));
 
                 /* Где-то здесь будем подключать и друие кошельки */
             } else {
@@ -257,39 +226,12 @@ export default {
         /*      Проверить количество каждого токена по userAccount */
         /*      Если количество токенов > 0 то занести токен и его количество в массив */
         /*          - в отдельные элементы в зависимости от состояния. */
-        const defi_tokens = await getJSONdata('./static/json/defi_tokens.json');
-        const stablecoins = await getJSONdata('./static/json/stablecoins.json');
-        const dex_lp = await getJSONdata('./static/json/dex_lp.json');
 
-        const tokenAddress =  [].concat(defi_tokens, stablecoins); 
-
-        if (dex_lp.length) {
-            for(let i=0; i<dex_lp.length; i++) {   
-                tokenAddress.push({token:dex_lp[i].token,decimals:dex_lp[i].decimals,address:dex_lp[i].address});      
-            }
-        }
-        
-        // Баланс ETH
-        let balanceETH = Number(await window.ethereum.request({ 
-            method: 'eth_getBalance',
-            params: [walletAddress, 'latest']
-        }));
-        let decimals = 18;
-        balanceETH = balanceETH / (10**decimals);
-        console.log('Balance of ETH = ', balanceETH);
-
-        let e = {};
-        e.Name = "ETH";
-        e.Status = "-";
-        e.Number = balanceETH;
-        e.Value = 0;
-        e.GT = 0;
-        e.UMA = 0;
-        e.Instrument = "";
+        const portfolio = [];
+        const tokenAddress =  [...[{token: 'ETH',decimals: 18,address:walletAddress}], ...this.STABLECOINS, ...this.DEFI_TOKENS, ...this.DEX_LP];
 
         // Баланс токенов ERC20
         for (let i of tokenAddress) {
-            let a = {};
             let balance = await window.ethereum.request({
                 method: 'eth_getBalance',
                 params: [i.address,'latest']
@@ -297,26 +239,46 @@ export default {
             balance = balance / (10**i.decimals);
             console.log('Balance of ',i.token, ' = ', Number(balance));
             // Проверить статус - в кошельке, пул или стейк
-            a.Name = i.token;
-            a.Status = "-";
-            a.Number = balance;
-            a.Value = 0;
-            a.GT = 0;
-            a.UMA = 0;
-            a.Instrument = "";
+            portfolio.push({
+                Name: i.token,
+                Status: "-",
+                Number: balance,
+                Value: 0,
+                GT: 0,
+                UMA: 0,
+                Instrument: ""
+            });
         }
 
-    }
+        return portfolio;
+    },
+
+  },
+  watch: {
+      stableCoinsTypes: function() {
+          setTimeout(function() {window.$('select').niceSelect('update')}, 0);
+      } 
   },
   computed: {
-      ...mapGetters([
-          'INSTRUMENTS', 'PORTFOLIO', 'USER_ACCOUNT', 'NETWORK_ID'
-      ]),
+    ...mapGetters([
+          'INSTRUMENTS', 'PORTFOLIO', 'USER_ACCOUNT', 'NETWORK_ID', 'STABLECOINS', 'DEX_LP', 'DEFI_TOKENS'
+    ]),
+
+    stableCoinsTypes: function() {
+        return getUnicCoins(this.STABLECOINS, 'token');
+    },
+
+    dexLP: function() {
+        return getUnicCoins(this.DEX_LP, 'dex');
+    }
   },
   mounted() {
       this.GET_INSTRUMENTS_FROM_API();
       this.GET_PORTFOLIO_FROM_API();
       this.GET_NETWORK_ID();
+      this.GET_STABLECOINS_FROM_API();
+      this.GET_DEX_LP_FROM_API();
+      this.GET_DEFI_TOKENS_FROM_API();
   }
 }
 </script>
@@ -324,5 +286,73 @@ export default {
     p.account-id {
         color: #fff;
         margin: 0 20px 0 auto;
+    }
+    .j-between {
+        justify-content: space-between;
+    }
+    .flex-collumn {
+        display: flex;
+        flex-direction: column;
+    }
+    .but_flex {
+        margin-top: 20px;
+    }
+    .mt-auto {
+        margin-top: auto;
+    }
+    .mb-auto {
+        margin-bottom: auto;
+    }
+    .lr-auto {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .mb-10 {
+        margin-bottom: 10px;
+    }
+    .select-wrapp {
+        height: 52px;
+    }
+    .ml-0 {
+        margin-left: 0;
+    }
+    .flex-row .select-wrapp,
+    .flex-row input {
+        width: 25%;
+    }
+    .flex-row-2 input {
+        width: 45%;
+    }
+    .mr-10 {
+        margin-right: 10px;
+    }
+    .mt-20 {
+        margin-top: 20px;
+    }
+    .ml-a {
+        margin-left: auto;
+    }
+    .radios {
+        display: flex;
+        align-items: center;
+    }
+    .radios input[type="radio"] {
+        width: auto;
+        height: auto;
+        margin: 0 5px 1px;
+    }
+    .radios label {
+        margin: 0;
+    }
+    .half-row {
+        width: 52%;
+    }
+    .align-center {
+        align-items: center;
+    }
+    h4 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        text-align: center;
     }
 </style>
