@@ -4,7 +4,8 @@
             <div class="row" data-aos="fade-up" data-aos-delay="600" data-aos-duration="800">
                 <div class="col-md-12">
                     <div class="h2_flex">
-                        <div><h2 v-if="NETWORK_ID">{{ NETWORK_ID }}</h2></div>
+                        <button class="orangebut">Vote</button>
+                        <!-- <div><h2 v-if="NETWORK_ID">{{ NETWORK_ID }}</h2></div> -->
                         <p class="account-id" v-if="USER_ACCOUNT">{{ USER_ACCOUNT }}</p>
                         <button class="orangebut" @click="connectWallet">Connect Wallet</button>
                     </div>
@@ -44,11 +45,17 @@
                                         <h4>SYTHETIC</h4>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
                                             <input type="text" placeholder="0.000" class="mb-10">
-                                            <input type="text" placeholder="Token" :value="selectedItem.Name">
+                                            <div class="input-wrapp">
+                                                <input type="text" placeholder="Token" :value="selectedItem.Name">
+                                                <p class="flex j-end color-green mb-0"><span>0.000</span></p>
+                                            </div>
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
                                             <input type="text" placeholder="0.000" class="mb-10">
-                                            <input type="text" placeholder="Token" :value="selectedItem.Name">
+                                            <div class="input-wrapp">
+                                                <input type="text" placeholder="Token" value="">
+                                                <p class="flex j-end color-green mb-0"><span>0.000</span></p>
+                                            </div>
                                         </div>
                                         <div class="but_flex mt-auto">
                                             <button class="cancelbut">Mint</button>
@@ -58,9 +65,9 @@
                                     <div class="col-md-5 col-sm-4 col-xs-12 flex-collumn">
                                         <div data-type="widget" class="mb-auto"></div>
                                         <div class="description mb-10" v-if="selectedItem.Description">{{ selectedItem.Description }}</div>
-                                        <div class="flex mb-10 flex-row-2 flex j-between">
+                                        <div class="flex mb-10 flex-row-2 flex j-center">
                                             <input type="text" value="" placeholder="0.0000 UNSX" class="mb-10">
-                                            <input type="text" value="" placeholder="0.0000 UMA">
+                                            <!-- <input type="text" value="" placeholder="0.0000 UMA"> -->
                                         </div>
                                         <button class="orangebut lr-auto">Claim Rewards</button>
                                     </div>
@@ -75,8 +82,14 @@
                                             <input type="text" placeholder="0.000">
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
-                                            <input type="text" placeholder="0.000" class="mb-10">
-                                            <input type="text" placeholder="Token" :value="selectedItem.Name">
+                                            <div class="input-wrapp">
+                                                <input type="text" placeholder="0.000" class="">
+                                                <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>
+                                            </div>
+                                            <div class="input-wrapp">
+                                                <input type="text" placeholder="Token" :value="selectedItem.CollateralAddress">
+                                                <p class="flex j-end color-green mb-0"><span>0.000</span></p>
+                                            </div>
                                         </div>
                                         <div class="but_flex">
                                             <button class="cancelbut">Supply</button>
@@ -89,22 +102,40 @@
                                 <div class="row flex cards j-between">
                                     <div class="col-md-7 col-sm-7 col-xs-12">
                                         <div class="flex mb-10 flex-row">
-                                            <input type="text" placeholder="0.000" class="mr-10">
-                                            <input type="text" placeholder="Token" :value="selectedItem.Name">
-                                            <input type="text" placeholder="0.000" class="ml-a">
+                                            <div class="input-wrapp mr-10">
+                                                <input type="text" placeholder="0.000" class="">
+                                                <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>                                                
+                                            </div>
+                                            <div class="input-wrapp">
+                                                <input type="text" placeholder="Token" :value="selectedItem.Name">
+                                                <p class="flex j-end color-green mb-0"><span>0.000</span></p>
+                                            </div>
+                                            <div class="input-wrapp ml-a">
+                                                <input type="text" placeholder="0.000" class="">
+                                                <p class="flex j-end mb-0"><span>Max price</span></p>
+                                            </div>
                                         </div>
                                         <div class="flex mb-10 flex-row">
-                                            <input type="text" placeholder="0.000" class="mr-10">
-                                            <div class="select-wrapp">
-                                                <select>
-                                                    <option value="" disabled selected>Stable Coin</option>
-                                                    <option 
-                                                        v-for="coin in stableCoinsTypes"
-                                                        :key="coin"
-                                                        :value="coin">{{ coin }}</option>
-                                                </select>
+                                            <div class="input-wrapp mr-10">
+                                                <input type="text" placeholder="0.000" class="">
+                                                <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>
                                             </div>
-                                            <input type="text" placeholder="0.000" class="ml-a">
+                                            <div class="input-wrapp">
+                                                <div class="flex-collumn">
+                                                    <select>
+                                                        <option value="" disabled selected>Stable Coin</option>
+                                                        <option 
+                                                            v-for="coin in stableCoinsTypes"
+                                                            :key="coin"
+                                                            :value="coin">{{ coin }}</option>
+                                                    </select>
+                                                </div>
+                                                <p class="flex j-end color-green mb-0"><span>0.000</span></p>
+                                            </div>
+                                            <div class="input-wrapp ml-a">
+                                                <input type="text" placeholder="0.000" class="">
+                                                <p class="flex j-end mb-0"><span>Min price</span></p>
+                                            </div>
                                         </div>
                                         <div class="mt-20 half-row">
                                             <div class="radios mb-10">
@@ -116,23 +147,27 @@
                                                 <input type="radio" name="commision" value="1" id="1">
                                                 <label for="1">1%</label>
                                             </div>
-                                            <input type="text" placeholder="LP Estimated">
+                                            <input type="text" placeholder="LP Estimated" disabled>
                                         </div>
                                         <div class="but_flex ml-0">
                                             <button class="cancelbut">UnPool</button>
                                             <button class="blueb">Pool</button>
                                         </div>
                                     </div>
-                                    <div class="col-md-5 col-sm-5 col-xs-12">
-
-                                    </div>
+                                    <div class="col-md-5 col-sm-5 col-xs-12"></div>
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="cardtab3">
                                 <div class="row flex cards j-between">
                                     <div class="col-md-3 col-sm-4 col-xs-12">
-                                        <input type="text" placeholder="0.000" class="mb-10">
-                                        <input type="text" placeholder="Token" :value="selectedItem.Name">
+                                        <div class="mb-10">
+                                            <input type="text" placeholder="0.000" class="">
+                                            <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>
+                                        </div>
+                                        <div>
+                                            <input class="" type="text" placeholder="Token" value="">
+                                            <p class="flex j-end color-green mb-0"><span>0.000</span></p>
+                                        </div>
                                         <div class="but_flex">
                                             <button class="cancelbut">UnStake</button>
                                             <button class="blueb">Stake</button>
@@ -143,12 +178,18 @@
                                         <button class="orangebut mt-auto">Claim Rewards</button>
                                     </div>
                                     <div class="col-md-3 col-sm-4 col-xs-12">
-                                        <input type="text" placeholder="0.000" class="mb-10">
-                                        <div class="select-wrapp">
-                                            <select>
-                                                <option value="" selected disabled>Choose DEX</option>
-                                                <option v-for="dex in dexLP" :key="dex" :value="dex">{{ dex }}</option>
-                                            </select>
+                                        <div class="mb-10">
+                                            <input type="text" placeholder="0.000" class="">
+                                            <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>
+                                        </div>
+                                        <div>
+                                            <div class="select-wrapp">
+                                                <select>
+                                                    <option value="" selected disabled>Choose DEX</option>
+                                                    <option v-for="dex in dexLP" :key="dex" :value="dex">{{ dex }}</option>
+                                                </select>
+                                            </div>
+                                            <p class="flex j-end color-green mb-0"><span>0.000</span></p>
                                         </div>
                                         <div class="but_flex">
                                             <button class="cancelbut">UnStake</button>
@@ -265,7 +306,8 @@ export default {
     ]),
 
     stableCoinsTypes: function() {
-        return getUnicCoins(this.STABLECOINS, 'token');
+        const pair = this.selectedItem.UNISWAP_POOL ? this.selectedItem.UNISWAP_POOL[0].Pair : '';
+        return getUnicCoins(this.STABLECOINS, 'token').filter(i => pair.indexOf(i) > 0);
     },
 
     dexLP: function() {
@@ -290,6 +332,12 @@ export default {
     .j-between {
         justify-content: space-between;
     }
+    .j-center {
+        justify-content: center;
+    }
+    .j-end {
+        justify-content: end;
+    }
     .flex-collumn {
         display: flex;
         flex-direction: column;
@@ -310,18 +358,25 @@ export default {
     .mb-10 {
         margin-bottom: 10px;
     }
+    .mb-0 {
+        margin-bottom: 0;
+    }
     .select-wrapp {
-        height: 52px;
+        height: 42px;
     }
     .ml-0 {
         margin-left: 0;
     }
     .flex-row .select-wrapp,
-    .flex-row input {
+    .flex-row .input-wrapp {
         width: 25%;
     }
-    .flex-row-2 input {
+    .flex-row-2 input,
+    .flex-row-2 .input-wrapp {
         width: 45%;
+    }
+    .flex-row-2 .input-wrapp input {
+        width: 100%;
     }
     .mr-10 {
         margin-right: 10px;
@@ -355,4 +410,6 @@ export default {
         margin-bottom: 20px;
         text-align: center;
     }
+    .color-red {color: red;}
+    .color-green {color: green;}
 </style>
