@@ -7,8 +7,12 @@
                         <a href="" class="logo"><img src="../assets/img/logo.png" alt=""><span>Universal Synthetics</span></a>
                         <div class="top_list_wrp_all">
                             <ul class="top_list">
-                                <li><a href="">home</a></li>
-                                <li class="active"><a href="">operations</a></li>
+                                <router-link :to="{ name: 'Home'}" tag="li" active-class="active" exact>
+                                    <a href="">home</a>
+                                </router-link>
+                                <router-link :to="{ name: 'Actions'}" tag="li" active-class="active">
+                                    <a href="">operations</a>
+                                </router-link>
                                 <li><a href="">Doc</a></li>
                                 <li><a href="">About</a></li>
                             </ul>

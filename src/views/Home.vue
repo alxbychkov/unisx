@@ -12,7 +12,7 @@
                       </div>
                       <div class="after_h1_wrp">
                           <div class="ovh">
-                              <p data-aos="fade-up" data-aos-delay="700" data-aos-duration="800" class="after_h1">New synthetic, collateral-backed tokens whose value changes depending on exhange quotes. Synthetics are created by depositing collateral into a smart contract and minting tokens backed by that collateral.</p>
+                              <p data-aos="fade-up" data-aos-delay="700" data-aos-duration="800" class="after_h1">New synthetic, collateral-backed tokens whose value changes depending on exhange quotes. Synthetics are created by depositing collateral into a smart contract and minting tokens backed by that collateral.</p>
                           </div>
                           <button data-aos="fade" data-aos-delay="1200" data-aos-duration="800" class="orangebut">Register</button>
                       </div>
@@ -56,13 +56,14 @@
                                   <div class="hw_card_img" data-aos="fade-up" data-aos-delay="900" data-aos-duration="800">
                                       <img src="../assets/img/hw2.png" alt="">
                                       <p>Pool</p>
-                                      <span>Deposit UniSX synthetic tokens in the corresponding Uniswap pool to earn OPIUM & additional UniSX liquidity provider rewards.</span>
+                                      <span>Deposit UniSX synthetic tokens in the corresponding Uniswap pool to earn OPIUM & additional UniSX liquidity provider rewards.</span>
                                   </div>
                                   
                                   <div class="hw_card_img" data-aos="fade-up" data-aos-delay="1200" data-aos-duration="800">
                                       <img src="../assets/img/hw4.png" alt="">
                                       <p>Trade</p>
-                                      <span>You can trade UniSX synthetic tokens on DEX to yarn the difference between minting cost and the synthetics spot price as profit.</span>
+                                      <span>
+                                        You can trade UniSX synthetic tokens on DEX to yarn the difference between minting cost and the synthetics spot price as profit.</span>
                                   </div>
                               </div>
                           </div>
