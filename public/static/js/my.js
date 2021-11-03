@@ -15,7 +15,7 @@ $(window).on('load scroll',function(){
 $(document).ready(function() {
 $('a[href^="#"]').not('.cards_tabs_nav li a').click(function( event ) {
     event.preventDefault();
-    $("html, body").animate({ scrollTop: $($(this).attr("href")).offset().top }, 500);
+    // $("html, body").animate({ scrollTop: $($(this).attr("href")).offset().top }, 500);
 });
 if($('body').find('.marquee').length){
 var html = $('.marquee').html()

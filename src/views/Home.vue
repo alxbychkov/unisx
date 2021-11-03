@@ -20,13 +20,13 @@
               </div>
           </div>
           <div class="parthers_wrp">
-              <div class="partners_list marquee">
-              <div class="logo_elem"><img src="../assets/img/logo.svg" alt=""></div>
-              <div class="logo_elem"><img src="../assets/img/logo.svg" alt=""></div>
-              <div class="logo_elem"><img src="../assets/img/logo.svg" alt=""></div>
-              <div class="logo_elem"><img src="../assets/img/logo.svg" alt=""></div>
-              <div class="logo_elem"><img src="../assets/img/logo.svg" alt=""></div>
-          </div>
+              <!-- <div class="partners_list marquee">
+                <div class="logo_elem"><img src="../assets/img/logo.svg" alt=""></div>
+                <div class="logo_elem"><img src="../assets/img/logo.svg" alt=""></div>
+                <div class="logo_elem"><img src="../assets/img/logo.svg" alt=""></div>
+                <div class="logo_elem"><img src="../assets/img/logo.svg" alt=""></div>
+                <div class="logo_elem"><img src="../assets/img/logo.svg" alt=""></div>
+            </div> -->
           </div>
           <div class="howworks">
               <div class="container">

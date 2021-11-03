@@ -314,6 +314,9 @@ export default {
         return getUnicCoins(this.DEX_LP, 'dex');
     }
   },
+  created() {
+      console.log('create');
+  },
   mounted() {
       this.GET_INSTRUMENTS_FROM_API();
       this.GET_PORTFOLIO_FROM_API();
@@ -321,6 +324,8 @@ export default {
       this.GET_STABLECOINS_FROM_API();
       this.GET_DEX_LP_FROM_API();
       this.GET_DEFI_TOKENS_FROM_API();
+      console.log('mount');
+      window.$('select').niceSelect();
   }
 }
 </script>
