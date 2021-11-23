@@ -46,7 +46,8 @@ const store = new Vuex.Store({
     actions: {
         async GET_INSTRUMENTS_FROM_API({commit}) {
             const instruments = await getJSONdata('./static/json/unisx_instruments.json', commit, 'SET_INSTRUMENTS');
-            return await createPrice(instruments);
+            await createPrice(instruments);
+            return instruments;
         },
 
         async GET_PORTFOLIO_FROM_API({commit}) {

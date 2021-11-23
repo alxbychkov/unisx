@@ -1,4 +1,5 @@
 import axios from "axios";
+import {getPrice} from '../core/price';
 
 export async function getJSONdata(url, commit = {}, action = '') {
     return await axios(url)
@@ -48,7 +49,8 @@ export async function createPrice(json) {
     if (typeof json !== 'object' && json.length) return false;
     const ln = json.length;
     for (let i=0; i<ln; i++) {
-        const price = (+json[i].Rewards / +json[i]?.decimals).toFixed(2);
+        // const price = (+json[i].Rewards / +json[i]?.decimals).toFixed(2);
+        const price = await getPrice();
         json[i].Price = price ? price : 0;
     }
     return await json;

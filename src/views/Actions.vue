@@ -7,7 +7,7 @@
                         <button class="orangebut">Vote</button>
                         <!-- <div><h2 v-if="NETWORK_ID">{{ NETWORK_ID }}</h2></div> -->
                         <p class="account-id" v-if="USER_ACCOUNT">{{ USER_ACCOUNT }}</p>
-                        <button class="orangebut" @click="connectWallet">Connect Wallet</button>
+                        <button class="orangebut" @click="connect">Connect Wallet</button>
                     </div>
                 </div>
             </div>
@@ -210,6 +210,9 @@
 import {getUnicCoins} from '../helpers';
 import {mapActions, mapGetters} from 'vuex';
 import vTable from '../components/elements/v-table.vue';
+import {connectMetamask, accountPromise} from '../core/metamask'; 
+// eslint-disable-next-line no-unused-vars
+import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit} from '../core/eth';
 
 export default {
   name: 'Actions',
@@ -294,6 +297,11 @@ export default {
         return portfolio;
     },
 
+    async connect() {
+        await connectMetamask(this.USER_ACCOUNT);
+        accountPromise();
+        ethPromise();
+    }
   },
   watch: {
       stableCoinsTypes: function() {
