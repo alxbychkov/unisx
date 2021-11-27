@@ -5,8 +5,10 @@
                 <div class="col-md-12">
                     <div class="h2_flex">
                         <button class="orangebut">Vote</button>
-                        <!-- <div><h2 v-if="NETWORK_ID">{{ NETWORK_ID }}</h2></div> -->
-                        <p class="account-id" v-if="USER_ACCOUNT">{{ USER_ACCOUNT }}</p>
+                        <div class="account-id">
+                            <p v-if="NETWORK_ID">{{ NETWORK_ID }}</p>
+                            <p v-if="USER_ACCOUNT">{{ USER_ACCOUNT }}</p>
+                        </div>
                         <button class="orangebut" @click="connect">Connect Wallet</button>
                     </div>
                 </div>
@@ -44,21 +46,21 @@
                                     <div class="col-md-3 col-sm-4 col-xs-12 flex-collumn">
                                         <h4>SYTHETIC</h4>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
-                                            <input type="text" placeholder="0.000" class="mb-10">
+                                            <input type="text" placeholder="0.000" class="mb-10" v-model="sythetic.collateralAmount">
                                             <div class="input-wrapp">
                                                 <input type="text" placeholder="Token" :value="selectedItem.Name">
                                                 <p class="flex j-end color-green mb-0"><span>0.000</span></p>
                                             </div>
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
-                                            <input type="text" placeholder="0.000" class="mb-10">
+                                            <input type="text" placeholder="0.000" class="mb-10" v-model="sythetic.tokensAmount">
                                             <div class="input-wrapp">
                                                 <input type="text" placeholder="Token" value="">
                                                 <p class="flex j-end color-green mb-0"><span>0.000</span></p>
                                             </div>
                                         </div>
                                         <div class="but_flex mt-auto">
-                                            <button class="cancelbut">Mint</button>
+                                            <button class="cancelbut" @click="mint">Mint</button>
                                             <button class="blueb">Burn</button>
                                         </div>
                                     </div>
@@ -210,6 +212,7 @@
 import {getUnicCoins} from '../helpers';
 import {mapActions, mapGetters} from 'vuex';
 import vTable from '../components/elements/v-table.vue';
+// eslint-disable-next-line no-unused-vars
 import {connectMetamask, accountPromise} from '../core/metamask'; 
 // eslint-disable-next-line no-unused-vars
 import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit} from '../core/eth';
@@ -225,7 +228,12 @@ export default {
   data(){
       return {
           portfolio: localStorage.getItem('portfolioList') ? JSON.parse(localStorage.getItem('portfolioList')) : [],
-          selectedItem: ''
+          selectedItem: '',
+          sythetic: {
+              collateralAmount: '',
+              tokensAmount: ''
+          },
+          newPosition: ''
       }
   },
   methods: {
@@ -298,9 +306,32 @@ export default {
     },
 
     async connect() {
-        await connectMetamask(this.USER_ACCOUNT);
-        accountPromise();
-        ethPromise();
+        await connectMetamask();
+        await accountPromise.then(account => {
+            localStorage.setItem('userAccount', account);
+            this.GET_USER_ACCOUNT(account);
+            // getAccount().then(data => console.log(data));
+            // getFinancialContractProperties().then(data => console.log(data));
+            // getPosition().then(data => console.log(data));
+        });
+        this.portfolio = await this.getPortfolioList(this.USER_ACCOUNT);
+        localStorage.setItem('portfolioList', JSON.stringify(this.portfolio));
+    },
+
+    async mint() {
+        if (this.sythetic.collateralAmount && this.sythetic.tokensAmount) {  
+            console.log('Creating');          
+            try {
+                const newPosition = createPosition(this.sythetic.collateralAmount, this.sythetic.tokensAmount);
+                for await (let value of newPosition) {
+                    console.log(value.message);
+                }
+            } catch(e) {
+                console.error(e);
+                return
+            }
+            console.log('Success');  
+        }
     }
   },
   watch: {
@@ -323,7 +354,7 @@ export default {
     }
   },
   created() {
-      console.log('create');
+      console.log('create', this.INSTRUMENTS);
   },
   mounted() {
       this.GET_INSTRUMENTS_FROM_API();
@@ -338,7 +369,7 @@ export default {
 }
 </script>
 <style scoped>
-    p.account-id {
+    .account-id {
         color: #fff;
         margin: 0 20px 0 auto;
     }
