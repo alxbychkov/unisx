@@ -306,16 +306,20 @@ export default {
     },
 
     async connect() {
-        await connectMetamask();
-        await accountPromise.then(account => {
-            localStorage.setItem('userAccount', account);
-            this.GET_USER_ACCOUNT(account);
-            // getAccount().then(data => console.log(data));
-            // getFinancialContractProperties().then(data => console.log(data));
-            // getPosition().then(data => console.log(data));
-        });
-        this.portfolio = await this.getPortfolioList(this.USER_ACCOUNT);
-        localStorage.setItem('portfolioList', JSON.stringify(this.portfolio));
+        try {
+            await connectMetamask();
+            await accountPromise.then(account => {
+                localStorage.setItem('userAccount', account);
+                this.GET_USER_ACCOUNT(account);
+                // getAccount().then(data => console.log(data));
+                // getFinancialContractProperties().then(data => console.log(data));
+                // getPosition().then(data => console.log(data));
+            });
+            this.portfolio = await this.getPortfolioList(this.USER_ACCOUNT);
+            localStorage.setItem('portfolioList', JSON.stringify(this.portfolio));
+        } catch(e) {
+            alert(e);
+        }
     },
 
     async mint() {
