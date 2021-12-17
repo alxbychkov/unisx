@@ -48,15 +48,15 @@
                                         <div class="flex mb-10 flex-row-2 flex j-between">
                                             <input type="text" placeholder="0.000" class="mb-10" v-model="sythetic.collateralAmount">
                                             <div class="input-wrapp">
-                                                <input type="text" placeholder="Token" :value="selectedItem.Name">
-                                                <p class="flex j-end color-green mb-0"><span>0.000</span></p>
+                                                <input type="text" placeholder="Token" :value="selectedItem.Name" disabled>
+                                                <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.collateralAmountFormatted }}</span></p>
                                             </div>
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
-                                            <input type="text" placeholder="0.000" class="mb-10" v-model="sythetic.tokensAmount">
+                                            <input type="text" placeholder="0.000" class="mb-10" v-model="sythetic.tokensAmount" >
                                             <div class="input-wrapp">
-                                                <input type="text" placeholder="Token" value="">
-                                                <p class="flex j-end color-green mb-0"><span>0.000</span></p>
+                                                <input type="text" placeholder="Token" value="" disabled>
+                                                <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.tokensOutstandingFormatted }}</span></p>
                                             </div>
                                         </div>
                                         <div class="but_flex mt-auto">
@@ -89,7 +89,7 @@
                                                 <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>
                                             </div>
                                             <div class="input-wrapp">
-                                                <input type="text" placeholder="Token" :value="selectedItem.CollateralAddress">
+                                                <input type="text" placeholder="Token" :value="selectedItem.CollateralAddress" disabled>
                                                 <p class="flex j-end color-green mb-0"><span>0.000</span></p>
                                             </div>
                                         </div>
@@ -229,6 +229,10 @@ export default {
       return {
           portfolio: localStorage.getItem('portfolioList') ? JSON.parse(localStorage.getItem('portfolioList')) : [],
           selectedItem: '',
+          selectedItemBalance: {
+              collateralAmountFormatted: '0.0000',
+              tokensOutstandingFormatted: '0.0000'
+          },
           sythetic: {
               collateralAmount: '',
               tokensAmount: ''
@@ -249,6 +253,18 @@ export default {
       
     getTableItem(item) {
         this.selectedItem = item;
+
+        getPosition().then(data => {
+            if (item.Name === 'uSPAC5') {
+                this.selectedItemBalance = {
+                    collateralAmountFormatted: data.collateralAmountFormatted,
+                    tokensOutstandingFormatted: data.tokensOutstandingFormatted
+                };
+            } else {
+                this.selectedItemBalance.collateralAmountFormatted = '0.0000';
+                this.selectedItemBalance.tokensOutstandingFormatted = '0.0000';
+            }
+        });
     },
 
     async connectWallet() {
@@ -280,7 +296,8 @@ export default {
         /*          - в отдельные элементы в зависимости от состояния. */
 
         const portfolio = [];
-        const tokenAddress =  [...[{token: 'ETH',decimals: 18,address:walletAddress}], ...this.STABLECOINS, ...this.DEFI_TOKENS, ...this.DEX_LP];
+
+        const tokenAddress =  [...[{token: 'ETH',decimals: 18,address:walletAddress}], ...this.STABLECOINS, ...this.DEFI_TOKENS, ...this.DEX_LP, ...[{token: this.INSTRUMENTS[0].Name, decimals: this.INSTRUMENTS[0].decimals, address: this.INSTRUMENTS[0].CollateralAddress}]];
 
         // Баланс токенов ERC20
         for (let i of tokenAddress) {
