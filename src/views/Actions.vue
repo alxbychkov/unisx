@@ -271,11 +271,13 @@ export default {
         this.clearInputs();
         this.selectedItem = item;
 
-        // console.log(this.selectedItem);
+        console.log(this.selectedItem);
 
         this.sythetic.cr = item.CR ? +item.CR : 1;
 
         getPosition().then(data => {
+            console.log('getPosition: ', data);
+
             if (item.Name === 'uSPAC5') {
                 this.selectedItemBalance = {
                     collateralAmountFormatted: data.collateralAmountFormatted,
