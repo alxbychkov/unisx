@@ -46,16 +46,30 @@
                                     <div class="col-md-3 col-sm-4 col-xs-12 flex-collumn">
                                         <h4>SYTHETIC</h4>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
-                                            <input type="text" placeholder="0.000" class="mb-10" v-model="sythetic.collateralAmount">
+                                            <input 
+                                                type="text"
+                                                placeholder="0.000"
+                                                class="mb-10"
+                                                v-model="sythetic.collateralAmount" 
+                                                :disabled="!selectedItem.Name"
+                                                @input="consider('collateralAmount')
+                                            ">
                                             <div class="input-wrapp">
                                                 <input type="text" placeholder="Token" :value="selectedItem.Name" disabled>
                                                 <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.collateralAmountFormatted }}</span></p>
                                             </div>
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
-                                            <input type="text" placeholder="0.000" class="mb-10" v-model="sythetic.tokensAmount" >
+                                            <input 
+                                                type="text"
+                                                placeholder="0.000"
+                                                class="mb-10"
+                                                v-model="sythetic.tokensAmount"
+                                                :disabled="!selectedItem.CollateralName"
+                                                @input="consider('tokensAmount')    
+                                            ">
                                             <div class="input-wrapp">
-                                                <input type="text" placeholder="Token" value="" disabled>
+                                                <input type="text" placeholder="Token" :value="selectedItem.CollateralName" disabled>
                                                 <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.tokensOutstandingFormatted }}</span></p>
                                             </div>
                                         </div>
@@ -231,11 +245,13 @@ export default {
           selectedItem: '',
           selectedItemBalance: {
               collateralAmountFormatted: '0.0000',
-              tokensOutstandingFormatted: '0.0000'
+              tokensOutstandingFormatted: '0.0000',
+              cr: 1
           },
           sythetic: {
               collateralAmount: '',
-              tokensAmount: ''
+              tokensAmount: '',
+              cr: 1
           },
           newPosition: ''
       }
@@ -252,7 +268,12 @@ export default {
     ]),
       
     getTableItem(item) {
+        this.clearInputs();
         this.selectedItem = item;
+
+        // console.log(this.selectedItem);
+
+        this.sythetic.cr = item.CR ? +item.CR : 1;
 
         getPosition().then(data => {
             if (item.Name === 'uSPAC5') {
@@ -353,8 +374,25 @@ export default {
             }
             console.log('Success');  
         }
+    },
+
+    consider(e) {
+      switch (e) {
+          case 'collateralAmount':
+              this.sythetic.tokensAmount = this.sythetic.collateralAmount * this.sythetic.cr;
+              break;
+          case 'tokensAmount':
+              this.sythetic.collateralAmount = this.sythetic.tokensAmount / this.sythetic.cr;
+            break;
+      }
+    },
+
+    clearInputs() {
+        this.sythetic.tokensAmount = '';
+        this.sythetic.collateralAmount = '';
     }
   },
+
   watch: {
       stableCoinsTypes: function() {
           setTimeout(function() {window.$('select').niceSelect('update')}, 0);
