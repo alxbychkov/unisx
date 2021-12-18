@@ -70,7 +70,7 @@
                                             ">
                                             <div class="input-wrapp">
                                                 <input type="text" placeholder="Token" :value="selectedItem.CollateralName" disabled>
-                                                <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.tokensOutstandingFormatted }}</span></p>
+                                                <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.collateralBalanceFormatted }}</span></p>
                                             </div>
                                         </div>
                                         <div class="but_flex mt-auto">
@@ -229,7 +229,7 @@ import vTable from '../components/elements/v-table.vue';
 // eslint-disable-next-line no-unused-vars
 import {connectMetamask, accountPromise} from '../core/metamask'; 
 // eslint-disable-next-line no-unused-vars
-import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit} from '../core/eth';
+import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, getCollateralBalance} from '../core/eth';
 
 export default {
   name: 'Actions',
@@ -245,7 +245,7 @@ export default {
           selectedItem: '',
           selectedItemBalance: {
               collateralAmountFormatted: '0.0000',
-              tokensOutstandingFormatted: '0.0000',
+              collateralBalanceFormatted: '0.0000',
               cr: 1
           },
           sythetic: {
@@ -267,7 +267,7 @@ export default {
         'GET_DEFI_TOKENS_FROM_API'
     ]),
       
-    getTableItem(item) {
+    async getTableItem(item) {
         this.clearInputs();
         this.selectedItem = item;
 
@@ -275,19 +275,52 @@ export default {
 
         this.sythetic.cr = item.CR ? +item.CR : 1;
 
-        getPosition().then(data => {
-            console.log('getPosition: ', data);
+        if (['uSPAC5'].includes(item.Name)) {
+            const collateralAmount = await getPosition();
+            const collateralBalance = await getAccount();
 
-            if (item.Name === 'uSPAC5') {
-                this.selectedItemBalance = {
-                    collateralAmountFormatted: data.collateralAmountFormatted,
-                    tokensOutstandingFormatted: data.tokensOutstandingFormatted
-                };
-            } else {
-                this.selectedItemBalance.collateralAmountFormatted = '0.0000';
-                this.selectedItemBalance.tokensOutstandingFormatted = '0.0000';
+            console.log(collateralAmount, collateralBalance);
+
+            this.selectedItemBalance = {
+                collateralAmountFormatted: collateralAmount.tokensOutstandingFormatted,
+                collateralBalanceFormatted: collateralBalance.collateralBalanceFormatted
             }
-        });
+        } else {
+            this.selectedItemBalance = {
+                collateralAmountFormatted: '0.0000',
+                collateralBalanceFormatted: '0.0000'
+            }
+        }
+        
+        getCollateralBalance().then(data => console.log('getCollateralBalance: ', data));
+
+
+
+        // getPosition().then(data => {
+        //     console.log('getPosition: ', data);
+
+        //     if (item.Name === 'uSPAC5') {
+        //         this.selectedItemBalance = {
+        //             collateralAmountFormatted: data.collateralAmountFormatted
+        //         };
+        //     } else {
+        //         this.selectedItemBalance.collateralAmountFormatted = '0.0000';
+        //     }
+        // });
+
+        // getAccount().then(data => {
+        //     console.log('getAccount: ', data)
+
+        //     if (item.Name === 'uSPAC5') {
+        //         this.selectedItemBalance = {
+        //             collateralBalanceFormatted: data.collateralBalanceFormatted
+        //         };
+        //     } else {
+        //         this.selectedItemBalance.collateralBalanceFormatted = '0.0000';
+        //     }
+        // });
+
+        console.log(this.selectedItemBalance);
     },
 
     async connectWallet() {
@@ -381,10 +414,10 @@ export default {
     consider(e) {
       switch (e) {
           case 'collateralAmount':
-              this.sythetic.tokensAmount = this.sythetic.collateralAmount * this.sythetic.cr;
+              this.sythetic.tokensAmount = (this.sythetic.collateralAmount * this.sythetic.cr).toString();
               break;
           case 'tokensAmount':
-              this.sythetic.collateralAmount = this.sythetic.tokensAmount / this.sythetic.cr;
+              this.sythetic.collateralAmount = (this.sythetic.tokensAmount / this.sythetic.cr).toString();
             break;
       }
     },
