@@ -229,7 +229,7 @@ import vTable from '../components/elements/v-table.vue';
 // eslint-disable-next-line no-unused-vars
 import {connectMetamask, accountPromise} from '../core/metamask'; 
 // eslint-disable-next-line no-unused-vars
-import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, getCollateralBalance} from '../core/eth';
+import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, getCollateralBalance, getBalance} from '../core/eth';
 
 export default {
   name: 'Actions',
@@ -295,30 +295,6 @@ export default {
         getCollateralBalance().then(data => console.log('getCollateralBalance: ', data));
 
 
-        // getPosition().then(data => {
-        //     console.log('getPosition: ', data);
-
-        //     if (item.Name === 'uSPAC5') {
-        //         this.selectedItemBalance = {
-        //             collateralAmountFormatted: data.collateralAmountFormatted
-        //         };
-        //     } else {
-        //         this.selectedItemBalance.collateralAmountFormatted = '0.0000';
-        //     }
-        // });
-
-        // getAccount().then(data => {
-        //     console.log('getAccount: ', data)
-
-        //     if (item.Name === 'uSPAC5') {
-        //         this.selectedItemBalance = {
-        //             collateralBalanceFormatted: data.collateralBalanceFormatted
-        //         };
-        //     } else {
-        //         this.selectedItemBalance.collateralBalanceFormatted = '0.0000';
-        //     }
-        // });
-
         console.log(this.selectedItemBalance);
     },
 
@@ -344,6 +320,7 @@ export default {
         }
     },
 
+    // eslint-disable-next-line no-unused-vars
     async getPortfolioList(walletAddress) {
         /* Перебор всех возможных токенов */
         /*      Проверить количество каждого токена по userAccount */
@@ -351,8 +328,11 @@ export default {
         /*          - в отдельные элементы в зависимости от состояния. */
 
         const portfolio = [];
+        const instumentsJSON = this.INSTRUMENTS.map(instrument => {return {token: instrument.Name, decimals: instrument.decimals, address: instrument.CollateralAddress, price: instrument.Price}});
 
-        const tokenAddress =  [...[{token: 'ETH',decimals: 18,address:walletAddress}], ...this.STABLECOINS, ...this.DEFI_TOKENS, ...this.DEX_LP, ...[{token: this.INSTRUMENTS[0].Name, decimals: this.INSTRUMENTS[0].decimals, address: this.INSTRUMENTS[0].CollateralAddress}]];
+        // const tokenAddress =  [...[{token: 'ETH',decimals: 18,address:walletAddress}], ...this.STABLECOINS, ...this.DEFI_TOKENS, ...this.DEX_LP, ...instumentsJSON];
+
+        const tokenAddress =  [...instumentsJSON];
 
         // Баланс токенов ERC20
         for (let i of tokenAddress) {
@@ -360,18 +340,22 @@ export default {
                 method: 'eth_getBalance',
                 params: [i.address,'latest']
             });
+            getPosition(i.address).then(data => console.log(data));
             balance = balance / (10**i.decimals);
+            const value = i.price ? balance * i.price : 0;
             console.log('Balance of ',i.token, ' = ', Number(balance));
             // Проверить статус - в кошельке, пул или стейк
-            portfolio.push({
-                Name: i.token,
-                Status: "-",
-                Number: balance,
-                Value: 0,
-                GT: 0,
-                UMA: 0,
-                Instrument: ""
-            });
+            if (balance > 0) {
+                portfolio.push({
+                    Name: i.token,
+                    Status: "-",
+                    Number: balance,
+                    Value: value,
+                    GT: 0,
+                    UMA: 0,
+                    Instrument: ""
+                });
+            }
         }
 
         return portfolio;
