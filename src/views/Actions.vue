@@ -74,7 +74,7 @@
                                             </div>
                                         </div>
                                         <div class="but_flex mt-auto">
-                                            <button class="cancelbut" @click="mint">Mint</button>
+                                            <button class="cancelbut mint" @click="mint" :disabled="!sythetic.tokensAmount">Mint</button>
                                             <button class="blueb">Burn</button>
                                         </div>
                                     </div>
@@ -282,8 +282,8 @@ export default {
             console.log(collateralAmount, collateralBalance);
 
             this.selectedItemBalance = {
-                collateralAmountFormatted: collateralAmount.tokensOutstandingFormatted,
-                collateralBalanceFormatted: collateralBalance.collateralBalanceFormatted
+                collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(4).toString(),
+                collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(4).toString()
             }
         } else {
             this.selectedItemBalance = {
@@ -293,7 +293,6 @@ export default {
         }
         
         getCollateralBalance().then(data => console.log('getCollateralBalance: ', data));
-
 
 
         // getPosition().then(data => {
@@ -414,10 +413,10 @@ export default {
     consider(e) {
       switch (e) {
           case 'collateralAmount':
-              this.sythetic.tokensAmount = (this.sythetic.collateralAmount * this.sythetic.cr).toString();
+              this.sythetic.tokensAmount = this.round((this.sythetic.collateralAmount * this.sythetic.cr), 4).toString();
               break;
           case 'tokensAmount':
-              this.sythetic.collateralAmount = (this.sythetic.tokensAmount / this.sythetic.cr).toString();
+              this.sythetic.collateralAmount = this.round((this.sythetic.tokensAmount / this.sythetic.cr), 4).toString();
             break;
       }
     },
@@ -425,6 +424,11 @@ export default {
     clearInputs() {
         this.sythetic.tokensAmount = '';
         this.sythetic.collateralAmount = '';
+    },
+
+    round(value, precision) {
+        const multiplier = Math.pow(10, precision || 0);
+        return Math.round(value * multiplier) / multiplier;
     }
   },
 
@@ -550,4 +554,10 @@ export default {
     }
     .color-red {color: red;}
     .color-green {color: green;}
+    .mint:disabled {
+        opacity: .5;
+    }
+    .mint:hover:disabled {
+        background-color: transparent;
+    }
 </style>
