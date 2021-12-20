@@ -321,7 +321,7 @@ export default {
     },
 
     // eslint-disable-next-line no-unused-vars
-    async getPortfolioList(walletAddress) {
+    async getPortfolioList(walletAddress = '') {
         /* Перебор всех возможных токенов */
         /*      Проверить количество каждого токена по userAccount */
         /*      Если количество токенов > 0 то занести токен и его количество в массив */
@@ -340,12 +340,20 @@ export default {
                 method: 'eth_getBalance',
                 params: [i.address,'latest']
             });
+
+            const collateralAmount = await getPosition();
+
             getPosition(i.address).then(data => console.log(data));
-            balance = balance / (10**i.decimals);
+
+            // balance = balance / (10**i.decimals);
+
+            balance = (+collateralAmount.tokensOutstandingFormatted).toFixed(4).toString();
+
             const value = i.price ? balance * i.price : 0;
             console.log('Balance of ',i.token, ' = ', Number(balance));
+
             // Проверить статус - в кошельке, пул или стейк
-            if (balance > 0) {
+            if (balance > 0 && i.token !== 'uSPAC10') {
                 portfolio.push({
                     Name: i.token,
                     Status: "-",
@@ -386,6 +394,7 @@ export default {
                 for await (let value of newPosition) {
                     console.log(value.message);
                 }
+                this.portfolio = await this.getPortfolioList();
             } catch(e) {
                 console.error(e);
                 return
