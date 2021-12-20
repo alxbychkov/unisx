@@ -25,7 +25,7 @@
                 <div class="col-md-7 col-sm-12 col-xs-12">
                     <v-table 
                         :tableData="portfolio"
-                        :tableHeaders="['Portfolio', 'Number', 'Value, USD', 'Rewards']"
+                        :tableHeaders="['Portfolio', 'Amount', 'Value, USD', 'Rewards']"
                         :tableRows="['Name', 'Number', 'Value', 'Rewards']"
                         @getTableItem="getTableItem"
                     />
@@ -91,7 +91,7 @@
                                         <h4>COLLATERAL</h4>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
                                             <span>Collateral Ratio</span>
-                                            <input type="text" placeholder="0.000" disabled>
+                                            <input type="text" placeholder="0.000" disabled :value="selectedItemBalance.collateralRatio">
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
                                             <span>Liquidation Price</span>
@@ -100,11 +100,11 @@
                                         <div class="flex mb-10 flex-row-2 flex j-between">
                                             <div class="input-wrapp">
                                                 <input type="text" placeholder="0.000" class="">
-                                                <p class="flex j-between color-red mb-0"><span>MAX:</span><span>{{ selectedItemBalance.collateralBalanceFormatted }}</span></p>
+                                                <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>
                                             </div>
                                             <div class="input-wrapp">
                                                 <input type="text" placeholder="Token" :value="selectedItem.CollateralName" disabled>
-                                                <p class="flex j-end color-green mb-0"><span>0.000</span></p>
+                                                <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.collateralBalanceFormatted }}</span></p>
                                             </div>
                                         </div>
                                         <div class="but_flex">
@@ -230,6 +230,7 @@ import vTable from '../components/elements/v-table.vue';
 import {connectMetamask, accountPromise} from '../core/metamask'; 
 // eslint-disable-next-line no-unused-vars
 import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, getCollateralBalance, getBalance} from '../core/eth';
+import {toFix} from '../core/config';
 
 export default {
   name: 'Actions',
@@ -246,6 +247,7 @@ export default {
           selectedItemBalance: {
               collateralAmountFormatted: '0.0000',
               collateralBalanceFormatted: '0.0000',
+              collateralRatio: '0.0000',
               cr: 1
           },
           sythetic: {
@@ -268,7 +270,7 @@ export default {
     ]),
       
     async getTableItem(item) {
-        this.clearInputs();
+        this.clearInputs(item.Value);
         this.selectedItem = item;
 
         console.log(this.selectedItem);
@@ -278,17 +280,22 @@ export default {
         if (['uSPAC5'].includes(item.Name)) {
             const collateralAmount = await getPosition();
             const collateralBalance = await getAccount();
+            const contractProperties = await getFinancialContractProperties();
+            const collateralRatio = ((+contractProperties.totalTokensOutstandingFormatted)/(+contractProperties.totalPositionCollateralFormatted))*this.INSTRUMENTS[0].Price;
 
             console.log(collateralAmount, collateralBalance);
+            console.log('ratio: ', collateralRatio);
 
             this.selectedItemBalance = {
-                collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(4).toString(),
-                collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(4).toString()
+                collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
+                collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString(),
+                collateralRatio: (+collateralRatio).toFixed(toFix).toString()
             }
         } else {
             this.selectedItemBalance = {
                 collateralAmountFormatted: '0.0000',
-                collateralBalanceFormatted: '0.0000'
+                collateralBalanceFormatted: '0.0000',
+                collateralRatio: '0.0000'
             }
         }
         
@@ -347,7 +354,7 @@ export default {
 
             // balance = balance / (10**i.decimals);
 
-            balance = (+collateralAmount.tokensOutstandingFormatted).toFixed(4).toString();
+            balance = (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString();
 
             const value = i.price ? balance * i.price : 0;
             console.log('Balance of ',i.token, ' = ', Number(balance));
@@ -415,9 +422,13 @@ export default {
       }
     },
 
-    clearInputs() {
+    clearInputs(portfolio = false) {
         this.sythetic.tokensAmount = '';
         this.sythetic.collateralAmount = '';
+
+        if (portfolio) {
+            this.selectedItemBalance.collateralRatio;
+        }
     },
 
     round(value, precision) {
@@ -447,6 +458,7 @@ export default {
   },
   created() {
       console.log('create', this.INSTRUMENTS);
+      console.log('process ', process.env.NODE_ENV);
   },
   mounted() {
       this.GET_INSTRUMENTS_FROM_API();
