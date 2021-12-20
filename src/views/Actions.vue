@@ -328,7 +328,7 @@ export default {
         /*          - в отдельные элементы в зависимости от состояния. */
 
         const portfolio = [];
-        const instumentsJSON = this.INSTRUMENTS.map(instrument => {return {token: instrument.Name, decimals: instrument.decimals, address: instrument.CollateralAddress, price: instrument.Price}});
+        const instumentsJSON = this.INSTRUMENTS.map(instrument => {return {token: instrument.Name, decimals: instrument.decimals, address: instrument.CollateralAddress, price: instrument.Price, collateral: instrument.CollateralName}});
 
         // const tokenAddress =  [...[{token: 'ETH',decimals: 18,address:walletAddress}], ...this.STABLECOINS, ...this.DEFI_TOKENS, ...this.DEX_LP, ...instumentsJSON];
 
@@ -361,7 +361,8 @@ export default {
                     Value: value,
                     GT: 0,
                     UMA: 0,
-                    Instrument: ""
+                    Instrument: "",
+                    CollateralName: i.collateral
                 });
             }
         }
