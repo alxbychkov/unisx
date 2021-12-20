@@ -74,7 +74,7 @@
                                             </div>
                                         </div>
                                         <div class="but_flex mt-auto">
-                                            <button class="cancelbut mint" @click="mint" :disabled="!sythetic.tokensAmount">Mint</button>
+                                            <button class="cancelbut disabled" @click="mint" :disabled="!sythetic.tokensAmount">Mint</button>
                                             <button class="blueb">Burn</button>
                                         </div>
                                     </div>
@@ -91,7 +91,7 @@
                                         <h4>COLLATERAL</h4>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
                                             <span>Collateral Ratio</span>
-                                            <input type="text" placeholder="0.000">
+                                            <input type="text" placeholder="0.000" disabled>
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
                                             <span>Liquidation Price</span>
@@ -100,16 +100,16 @@
                                         <div class="flex mb-10 flex-row-2 flex j-between">
                                             <div class="input-wrapp">
                                                 <input type="text" placeholder="0.000" class="">
-                                                <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>
+                                                <p class="flex j-between color-red mb-0"><span>MAX:</span><span>{{ selectedItemBalance.collateralBalanceFormatted }}</span></p>
                                             </div>
                                             <div class="input-wrapp">
-                                                <input type="text" placeholder="Token" :value="selectedItem.CollateralAddress" disabled>
+                                                <input type="text" placeholder="Token" :value="selectedItem.CollateralName" disabled>
                                                 <p class="flex j-end color-green mb-0"><span>0.000</span></p>
                                             </div>
                                         </div>
                                         <div class="but_flex">
-                                            <button class="cancelbut">Supply</button>
-                                            <button class="blueb">Withdraw</button>
+                                            <button class="cancelbut disabled" :disabled="!selectedItem.Value">Supply</button>
+                                            <button class="blueb disabled" :disabled="!selectedItem.Value">Withdraw</button>
                                         </div>
                                     </div>
                                 </div>
@@ -548,10 +548,15 @@ export default {
     }
     .color-red {color: red;}
     .color-green {color: green;}
-    .mint:disabled {
+    .disabled:disabled {
         opacity: .5;
     }
-    .mint:hover:disabled {
+    .disabled:hover:disabled {
         background-color: transparent;
+    }
+    .blueb.disabled:hover:disabled {
+        background: linear-gradient( 
+            0deg, rgba(21, 0, 153, 0.3008) -18.27%, rgba(255, 255, 255, 0.6272) 171.15% ), linear-gradient(
+            0deg, #408cff, #408cff), #f9c02f;
     }
 </style>
