@@ -8,7 +8,7 @@
 		"CollateralName": "WETH",
 		"CollateralAddress": "0xd0A1E359811322d97991E03f863a0C30C2cF029C",
 		"CollateralDecimals": "18",
-		"CR": "1",
+		"CR": "1.5",
 		"UNISWAP_POOL":
 			[
 				{"Pair": "uSPAC5/USDC", "PoolAddress": "0x0000000000000000000000000000000000000000"}
@@ -25,7 +25,7 @@
 		"CollateralName": "USDC",
 		"CollateralAddress": "0x7079f3762805cff9c979a5bdc6f5648bcfee76c8",
 		"CollateralDecimals": "6",
-		"CR": "1",
+		"CR": "1.5",
 		"UNISWAP_POOL":
 			[
 				{"Pair": "uSPAC5/USDC", "PoolAddress": "0x0000000000000000000000000000000000000000"}
