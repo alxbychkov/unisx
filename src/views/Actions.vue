@@ -255,7 +255,8 @@ export default {
               tokensAmount: '',
               cr: 1
           },
-          newPosition: ''
+          newPosition: '',
+          collateralPrice: 1
       }
   },
   methods: {
@@ -414,10 +415,10 @@ export default {
     consider(e) {
       switch (e) {
           case 'collateralAmount':
-              this.sythetic.tokensAmount = this.round((this.sythetic.collateralAmount * this.sythetic.cr), 4).toString();
+              this.sythetic.tokensAmount = this.toPrice(e);
               break;
           case 'tokensAmount':
-              this.sythetic.collateralAmount = this.round((this.sythetic.tokensAmount / this.sythetic.cr), 4).toString();
+              this.sythetic.collateralAmount = this.toPrice(e);
             break;
       }
     },
@@ -434,6 +435,17 @@ export default {
     round(value, precision) {
         const multiplier = Math.pow(10, precision || 0);
         return Math.round(value * multiplier) / multiplier;
+    },
+
+    toPrice(token) {
+        switch (token) {
+            case 'collateralAmount':
+                return this.round((this.sythetic.collateralAmount * this.sythetic.cr * (this.INSTRUMENTS[0].Price / this.collateralPrice)), 4).toString();
+            case 'tokensAmount':
+                return this.round((this.sythetic.tokensAmount / this.sythetic.cr * (this.collateralPrice / this.INSTRUMENTS[0].Price)), 4).toString();
+            default:
+                return token;
+        }
     }
   },
 
