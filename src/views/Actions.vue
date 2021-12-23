@@ -44,7 +44,7 @@
                             <div role="tabpanel" class="tab-pane fade in active" id="cardtab1">
                                 <div class="row flex cards j-between">
                                     <div class="col-md-3 col-sm-4 col-xs-12 flex-collumn">
-                                        <h4>SYTHETIC</h4>
+                                        <h4>SYNTHETIC</h4>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
                                             <input 
                                                 type="text"
@@ -79,13 +79,13 @@
                                         </div>
                                     </div>
                                     <div class="col-md-5 col-sm-4 col-xs-12 flex-collumn">
-                                        <div data-type="widget" class="mb-auto"></div>
+                                        <div data-type="widget" class="mb-auto" style="display: none"></div>
                                         <div class="description mb-10" v-if="selectedItem.Description">{{ selectedItem.Description }}</div>
-                                        <div class="flex mb-10 flex-row-2 flex j-center">
+                                        <div class="flex mb-10 flex-row-2 flex j-center" style="display: none">
                                             <input type="text" value="" placeholder="0.0000 UNSX" class="mb-10">
                                             <!-- <input type="text" value="" placeholder="0.0000 UMA"> -->
                                         </div>
-                                        <button class="orangebut lr-auto">Claim Rewards</button>
+                                        <button class="orangebut lr-auto" style="display: none">Claim Rewards</button>
                                     </div>
                                     <div class="col-md-3 col-sm-4 col-xs-12">
                                         <h4>COLLATERAL</h4>
@@ -279,19 +279,7 @@ export default {
         this.sythetic.cr = item.CR ? +item.CR : 1;
 
         if (['uSPAC5'].includes(item.Name)) {
-            const collateralAmount = await getPosition();
-            const collateralBalance = await getAccount();
-            const contractProperties = await getFinancialContractProperties();
-            const collateralRatio = ((+contractProperties.totalTokensOutstandingFormatted)/(+contractProperties.totalPositionCollateralFormatted))*this.INSTRUMENTS[0].Price;
-
-            console.log(collateralAmount, collateralBalance);
-            console.log('ratio: ', collateralRatio);
-
-            this.selectedItemBalance = {
-                collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
-                collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString(),
-                collateralRatio: (+collateralRatio).toFixed(toFix).toString()
-            }
+            await this.updateSelectedItemBalance();
         } else {
             this.selectedItemBalance = {
                 collateralAmountFormatted: '0.0000',
@@ -336,7 +324,7 @@ export default {
         /*          - в отдельные элементы в зависимости от состояния. */
 
         const portfolio = [];
-        const instumentsJSON = this.INSTRUMENTS.map(instrument => {return {token: instrument.Name, decimals: instrument.decimals, address: instrument.CollateralAddress, price: instrument.Price, collateral: instrument.CollateralName}});
+        const instumentsJSON = this.INSTRUMENTS.map(instrument => {return {token: instrument.Name, decimals: instrument.decimals, address: instrument.CollateralAddress, price: instrument.Price, collateral: instrument.CollateralName, description: instrument.Description}});
 
         // const tokenAddress =  [...[{token: 'ETH',decimals: 18,address:walletAddress}], ...this.STABLECOINS, ...this.DEFI_TOKENS, ...this.DEX_LP, ...instumentsJSON];
 
@@ -357,7 +345,7 @@ export default {
 
             balance = (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString();
 
-            const value = i.price ? balance * i.price : 0;
+            const value = i.price ? (balance * i.price).toFixed(toFix) : 0;
             console.log('Balance of ',i.token, ' = ', Number(balance));
 
             // Проверить статус - в кошельке, пул или стейк
@@ -370,7 +358,8 @@ export default {
                     GT: 0,
                     UMA: 0,
                     Instrument: "",
-                    CollateralName: i.collateral
+                    CollateralName: i.collateral,
+                    Description: i.description
                 });
             }
         }
@@ -384,9 +373,6 @@ export default {
             await accountPromise.then(account => {
                 localStorage.setItem('userAccount', account);
                 this.GET_USER_ACCOUNT(account);
-                // getAccount().then(data => console.log(data));
-                // getFinancialContractProperties().then(data => console.log(data));
-                // getPosition().then(data => console.log(data));
             });
             this.portfolio = await this.getPortfolioList(this.USER_ACCOUNT);
             localStorage.setItem('portfolioList', JSON.stringify(this.portfolio));
@@ -403,12 +389,29 @@ export default {
                 for await (let value of newPosition) {
                     console.log(value.message);
                 }
+                await this.updateSelectedItemBalance();
                 this.portfolio = await this.getPortfolioList();
             } catch(e) {
                 console.error(e);
                 return
             }
             console.log('Success');  
+        }
+    },
+
+    async updateSelectedItemBalance() {
+        const collateralAmount = await getPosition();
+        const collateralBalance = await getAccount();
+        const contractProperties = await getFinancialContractProperties();
+        const collateralRatio = ((+contractProperties.totalTokensOutstandingFormatted)/(+contractProperties.totalPositionCollateralFormatted))*this.INSTRUMENTS[0].Price;
+
+        console.log(collateralAmount, collateralBalance);
+        console.log('ratio: ', collateralRatio);
+
+        this.selectedItemBalance = {
+            collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
+            collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString(),
+            collateralRatio: (+collateralRatio).toFixed(toFix).toString()
         }
     },
 
