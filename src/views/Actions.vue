@@ -399,7 +399,7 @@ export default {
         if (this.sythetic.collateralAmount && this.sythetic.tokensAmount) {  
             console.log('Creating');          
             try {
-                const newPosition = createPosition(this.sythetic.collateralAmount, this.sythetic.tokensAmount);
+                const newPosition = createPosition(this.sythetic.tokensAmount, this.sythetic.collateralAmount);
                 for await (let value of newPosition) {
                     console.log(value.message);
                 }
