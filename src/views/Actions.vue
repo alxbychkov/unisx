@@ -95,11 +95,15 @@
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
                                             <span>Liquidation Price</span>
-                                            <input type="text" placeholder="0.000">
+                                            <input type="text" placeholder="0.000" disabled>
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
                                             <div class="input-wrapp">
-                                                <input type="text" placeholder="0.000" class="">
+                                                <input type="text"
+                                                    placeholder="0.000"
+                                                    v-model="collateral.collateralAmount"
+                                                    :disabled="!selectedItem.CollateralName"
+                                                >
                                                 <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>
                                             </div>
                                             <div class="input-wrapp">
@@ -108,7 +112,7 @@
                                             </div>
                                         </div>
                                         <div class="but_flex">
-                                            <button class="cancelbut disabled" :disabled="!selectedItem.Value">Supply</button>
+                                            <button class="cancelbut disabled" @click="deposit" :disabled="!selectedItem.Value">Supply</button>
                                             <button class="blueb disabled" :disabled="!selectedItem.Value">Withdraw</button>
                                         </div>
                                     </div>
@@ -255,6 +259,9 @@ export default {
               tokensAmount: '',
               cr: 1
           },
+          collateral: {
+              collateralAmount: ''
+          },
           newPosition: '',
           collateralPrice: 1
       }
@@ -289,8 +296,6 @@ export default {
         }
         
         getCollateralBalance().then(data => console.log('getCollateralBalance: ', data));
-
-
         console.log(this.selectedItemBalance);
     },
 
@@ -400,6 +405,25 @@ export default {
         }
     },
 
+    async deposit() {
+        if (this.collateral.collateralAmount) {  
+            console.log('Deposit');  
+                   
+            try {
+                const newDeposit = deposit(this.collateral.collateralAmount);
+                for await (let value of newDeposit) {
+                    console.log(value.message);
+                }
+                await this.updateSelectedItemBalance();
+                this.portfolio = await this.getPortfolioList();
+            } catch(e) {
+                console.error(e);
+                return
+            }
+            console.log('Success');  
+        }
+    },
+
     async updateSelectedItemBalance() {
         const collateralAmount = await getPosition();
         const collateralBalance = await getAccount();
@@ -430,6 +454,7 @@ export default {
     clearInputs(portfolio = false) {
         this.sythetic.tokensAmount = '';
         this.sythetic.collateralAmount = '';
+        this.collateral.collateralAmount = '';
 
         if (portfolio) {
             this.selectedItemBalance.collateralRatio;
