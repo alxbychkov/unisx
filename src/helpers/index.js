@@ -68,6 +68,5 @@ export function getUnicCoins(array, type) {
 }
 
 export function toDote(str) {
-    console.log(str);
     return str.replace(/\s/g, "").replace(",", ".");
 }
