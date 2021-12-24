@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 import EMP_ABI from './EMP_ABI.js'
 import {accountPromise} from './metamask.js'
 import {CHAIN_CONFIG} from './config.js'
@@ -23,8 +24,8 @@ const ERC20 = [
 	"event Transfer(address indexed from, address indexed to, uint amount)"
 ];
 
-let provider
-let financialContract
+export let provider
+export let financialContract
 export let collateralTokenAddress, collateralTokenDecimals, collateralToken
 export let tokenCurrencyAddress, tokenCurrencyDecimals, tokenCurrency
 

@@ -104,7 +104,11 @@
                                                     v-model="collateral.collateralAmount"
                                                     :disabled="!selectedItem.CollateralName"
                                                 >
-                                                <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>
+                                                <p class="flex j-between color-red mb-0"><span>MAX:</span>
+                                                    <span>
+                                                        {{ selectedItemBalance.collateralAmountFormatted }}
+                                                    </span>
+                                                </p>
                                             </div>
                                             <div class="input-wrapp">
                                                 <input type="text" placeholder="Token" :value="selectedItem.CollateralName" disabled>
@@ -227,13 +231,14 @@
 </template>
 
 <script>
-import {getUnicCoins} from '../helpers';
+import {getUnicCoins, toDote} from '../helpers';
 import {mapActions, mapGetters} from 'vuex';
 import vTable from '../components/elements/v-table.vue';
 // eslint-disable-next-line no-unused-vars
 import {connectMetamask, accountPromise} from '../core/metamask'; 
 // eslint-disable-next-line no-unused-vars
 import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, getCollateralBalance, getBalance} from '../core/eth';
+// eslint-disable-next-line no-unused-vars
 import {toFix} from '../core/config';
 
 export default {
@@ -388,10 +393,12 @@ export default {
     },
 
     async mint() {
-        if (this.sythetic.collateralAmount && this.sythetic.tokensAmount) {  
+        if (this.sythetic.collateralAmount && this.sythetic.tokensAmount) {
             console.log('Creating');          
             try {
-                const newPosition = createPosition(this.sythetic.tokensAmount, this.sythetic.collateralAmount);
+                const collateralAmount = toDote(this.sythetic.tokensAmount);
+                const tokensAmount = toDote(this.sythetic.collateralAmount);
+                const newPosition = createPosition(collateralAmount, tokensAmount);
                 for await (let value of newPosition) {
                     console.log(value.message);
                 }
@@ -408,9 +415,9 @@ export default {
     async deposit() {
         if (this.collateral.collateralAmount) {  
             console.log('Deposit');  
-                   
+            const collateralAmount = toDote(this.collateral.collateralAmount);
             try {
-                const newDeposit = deposit(this.collateral.collateralAmount);
+                const newDeposit = deposit(collateralAmount);
                 for await (let value of newDeposit) {
                     console.log(value.message);
                 }
@@ -469,9 +476,9 @@ export default {
     toPrice(token) {
         switch (token) {
             case 'collateralAmount':
-                return this.round((this.sythetic.collateralAmount * this.sythetic.cr * (this.INSTRUMENTS[0].Price / this.collateralPrice)), 4).toString();
+                return this.round((toDote(this.sythetic.collateralAmount) * this.sythetic.cr * (this.INSTRUMENTS[0].Price / this.collateralPrice)), 4).toString();
             case 'tokensAmount':
-                return this.round((this.sythetic.tokensAmount / this.sythetic.cr * (this.collateralPrice / this.INSTRUMENTS[0].Price)), 4).toString();
+                return this.round((toDote(this.sythetic.tokensAmount) / this.sythetic.cr * (this.collateralPrice / this.INSTRUMENTS[0].Price)), 4).toString();
             default:
                 return token;
         }
@@ -611,5 +618,8 @@ export default {
         background: linear-gradient( 
             0deg, rgba(21, 0, 153, 0.3008) -18.27%, rgba(255, 255, 255, 0.6272) 171.15% ), linear-gradient(
             0deg, #408cff, #408cff), #f9c02f;
+    }
+    .description.mb-10 {
+        padding: 0 30px;
     }
 </style>

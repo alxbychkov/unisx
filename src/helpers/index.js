@@ -1,5 +1,6 @@
 import axios from "axios";
 import {getPrice} from '../core/price';
+import { toFix } from "../core/config";
 
 export async function getJSONdata(url, commit = {}, action = '') {
     return await axios(url)
@@ -51,7 +52,7 @@ export async function createPrice(json) {
     for (let i=0; i<ln; i++) {
         // const price = (+json[i].Rewards / +json[i]?.decimals).toFixed(2);
         const price = await getPrice();
-        json[i].Price = price ? price : 0;
+        json[i].Price = price ? price.toFixed(toFix) : 0;
     }
     return await json;
 }
@@ -64,4 +65,9 @@ export function getUnicCoins(array, type) {
         }
     }
     return coins;
+}
+
+export function toDote(str) {
+    console.log(str);
+    return str.replace(/\s/g, "").replace(",", ".");
 }
