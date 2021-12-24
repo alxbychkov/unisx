@@ -278,7 +278,7 @@ export default {
 
         this.sythetic.cr = item.CR ? +item.CR : 1;
 
-        if (['uSPAC5'].includes(item.Name)) {
+        if (['uSPAC5', 'uSPAC10'].includes(item.Name)) {
             await this.updateSelectedItemBalance();
         } else {
             this.selectedItemBalance = {
@@ -324,7 +324,7 @@ export default {
         /*          - в отдельные элементы в зависимости от состояния. */
 
         const portfolio = [];
-        const instumentsJSON = this.INSTRUMENTS.map(instrument => {return {token: instrument.Name, decimals: instrument.decimals, address: instrument.CollateralAddress, price: instrument.Price, collateral: instrument.CollateralName, description: instrument.Description}});
+        const instumentsJSON = this.INSTRUMENTS.map(instrument => {return {token: instrument.Name, decimals: instrument.decimals, address: instrument.CollateralAddress, price: instrument.Price, collateral: instrument.CollateralName, description: instrument.Description, cr: instrument.CR}});
 
         // const tokenAddress =  [...[{token: 'ETH',decimals: 18,address:walletAddress}], ...this.STABLECOINS, ...this.DEFI_TOKENS, ...this.DEX_LP, ...instumentsJSON];
 
@@ -349,7 +349,7 @@ export default {
             console.log('Balance of ',i.token, ' = ', Number(balance));
 
             // Проверить статус - в кошельке, пул или стейк
-            if (balance > 0 && i.token !== 'uSPAC10') {
+            if (balance > 0) {
                 portfolio.push({
                     Name: i.token,
                     Status: "-",
@@ -359,7 +359,8 @@ export default {
                     UMA: 0,
                     Instrument: "",
                     CollateralName: i.collateral,
-                    Description: i.description
+                    Description: i.description,
+                    CR: i.cr
                 });
             }
         }

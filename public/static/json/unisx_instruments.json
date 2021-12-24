@@ -1,6 +1,6 @@
 [
 	{
-		"Name": "uSPAC5",
+		"Name": "uSPAC10",
 		"decimals": "18",
 		"Type": "EMP",
 		"DerivativeAddress": "0x7fd40a0e52e36af320aa75e70d4869bb0298b0d1",
@@ -11,24 +11,7 @@
 		"CR": "1.5",
 		"UNISWAP_POOL":
 			[
-				{"Pair": "uSPAC5/USDC", "PoolAddress": "0x0000000000000000000000000000000000000000"}
-			],
-		"Rewards": "300",
-		"Description": "A synthetic token that tracks the index of the 5 most active SPACs stocks can be used for speculative purposes and allows the user to earn on price movements in one of the most interesting markets without centralized intermediaries such as exchanges and brokers."
-	},
-	{
-		"Name": "uSPAC10",
-		"decimals": "18",
-		"Type": "EMP",
-		"DerivativeAddress": "0x0000000000000000000000000000000000000000",
-		"TokenAddress": "0x0000000000000000000000000000000000000000",
-		"CollateralName": "USDC",
-		"CollateralAddress": "0x7079f3762805cff9c979a5bdc6f5648bcfee76c8",
-		"CollateralDecimals": "6",
-		"CR": "1.5",
-		"UNISWAP_POOL":
-			[
-				{"Pair": "uSPAC5/USDC", "PoolAddress": "0x0000000000000000000000000000000000000000"}
+				{"Pair": "uSPAC10/USDC", "PoolAddress": "0x0000000000000000000000000000000000000000"}
 			],
 		"Rewards": "300",
 		"Description": "A synthetic token that tracks the index of the 10 most active SPACs stocks can be used for speculative purposes and allows the user to earn on price movements in one of the most interesting markets without centralized intermediaries such as exchanges and brokers."
