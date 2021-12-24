@@ -87,10 +87,10 @@
                                         </div>
                                         <button class="orangebut lr-auto" style="display: none">Claim Rewards</button>
                                     </div>
-                                    <div class="col-md-3 col-sm-4 col-xs-12">
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
                                         <h4>COLLATERAL</h4>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                                            <span>Collateral Ratio</span>
+                                            <span>Global<br>Collateralization ratio</span>
                                             <input type="text" placeholder="0.000" disabled :value="selectedItemBalance.collateralRatio">
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
@@ -428,7 +428,7 @@ export default {
         const collateralAmount = await getPosition();
         const collateralBalance = await getAccount();
         const contractProperties = await getFinancialContractProperties();
-        const collateralRatio = ((+contractProperties.totalTokensOutstandingFormatted)/(+contractProperties.totalPositionCollateralFormatted))*this.INSTRUMENTS[0].Price;
+        const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
 
         console.log(collateralAmount, collateralBalance);
         console.log('ratio: ', collateralRatio);
