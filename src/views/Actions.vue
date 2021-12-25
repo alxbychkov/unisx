@@ -106,7 +106,7 @@
                                                 >
                                                 <p class="flex j-between color-red mb-0"><span>MAX:</span>
                                                     <span>
-                                                        {{ selectedItemBalance.collateralAmountFormatted }}
+                                                        {{ selectedItemBalance.collateralTokens }}
                                                     </span>
                                                 </p>
                                             </div>
@@ -256,6 +256,7 @@ export default {
           selectedItemBalance: {
               collateralAmountFormatted: '0.0000',
               collateralBalanceFormatted: '0.0000',
+              collateralTokens: '0.0000',
               collateralRatio: '0.0000',
               cr: 1
           },
@@ -296,6 +297,7 @@ export default {
             this.selectedItemBalance = {
                 collateralAmountFormatted: '0.0000',
                 collateralBalanceFormatted: '0.0000',
+                collateralTokens: '0.0000',
                 collateralRatio: '0.0000'
             }
         }
@@ -443,6 +445,7 @@ export default {
         this.selectedItemBalance = {
             collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
             collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString(),
+            collateralTokens: (+collateralAmount.collateralAmountFormatted).toFixed(toFix).toString(),
             collateralRatio: (+collateralRatio).toFixed(toFix).toString()
         }
     },
