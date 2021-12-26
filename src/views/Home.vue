@@ -17,7 +17,9 @@
                                 New synthetic, collateral-backed tokens the price of which are tied to the quotes of various SPAC stock indexes, expanding the facilities for getting exposure on assets from traditional markets. Synthetics are created by depositing collateral into a smart contract and minting tokens backed by that collateral.
                             </p>
                           </div>
-                          <button data-aos="fade" data-aos-delay="1200" data-aos-duration="800" class="orangebut">Register</button>
+                            <router-link :to="{ name: 'Actions'}">
+                                <a href="" data-aos="fade" data-aos-delay="1200" data-aos-duration="800" class="orangebut d-flex">OPERATIONS</a>
+                            </router-link>
                       </div>
                   </div>
               </div>
@@ -84,3 +86,10 @@ export default {
   props: {}
 }
 </script>
+<style scoped>
+    .d-flex {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
