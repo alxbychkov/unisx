@@ -8,11 +8,14 @@
               <div class="row">
                   <div class="col-md-12">
                       <div class="ovh">
-                          <h1 data-aos="fade-up" data-aos-delay="300" data-aos-duration="800">UniSX decentralised <br>derivatives</h1>
+                          <h1 data-aos="fade-up" data-aos-delay="300" data-aos-duration="800">UniSX decentralised <br>indexes
+                          </h1>
                       </div>
                       <div class="after_h1_wrp">
                           <div class="ovh">
-                              <p data-aos="fade-up" data-aos-delay="700" data-aos-duration="800" class="after_h1">New synthetic, collateral-backed tokens whose value changes depending on exhange quotes. Synthetics are created by depositing collateral into a smart contract and minting tokens backed by that collateral.</p>
+                              <p data-aos="fade-up" data-aos-delay="700" data-aos-duration="800" class="after_h1">
+                                New synthetic, collateral-backed tokens the price of which are tied to the quotes of various SPAC stock indexes, expanding the facilities for getting exposure on assets from traditional markets. Synthetics are created by depositing collateral into a smart contract and minting tokens backed by that collateral.
+                            </p>
                           </div>
                           <button data-aos="fade" data-aos-delay="1200" data-aos-duration="800" class="orangebut">Register</button>
                       </div>
@@ -43,27 +46,27 @@
                                   <div class="hw_card_img" data-aos="fade-up" data-aos-delay="300" data-aos-duration="800">
                                       <img src="../assets/img/hw1.png" alt="">
                                       <p>Mint</p>
-                                      <span>Mint UniSX tokens and get sponsor revards. You can trade your tokens or deposit them to DEX liquidity pools.</span>
+                                      <span>Mint synthetic tokens and get sponsor revards in UNISX reward tokens. You can trade your tokens or deposit them to DEX liquidity pools.</span>
                                   </div>
                                   
                                   <div class="hw_card_img" data-aos="fade-up" data-aos-delay="600" data-aos-duration="800"> 
                                       <img src="../assets/img/hw3.png" alt="">
                                       <p>Stake</p>
-                                      <span>Stake UniSX tokens to smart contract and earn additional GT</span>
+                                      <span>Stake UNISX tokens and liquidity pool tokens to smart contract and earn additional UNISX tokens and utility xUNISX tokens.</span>
                                   </div>
                               </div>
                               <div class="col-md-6 col-sm-6 col-xs-12">
                                   <div class="hw_card_img" data-aos="fade-up" data-aos-delay="900" data-aos-duration="800">
                                       <img src="../assets/img/hw2.png" alt="">
                                       <p>Pool</p>
-                                      <span>Deposit UniSX synthetic tokens in the corresponding Uniswap pool to earn OPIUM & additional UniSX liquidity provider rewards.</span>
+                                      <span>Deposit synthetic tokens in the liquidity pool to earn DEX commision.</span>
                                   </div>
                                   
                                   <div class="hw_card_img" data-aos="fade-up" data-aos-delay="1200" data-aos-duration="800">
                                       <img src="../assets/img/hw4.png" alt="">
                                       <p>Trade</p>
                                       <span>
-                                        You can trade UniSX synthetic tokens on DEX to yarn the difference between minting cost and the synthetics spot price as profit.</span>
+                                        You can trade synthetic tokens on DEX to earn the difference between minting cost and the synthetics spot price as profit. Holding of xUNISX tokens entitles you to receive cashback on DEX commissions.</span>
                                   </div>
                               </div>
                           </div>
