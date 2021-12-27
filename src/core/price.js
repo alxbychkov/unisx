@@ -1,41 +1,63 @@
-import {BASKET, MARKETSTACK_API_KEY} from './config.js'
+/* eslint-disable no-unused-vars */
+import {BASKET, RAPID_API_KEY, CORRECTION_FACTOR} from './config.js'
+import { ethers } from 'ethers'
+const {FixedNumber, BigNumber} = ethers
 
-export async function getPrice(){
-  const now = new Date()
-  // Give 5 days to skip non-working days and query at least one working day
-  const MINIMAL_LOOKBACK = 1000 * 3600 * 24 * 5;
-  const start = new Date(now - MINIMAL_LOOKBACK)
+export async function getPriceFN() {
+  // Construct URL.
+  // https://rapidapi.com/principalapis/api/stock-data-yahoo-finance-alternative/
+  const symbolsStr = BASKET.join("%2C");
+  const url = `https://stock-data-yahoo-finance-alternative.p.rapidapi.com/v6/finance/quote?symbols=${symbolsStr}`;
+  const options = {
+    method: "GET",
+    headers: {
+      "x-rapidapi-host": "stock-data-yahoo-finance-alternative.p.rapidapi.com",
+      "x-rapidapi-key": RAPID_API_KEY,
+    },
+  };
 
-  function dateToStr(date){
-    return date.toISOString().slice(0, 10)
+  const response = await (await fetch(url, options)).json()
+
+  const data = response && response.quoteResponse && response.quoteResponse.result;
+
+  // Check responses.
+  if (data == null || data.length == 0) {
+    throw new Error(`Could not parse price result`);
   }
 
-  const url = `https://api.marketstack.com/v1/eod` +
-    `?access_key=${MARKETSTACK_API_KEY}` +
-    `&sort=DESC` +
-    `&symbols=${BASKET.join(',')}` +
-    `&limit=${BASKET.length}` +
-    `&date_from=${dateToStr(start)}&date_to=${dateToStr(now)}`
-
-  console.log("query marketstack", url);
-
-  const data = await (await fetch(url)).json()
-
-  if(data.data == null || data.data.length == 0){
-    throw new Error('Malformed price data')
-  }
-
-  let avg = 0
-  for (let symbol of BASKET) {
-    const item = data.data.find(item => item.symbol == symbol)
-    if(item == null){
-      throw new Error('No data for symbol ' + symbol)
+  // Parse results.
+  // For every symbol, get last known price
+  const prices = BASKET.map((symbol) => {
+    const item = data.find((item) => item.symbol == symbol);
+    if (item == null) {
+      throw new Error(`Response lacks data for symbol ${symbol}`);
     }
-    // close price can be null, fallback to open price
-    const price = item.close || item.open
-    avg = avg + price
-  }
-  avg = avg / BASKET.length
+    const rawPrice = item.regularMarketPrice;
+    if (rawPrice == null) {
+      throw new Error(`Response has no price for ${symbol}`);
+    }
+    return rawPrice;
+  });
 
-  return avg
+  return calculateBasketPrice(prices);
+}
+
+async function calculateBasketPrice(stockPrices) {
+  const prices = stockPrices.map((rawPrice) => FixedNumber.from(rawPrice.toString()));
+
+  // Calculate average price
+  let price = FixedNumber.from(0);
+  for (const p of prices) {
+    price = price.addUnsafe(p);
+  }
+  price = price.divUnsafe(FixedNumber.from(BASKET.length));
+
+  // Apply correction factor
+  price = price.mulUnsafe(FixedNumber.from(CORRECTION_FACTOR.toString()));
+
+  return price
+}
+
+export async function getPrice() {
+  return (await getPriceFN()).toString()
 }

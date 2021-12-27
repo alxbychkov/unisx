@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
 import EMP_ABI from './EMP_ABI.js'
 import {accountPromise} from './metamask.js'
-import {CHAIN_CONFIG} from './config.js'
+import {CHAIN_CONFIG, USER_CR} from './config.js'
+import {getPriceFN} from './price.js'
 import { ethers } from 'ethers'
 
 function getChainConfig(){
@@ -28,20 +28,30 @@ export let provider
 export let financialContract
 export let collateralTokenAddress, collateralTokenDecimals, collateralToken
 export let tokenCurrencyAddress, tokenCurrencyDecimals, tokenCurrency
+export let collateralRequirement
+let price
 
-export const ethPromise = accountPromise.then(async () => {
-  provider = new ethers.providers.Web3Provider(window.ethereum)
-  const signer = provider.getSigner()
-  financialContract = new ethers.Contract(getChainConfig().financialContractAddress, EMP_ABI, signer)
+export const ethPromise = Promise.all([
+  getPriceFN().then(_price => price = _price),
 
-  collateralTokenAddress = await financialContract.collateralCurrency()
-  collateralToken = new ethers.Contract(collateralTokenAddress, ERC20, signer)
-  collateralTokenDecimals = await collateralToken.decimals()
+  accountPromise.then(async () => {
+    // TODO initialize in parallel
 
-  tokenCurrencyAddress = await financialContract.tokenCurrency()
-  tokenCurrency = new ethers.Contract(tokenCurrencyAddress, ERC20, signer)
-  tokenCurrencyDecimals = await tokenCurrency.decimals()
-})
+    provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
+    financialContract = new ethers.Contract(getChainConfig().financialContractAddress, EMP_ABI, signer)
+
+    collateralTokenAddress = await financialContract.collateralCurrency()
+    collateralToken = new ethers.Contract(collateralTokenAddress, ERC20, signer)
+    collateralTokenDecimals = await collateralToken.decimals()
+
+    tokenCurrencyAddress = await financialContract.tokenCurrency()
+    tokenCurrency = new ethers.Contract(tokenCurrencyAddress, ERC20, signer)
+    tokenCurrencyDecimals = await tokenCurrency.decimals()
+
+    collateralRequirement = await financialContract.collateralRequirement()
+  }),
+])
 
 export async function getBalance(account = window.ethereum.selectedAddress){
   return provider.getBalance(account)
@@ -49,6 +59,10 @@ export async function getBalance(account = window.ethereum.selectedAddress){
 
 export async function getCollateralBalance(account = window.ethereum.selectedAddress){
   return collateralToken.balanceOf(account)
+}
+
+export async function getTokenCurrencyBalance(account = window.ethereum.selectedAddress){
+  return tokenCurrency.balanceOf(account)
 }
 
 export async function getAccount(account = window.ethereum.selectedAddress){
@@ -150,24 +164,37 @@ function toBN(val, decimals) {
   }
 }
 
+async function* ensureAllowance(amount, contract, address = window.ethereum.selectedAddress) {
+  const financialContractAddress = getChainConfig().financialContractAddress
+  yield {message: 'Checking balance'}
+  const balance = await contract.balanceOf(address)
+  if(balance.lt(amount)){
+    throw new Error('Insufficient balance')
+  }
+  yield {message: 'Checking allowance'}
+  const allowance = await contract.allowance(address, financialContractAddress)
+  if(allowance.lt(amount)){
+    yield {message: 'Sending approve transaction'}
+    const approveTx = await contract.approve(financialContractAddress, amount)
+    yield {message: 'Waiting for approve transaction', txHash: approveTx.hash}
+    await approveTx.wait()
+  }
+}
+
+async function* ensureCollateralAllowance(collateralAmount) {
+  yield* ensureAllowance(collateralAmount, collateralToken)
+}
+
+async function* ensureTokenCurrencyAllowance(tokensAmount) {
+  yield* ensureAllowance(tokensAmount, tokenCurrency)
+}
+
 export async function* createPosition(collateralAmount, tokensAmount){
   collateralAmount = toBN(collateralAmount, collateralTokenDecimals)
   tokensAmount = toBN(tokensAmount, tokenCurrencyDecimals)
 
-  const financialContractAddress = getChainConfig().financialContractAddress
-  yield {message: 'Checking balance'}
-  const balance = await getCollateralBalance()
-  if(balance.lt(collateralAmount)){
-    throw new Error('Insufficient collateral balance')
-  }
-  yield {message: 'Checking allowance'}
-  const allowance = await collateralToken.allowance(window.ethereum.selectedAddress, financialContractAddress)
-  if(allowance.lt(collateralAmount)){
-    yield {message: 'Sending approve transaction'}
-    const approveTx = await collateralToken.approve(financialContractAddress, collateralAmount)
-    yield {message: 'Waiting for approve transaction', txHash: approveTx.hash}
-    await approveTx.wait()
-  }
+  yield* ensureCollateralAllowance(collateralAmount)
+
   yield {message: 'Sending create position transaction'}
   const createTx = await financialContract.create({rawValue: collateralAmount}, {rawValue: tokensAmount})
   yield {message: 'Waiting for create position transaction', txHash: createTx.hash}
@@ -176,12 +203,54 @@ export async function* createPosition(collateralAmount, tokensAmount){
 
 export async function* deposit(collateralAmount){
   collateralAmount = toBN(collateralAmount, collateralTokenDecimals)
-  yield {message: 'Sending approve transaction'}
-  const approveTx = await collateralToken.approve(getChainConfig().financialContractAddress, collateralAmount)
-  yield {message: 'Waiting for approve transaction', txHash: approveTx.hash}
-  await approveTx.wait()
+  yield* ensureCollateralAllowance(collateralAmount)
   yield {message: 'Sending deposit transaction'}
   const depositTx = await financialContract.deposit({rawValue: collateralAmount})
   yield {message: 'Waiting for deposit transaction', txHash: depositTx.hash}
   await depositTx.wait()
+}
+
+export async function* redeem(tokensAmount) {
+  tokensAmount = toBN(tokensAmount, tokenCurrencyDecimals)
+  yield* ensureTokenCurrencyAllowance(tokensAmount)
+  yield {message: 'Sending transaction'}
+  const tx = await financialContract.redeem({rawValue: tokensAmount})
+  yield {message: 'Waiting for transaction', txHash: tx.hash}
+  await tx.wait()
+}
+
+export async function* withdraw(collateralAmount) {
+  collateralAmount = toBN(collateralAmount)
+  yield {message: 'Sending transaction'}
+  const tx = await financialContract.withdraw({rawValue: collateralAmount})
+  yield {message: 'Waiting for transaction', txHash: tx.hash}
+  await tx.wait()
+}
+
+export function tokenCurrencyByCollateral(collateralAmount) {
+  collateralAmount = toBN(collateralAmount, collateralTokenDecimals)
+  collateralAmount = ethers.FixedNumber.from(collateralAmount.toString())
+    .divUnsafe(ethers.FixedNumber.from((10 ** collateralTokenDecimals).toString()))
+  return collateralAmount
+    .mulUnsafe(price)
+    .mulUnsafe(ethers.FixedNumber.from(collateralRequirement.toString()))
+    // Scale collateralRequirement
+    .divUnsafe(ethers.FixedNumber.from((10 ** 18).toString()))
+    .mulUnsafe(ethers.FixedNumber.from(USER_CR))
+    .round(tokenCurrencyDecimals)
+    .toString()
+}
+
+export function collateralByTokenCurrency(tokensAmount) {
+  tokensAmount = toBN(tokensAmount, tokenCurrencyDecimals)
+  tokensAmount = ethers.FixedNumber.from(tokensAmount.toString())
+    .divUnsafe(ethers.FixedNumber.from((10 ** tokenCurrencyDecimals).toString()))
+  return tokensAmount
+    .divUnsafe(price)
+    // Scale collateralRequirement
+    .mulUnsafe(ethers.FixedNumber.from((10 ** 18).toString()))
+    .divUnsafe(ethers.FixedNumber.from(collateralRequirement.toString()))
+    .divUnsafe(ethers.FixedNumber.from(USER_CR))
+    .round(collateralTokenDecimals)
+    .toString()
 }

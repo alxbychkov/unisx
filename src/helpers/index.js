@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import axios from "axios";
 import {getPrice} from '../core/price';
 import { toFix } from "../core/config";
@@ -52,7 +53,7 @@ export async function createPrice(json) {
     for (let i=0; i<ln; i++) {
         // const price = (+json[i].Rewards / +json[i]?.decimals).toFixed(2);
         const price = await getPrice();
-        json[i].Price = price ? price.toFixed(toFix) : 0;
+        json[i].Price = price ? price : 0;
     }
     return await json;
 }

@@ -75,7 +75,7 @@
                                         </div>
                                         <div class="but_flex mt-auto">
                                             <button class="cancelbut disabled" @click="mint" :disabled="!sythetic.tokensAmount">Mint</button>
-                                            <button class="blueb">Burn</button>
+                                            <button class="blueb disabled" @click="burn" :disabled="!sythetic.collateralAmount">Burn</button>
                                         </div>
                                     </div>
                                     <div class="col-md-5 col-sm-4 col-xs-12 flex-collumn">
@@ -104,7 +104,7 @@
                                                     v-model="collateral.collateralAmount"
                                                     :disabled="!selectedItem.CollateralName"
                                                 >
-                                                <p class="flex j-between color-red mb-0"><span>MAX:</span>
+                                                <p class="flex j-between color-red mb-0" style="display: none"><span>MAX:</span>
                                                     <span>
                                                         {{ selectedItemBalance.collateralTokens }}
                                                     </span>
@@ -117,7 +117,7 @@
                                         </div>
                                         <div class="but_flex">
                                             <button class="cancelbut disabled" @click="deposit" :disabled="!selectedItem.Value">Supply</button>
-                                            <button class="blueb disabled" :disabled="!selectedItem.Value">Withdraw</button>
+                                            <button class="blueb disabled" @click="withdraw" :disabled="!selectedItem.Value">Withdraw</button>
                                         </div>
                                     </div>
                                 </div>
@@ -237,7 +237,7 @@ import vTable from '../components/elements/v-table.vue';
 // eslint-disable-next-line no-unused-vars
 import {connectMetamask, accountPromise} from '../core/metamask'; 
 // eslint-disable-next-line no-unused-vars
-import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, getCollateralBalance, getBalance} from '../core/eth';
+import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, getCollateralBalance, getBalance, redeem} from '../core/eth';
 // eslint-disable-next-line no-unused-vars
 import {toFix} from '../core/config';
 
@@ -421,6 +421,44 @@ export default {
             try {
                 const newDeposit = deposit(collateralAmount);
                 for await (let value of newDeposit) {
+                    console.log(value.message);
+                }
+                await this.updateSelectedItemBalance();
+                this.portfolio = await this.getPortfolioList();
+            } catch(e) {
+                console.error(e);
+                return
+            }
+            console.log('Success');  
+        }
+    },
+
+    async burn() {
+        if (this.sythetic.collateralAmount) {  
+            console.log('Burn');  
+            const tokensAmount = toDote(this.sythetic.collateralAmount);
+            try {
+                const newBurn = redeem(tokensAmount);
+                for await (let value of newBurn) {
+                    console.log(value.message);
+                }
+                await this.updateSelectedItemBalance();
+                this.portfolio = await this.getPortfolioList();
+            } catch(e) {
+                console.error(e);
+                return
+            }
+            console.log('Success');  
+        }
+    },
+
+    async withdraw() {
+        if (this.collateral.collateralAmount) {  
+            console.log('Withdraw');  
+            const collateralAmount = toDote(this.collateral.collateralAmount);
+            try {
+                const newWithdraw = deposit(collateralAmount);
+                for await (let value of newWithdraw) {
                     console.log(value.message);
                 }
                 await this.updateSelectedItemBalance();

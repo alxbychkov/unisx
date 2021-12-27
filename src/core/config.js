@@ -5,11 +5,15 @@ export const CHAIN_CONFIG = {
   },
 }
 
+export const USER_CR = '1.25'
+
 export const PRICE_IDENTIFIER = 'uSPAC10'
 
 export const BASKET = ["DWAC", "IRDM", "PRIM", "TGLS", "MP", "LCID", "GDYN", "SMPL", "ENVX", "QS"]
 
-export const MARKETSTACK_API_KEY = 'c61421fdf1724306cbb28822a9bbac47'
+export const CORRECTION_FACTOR = '1.0'
+
+export const RAPID_API_KEY = "4678111dccmsh29254e250c6a6d5p13bb96jsn5b3f51220277"
 
 export const isDev = !(process.env.NODE_ENV === 'production');
 export const toFix = isDev ? 5 : 4;
