@@ -14,7 +14,7 @@
                 </div>
             </div>
             <div class="row flex cards" data-aos="fade-up" data-aos-delay="1000" data-aos-duration="800">
-                <div class="col-md-5 col-sm-12 col-xs-12">
+                <div class="col-md-5 col-sm-12 col-xs-12 hidden">
                     <v-table 
                         :tableData="INSTRUMENTS"
                         :tableHeaders="['Instrument', 'Price, USD', 'Rewards APY']"
@@ -22,7 +22,7 @@
                         @getTableItem="getTableItem"
                     />
                 </div>
-                <div class="col-md-7 col-sm-12 col-xs-12">
+                <div class="col-md-12 col-sm-12 col-xs-12">
                     <v-table 
                         :tableData="portfolio"
                         :tableHeaders="['Portfolio', 'Amount', 'Value, USD', 'Rewards']"
@@ -43,7 +43,7 @@
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane fade in active" id="cardtab1">
                                 <div class="row flex cards j-between">
-                                    <div class="col-md-3 col-sm-4 col-xs-12 flex-collumn">
+                                    <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn">
                                         <h4>SYNTHETIC</h4>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
                                             <input 
@@ -54,12 +54,23 @@
                                                 :disabled="!selectedItem.Name"
                                                 @input="consider('collateralAmount')
                                             ">
-                                            <div class="input-wrapp">
+                                            <div class="input-wrapp hidden">
                                                 <input type="text" placeholder="Token" :value="selectedItem.Name" disabled>
                                                 <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.collateralAmountFormatted }}</span></p>
                                             </div>
+                                            <div class="input-wrapp">
+                                                <div class="flex-collumn">
+                                                    <select>
+                                                        <option value="" disabled selected>Instrument</option>
+                                                        <option 
+                                                            v-for="instrument in INSTRUMENTS"
+                                                            :key="instrument.Name"
+                                                            :value="instrument.Name">{{ instrument.Name }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="flex mb-10 flex-row-2 flex j-between">
+                                        <div class="flex mb-10 flex-row-2 flex j-between hidden">
                                             <input 
                                                 type="text"
                                                 placeholder="0.000"
@@ -73,12 +84,30 @@
                                                 <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.collateralBalanceFormatted }}</span></p>
                                             </div>
                                         </div>
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                                            <div class="w-45 flex j-between"><span>Price:</span><span>{{ INSTRUMENTS[0].Price }}</span></div>
+                                            <div class="w-45 flex j-between"><span>Rewards:</span><span>{{ INSTRUMENTS[0].Rewards }}</span></div>
+                                        </div>
+                                        <hr>
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                                            <span>Total synt tokens outstanding:</span>
+                                            <span>0.0000</span>
+                                        </div>
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                                            <span>Total collateral:</span>
+                                            <span>0.0000</span>
+                                        </div>
+                                        <hr>
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                                            <span>Global Collateralization ratio</span>
+                                            <span>{{ selectedItemBalance.collateralRatio }}</span>
+                                        </div>                                        
                                         <div class="but_flex mt-auto">
                                             <button class="cancelbut disabled" @click="mint" :disabled="!sythetic.tokensAmount">Mint</button>
                                             <button class="blueb disabled" @click="burn" :disabled="!sythetic.collateralAmount">Burn</button>
                                         </div>
                                     </div>
-                                    <div class="col-md-5 col-sm-4 col-xs-12 flex-collumn">
+                                    <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn">
                                         <div data-type="widget" class="mb-auto" style="display: none"></div>
                                         <div class="description mb-10" v-if="selectedItem.Description">{{ selectedItem.Description }}</div>
                                         <div class="flex mb-10 flex-row-2 flex j-center" style="display: none">
@@ -89,12 +118,12 @@
                                     </div>
                                     <div class="col-md-4 col-sm-4 col-xs-12">
                                         <h4>COLLATERAL</h4>
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center hidden">
                                             <span>Global<br>Collateralization ratio</span>
                                             <input type="text" placeholder="0.000" disabled :value="selectedItemBalance.collateralRatio">
                                         </div>
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                                            <span>Liquidation Price</span>
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center hidden">
+                                            <span>Liquidation Price:</span>
                                             <input type="text" placeholder="0.000" disabled>
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
@@ -115,6 +144,28 @@
                                                 <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.collateralBalanceFormatted }}</span></p>
                                             </div>
                                         </div>
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                                            <span>Collateral tokens in the wallet:</span>
+                                            <span>0.0000</span>
+                                        </div>
+                                        <hr>
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                                            <span>Position tokens outstanding:</span>
+                                            <span>0.0000</span>
+                                        </div>
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                                            <span>Collaterall amount:</span>
+                                            <span>0.0000</span>
+                                        </div>
+                                        <hr>
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                                            <span>Collateral Ratio:</span>
+                                            <span>0.0000</span>
+                                        </div>                                                                                                                        
+                                        <div class="flex mb-10 flex-row-2 flex j-between align-center color-red">
+                                            <span>Liquidation Price:</span>
+                                            <span>0.0000</span>
+                                        </div>                                        
                                         <div class="but_flex">
                                             <button class="cancelbut disabled" @click="deposit" :disabled="!selectedItem.Value">Supply</button>
                                             <button class="blueb disabled" @click="withdraw" :disabled="!selectedItem.Value">Withdraw</button>
@@ -580,7 +631,7 @@ export default {
         flex-direction: column;
     }
     .but_flex {
-        margin-top: 20px;
+        margin-top: 40px;
     }
     .mt-auto {
         margin-top: auto;
@@ -662,5 +713,13 @@ export default {
     }
     .description.mb-10 {
         padding: 0 30px;
+    }
+    hr {
+        width: 100%;
+        border-top: 1px solid #000;
+        margin: 5px 0;
+    }
+    .w-45 {
+        width: 45%;
     }
 </style>
