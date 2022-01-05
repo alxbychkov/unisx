@@ -51,7 +51,7 @@
                                                 placeholder="0.000"
                                                 class="mb-10"
                                                 v-model="sythetic.collateralAmount" 
-                                                :disabled="!selectedItem.Name"
+                                                :disabled="!sythetic.name"
                                                 @input="consider('collateralAmount')
                                             ">
                                             <div class="input-wrapp hidden">
@@ -59,13 +59,13 @@
                                                 <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.collateralAmountFormatted }}</span></p>
                                             </div>
                                             <div class="input-wrapp">
-                                                <div class="flex-collumn">
-                                                    <select>
+                                                <div class="flex-collumn" @click="getInstrumentItem($event)">
+                                                    <select id="portfolio">
                                                         <option value="" disabled selected>Instrument</option>
                                                         <option 
-                                                            v-for="instrument in INSTRUMENTS"
-                                                            :key="instrument.Name"
-                                                            :value="instrument.Name">{{ instrument.Name }}</option>
+                                                            v-for="instrument in instrumentsList"
+                                                            :key="instrument"
+                                                            :value="instrument">{{ instrument }}</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -85,22 +85,22 @@
                                             </div>
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                                            <div class="w-45 flex j-between"><span>Price:</span><span>{{ INSTRUMENTS[0].Price }}</span></div>
-                                            <div class="w-45 flex j-between"><span>Rewards:</span><span>{{ INSTRUMENTS[0].Rewards }}</span></div>
+                                            <div class="w-45 flex j-between"><span>Price:</span><span>{{ sythetic.price }}</span></div>
+                                            <div class="w-45 flex j-between"><span>Rewards:</span><span>{{ sythetic.rewards }}</span></div>
                                         </div>
                                         <hr>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
                                             <span>Total synt tokens outstanding:</span>
-                                            <span>0.0000</span>
+                                            <span>{{ sythetic.totalSyntTokensOutstanding }}</span>
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
                                             <span>Total collateral:</span>
-                                            <span>0.0000</span>
+                                            <span>{{ sythetic.totalCollateral }}</span>
                                         </div>
                                         <hr>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
                                             <span>Global Collateralization ratio</span>
-                                            <span>{{ selectedItemBalance.collateralRatio }}</span>
+                                            <span>{{ sythetic.globalCollateralizationRation }}</span>
                                         </div>                                        
                                         <div class="but_flex mt-auto">
                                             <button class="cancelbut disabled" @click="mint" :disabled="!sythetic.tokensAmount">Mint</button>
@@ -141,26 +141,26 @@
                                             </div>
                                             <div class="input-wrapp">
                                                 <input type="text" placeholder="Token" :value="selectedItem.CollateralName" disabled>
-                                                <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.collateralBalanceFormatted }}</span></p>
+                                                <p class="flex j-end color-green mb-0 hidden"><span>{{ selectedItemBalance.collateralBalanceFormatted }}</span></p>
                                             </div>
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
                                             <span>Collateral tokens in the wallet:</span>
-                                            <span>0.0000</span>
+                                            <span>{{ selectedItemBalance.collateralBalanceFormatted }}</span>
                                         </div>
                                         <hr>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
                                             <span>Position tokens outstanding:</span>
-                                            <span>0.0000</span>
+                                            <span>{{ selectedItemBalance.collateralAmountFormatted }}</span>
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
                                             <span>Collaterall amount:</span>
-                                            <span>0.0000</span>
+                                            <span>{{ selectedItemBalance.collateralTokens }}</span>
                                         </div>
                                         <hr>
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center">
                                             <span>Collateral Ratio:</span>
-                                            <span>0.0000</span>
+                                            <span>{{ selectedItemBalance.collateralRatio }}</span>
                                         </div>                                                                                                                        
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center color-red">
                                             <span>Liquidation Price:</span>
@@ -309,18 +309,26 @@ export default {
               collateralBalanceFormatted: '0.0000',
               collateralTokens: '0.0000',
               collateralRatio: '0.0000',
-              cr: 1
+              cr: 1,
+              liquidationPrice: '0.0000'
           },
           sythetic: {
+              name: '',
               collateralAmount: '',
               tokensAmount: '',
-              cr: 1
+              cr: 1,
+              price: '0.0000',
+              rewards: '0',
+              totalSyntTokensOutstanding: '0.0000',
+              totalCollateral: '0.0000',
+              globalCollateralizationRation: '0.0000'
           },
           collateral: {
               collateralAmount: ''
           },
           newPosition: '',
-          collateralPrice: 1
+          collateralPrice: 1,
+          isInstrumentListUpdated: false
       }
   },
   methods: {
@@ -353,8 +361,35 @@ export default {
             }
         }
         
-        getCollateralBalance().then(data => console.log('getCollateralBalance: ', data));
+        // getCollateralBalance().then(data => console.log('getCollateralBalance: ', data));
         console.log(this.selectedItemBalance);
+    },
+
+    async getInstrumentItem(e) {
+        if (e.target.tagName === 'LI' && e.target.classList.contains('option') && !e.target.classList.contains('disabled') && !e.target.classList.contains('selected')) {
+            this.clearInputs(true);
+            const value = e.target.innerText;
+            const selectedValue = this.INSTRUMENTS.find(i => i.Name === value);
+            console.log(selectedValue);
+
+            const contractProperties = await getFinancialContractProperties();
+            console.log(contractProperties);
+            const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
+
+            this.sythetic = {
+                name: selectedValue.Name,
+                cr: selectedValue.CR,
+                price: selectedValue.Price,
+                rewards: selectedValue.Rewards,
+                totalSyntTokensOutstanding: (+contractProperties.totalTokensOutstandingFormatted).toFixed(toFix).toString(),
+                totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
+                globalCollateralizationRation: (+collateralRatio).toFixed(toFix).toString()
+            }
+
+            this.selectedItem = {
+                Description: selectedValue.Description ? selectedValue.Description : ''
+            }
+        }
     },
 
     async connectWallet() {
@@ -525,8 +560,9 @@ export default {
     async updateSelectedItemBalance() {
         const collateralAmount = await getPosition();
         const collateralBalance = await getAccount();
-        const contractProperties = await getFinancialContractProperties();
-        const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
+        // const contractProperties = await getFinancialContractProperties();
+        // const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
+        const collateralRatio = (+collateralAmount.collateralAmountFormatted)/((+collateralAmount.tokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
 
         console.log(collateralAmount, collateralBalance);
         console.log('ratio: ', collateralRatio);
@@ -537,17 +573,43 @@ export default {
             collateralTokens: (+collateralAmount.collateralAmountFormatted).toFixed(toFix).toString(),
             collateralRatio: (+collateralRatio).toFixed(toFix).toString()
         }
+
+        this.sythetic = {
+            name: '',
+            collateralAmount: '',
+            tokensAmount: '',
+            cr: 1,
+            price: '0.0000',
+            rewards: '0',
+            totalSyntTokensOutstanding: '0.0000',
+            totalCollateral: '0.0000',
+            globalCollateralizationRation: '0.0000'
+        }
+
+        const select = document.querySelector('#cardtab1 .nice-select');
+        if (select) {
+            select.querySelectorAll('.list li').forEach((li, index) => {
+                if (index === 0) {
+                    li.classList.contains('selected') || li.classList.add('selected');
+                    select.querySelector('.current').innerText = li.innerText;
+                } else {
+                    li.classList.contains('selected') && li.classList.remove('selected');
+                }
+                li.classList.contains('focus') && li.classList.remove('focus');
+            });
+        }
     },
 
     consider(e) {
       switch (e) {
           case 'collateralAmount':
-              this.sythetic.tokensAmount = this.toPrice(e);
+              this.sythetic.tokensAmount = (this.toPrice(e) !== '0') ? this.toPrice(e) : '';
               break;
           case 'tokensAmount':
               this.sythetic.collateralAmount = this.toPrice(e);
             break;
       }
+      console.log(this.sythetic);
     },
 
     clearInputs(portfolio = false) {
@@ -556,7 +618,16 @@ export default {
         this.collateral.collateralAmount = '';
 
         if (portfolio) {
-            this.selectedItemBalance.collateralRatio;
+         this.selectedItemBalance = {
+              collateralAmountFormatted: '0.0000',
+              collateralBalanceFormatted: '0.0000',
+              collateralTokens: '0.0000',
+              collateralRatio: '0.0000',
+              cr: 1,
+              liquidationPrice: '0.0000'
+          }
+
+          this.selectedItem = '';
         }
     },
 
@@ -594,11 +665,22 @@ export default {
 
     dexLP: function() {
         return getUnicCoins(this.DEX_LP, 'dex');
+    },
+
+    // PRICE: function() {
+    //     return this.INSTRUMENTS[0] ? this.INSTRUMENTS[0].Price : 0.0000;
+    // },
+
+    // REWARDS: function() {
+    //     return this.INSTRUMENTS[0] ? this.INSTRUMENTS[0].Rewards : 0;
+    // },
+
+    instrumentsList: function() {        
+        return  this.INSTRUMENTS ? this.INSTRUMENTS.map(instrument => instrument.Name) : [];
     }
   },
   created() {
       console.log('create', this.INSTRUMENTS);
-      console.log('process ', process.env.NODE_ENV);
   },
   mounted() {
       this.GET_INSTRUMENTS_FROM_API();
@@ -609,6 +691,24 @@ export default {
       this.GET_DEFI_TOKENS_FROM_API();
       console.log('mount');
       window.$('select').niceSelect();
+
+      const portfolioItems = document.querySelector('#cardtab1');
+
+      console.log(portfolioItems);
+
+      const observer = new MutationObserver(entries => {
+          console.log(entries);
+      });
+
+      observer.observe(portfolioItems, {
+          childList: true,
+      });
+  },
+  updated() {
+    if (this.instrumentsList.length && !this.isInstrumentListUpdated) {
+        window.$('select').niceSelect('update');
+        this.isInstrumentListUpdated = true;
+    }
   }
 }
 </script>

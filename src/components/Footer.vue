@@ -25,8 +25,8 @@
                                         </li>
                                     </ul>
                                     <ul class="top_list">
-                                        <li class="active"><a href="">ABOUT UNISX</a></li>
-                                        <li><a href="">FAQ</a></li>
+                                        <li><a href="https://app.gitbook.com/s/ZJzXI998HYkbVXBxp31w/" target="_blank">ABOUT UNISX</a></li>
+                                        <li><a href="https://app.gitbook.com/s/ZJzXI998HYkbVXBxp31w/" target="_blank">FAQ</a></li>
                                     </ul>
                                 </div>
                             </div>

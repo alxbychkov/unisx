@@ -13,8 +13,8 @@
                                 <router-link :to="{ name: 'Actions'}" tag="li" active-class="active">
                                     <a href="">operations</a>
                                 </router-link>
-                                <li><a href="">Doc</a></li>
-                                <li><a href="">About</a></li>
+                                <li><a href="https://app.gitbook.com/s/ZJzXI998HYkbVXBxp31w/" target="_blank">Doc</a></li>
+                                <li><a href="https://app.gitbook.com/s/ZJzXI998HYkbVXBxp31w/" target="_blank">About</a></li>
                             </ul>
                         </div>
                         <div class="open_nav"> <img src="../assets/img/menu.svg" alt=""> </div>
