@@ -36,8 +36,8 @@
                 <div class="col-md-12">
                     <ul class="cards_tabs_nav" role="tablist">
                         <li role="presentation" class="active"><a href="#cardtab1" role="tab" data-toggle="tab">Instrument</a></li>
-                        <li role="presentation"><a href="#cardtab2" role="tab" data-toggle="tab">POOL</a></li>
-                        <li role="presentation"><a href="#cardtab3" role="tab" data-toggle="tab">STAKE</a></li>
+                        <li role="presentation"><a href="#cardtab2" role="tab" data-toggle="tab" @click="clearInputs(true)">POOL</a></li>
+                        <li role="presentation"><a href="#cardtab3" role="tab" data-toggle="tab" @click="clearInputs(true)">STAKE</a></li>
                     </ul>
                     <div class="cards_in_tab">
                         <div class="tab-content">
@@ -128,10 +128,16 @@
                                         </div>
                                         <div class="flex mb-10 flex-row-2 flex j-between">
                                             <div class="input-wrapp">
-                                                <input type="text"
+                                                <!-- <input type="text"
                                                     placeholder="0.000"
                                                     v-model="collateral.collateralAmount"
                                                     :disabled="!selectedItem.CollateralName"
+                                                > -->
+                                                <input type="text"
+                                                    placeholder="0.000"
+                                                    v-model="sythetic.tokensAmount"
+                                                    :disabled="!selectedItem.CollateralName"
+                                                    @input="consider('tokensAmount')" 
                                                 >
                                                 <p class="flex j-between color-red mb-0" style="display: none"><span>MAX:</span>
                                                     <span>
@@ -343,14 +349,14 @@ export default {
     ]),
       
     async getTableItem(item) {
-        this.clearInputs(item.Value);
+        this.clearInputs();
         this.selectedItem = item;
 
-        console.log(this.selectedItem);
+        console.log('getTableItem: ', this.selectedItem);
 
         this.sythetic.cr = item.CR ? +item.CR : 1;
 
-        if (['uSPAC5', 'uSPAC10'].includes(item.Name)) {
+        if (['uSPAC5', 'uSPAC10', 'uSPAC10-test'].includes(item.Name)) {
             await this.updateSelectedItemBalance();
         } else {
             this.selectedItemBalance = {
@@ -362,33 +368,68 @@ export default {
         }
         
         // getCollateralBalance().then(data => console.log('getCollateralBalance: ', data));
-        console.log(this.selectedItemBalance);
+        console.log('getTableItem(selectedItemBalance): ', this.selectedItemBalance);
+
+        const selectInstrumentValue = document.querySelector(`.list [data-value="${item.Name}"]`);
+        if (selectInstrumentValue) {
+            this.getInstrumentItem(selectInstrumentValue);
+            selectInstrumentValue.classList.contains('selected') || selectInstrumentValue.classList.add('selected');
+            if (selectInstrumentValue.closest('.nice-select').querySelector('.current')) {
+                selectInstrumentValue.closest('.nice-select').querySelector('.current').innerText = item.Name;
+            }
+        }
     },
 
     async getInstrumentItem(e) {
-        if (e.target.tagName === 'LI' && e.target.classList.contains('option') && !e.target.classList.contains('disabled') && !e.target.classList.contains('selected')) {
-            this.clearInputs(true);
-            const value = e.target.innerText;
-            const selectedValue = this.INSTRUMENTS.find(i => i.Name === value);
-            console.log(selectedValue);
+        if (typeof e.target !== 'undefined') {
+            if (e.target.tagName === 'LI' && e.target.classList.contains('option') && !e.target.classList.contains('disabled') && !e.target.classList.contains('selected')) {
+                this.clearInputs(true);
+                
+                const value = e.target.innerText;
+                const selectedValue = this.INSTRUMENTS.find(i => i.Name === value);
+                const portfolioItem = this.portfolio.find(i => i.Name === value);
 
-            const contractProperties = await getFinancialContractProperties();
-            console.log(contractProperties);
-            const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
+                console.log('selectedValue: ', selectedValue);
 
-            this.sythetic = {
-                name: selectedValue.Name,
-                cr: selectedValue.CR,
-                price: selectedValue.Price,
-                rewards: selectedValue.Rewards,
-                totalSyntTokensOutstanding: (+contractProperties.totalTokensOutstandingFormatted).toFixed(toFix).toString(),
-                totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
-                globalCollateralizationRation: (+collateralRatio).toFixed(toFix).toString()
+                const contractProperties = await getFinancialContractProperties();
+                console.log('contractProperties: ', contractProperties);
+                console.log('this.selectedItem: ', this.selectedItem);
+                const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
+
+                this.sythetic = {
+                    name: selectedValue.Name,
+                    cr: selectedValue.CR,
+                    price: selectedValue.Price,
+                    rewards: selectedValue.Rewards,
+                    totalSyntTokensOutstanding: (+contractProperties.totalTokensOutstandingFormatted).toFixed(toFix).toString(),
+                    totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
+                    globalCollateralizationRation: (+collateralRatio).toFixed(toFix).toString()
+                }
+
+                // this.selectedItem = {
+                //     Description: selectedValue.Description ? selectedValue.Description : ''
+                // }
+
+                this.getTableItem(portfolioItem);
             }
+        } else {
+                this.clearInputs();
+            
+                const value = e.innerText;
+                const selectedValue = this.INSTRUMENTS.find(i => i.Name === value);
 
-            this.selectedItem = {
-                Description: selectedValue.Description ? selectedValue.Description : ''
-            }
+                const contractProperties = await getFinancialContractProperties();
+                const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
+
+                this.sythetic = {
+                    name: selectedValue.Name,
+                    cr: selectedValue.CR,
+                    price: selectedValue.Price,
+                    rewards: selectedValue.Rewards,
+                    totalSyntTokensOutstanding: (+contractProperties.totalTokensOutstandingFormatted).toFixed(toFix).toString(),
+                    totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
+                    globalCollateralizationRation: (+collateralRatio).toFixed(toFix).toString()
+                }
         }
     },
 
@@ -437,7 +478,7 @@ export default {
 
             const collateralAmount = await getPosition();
 
-            getPosition(i.address).then(data => console.log(data));
+            getPosition(i.address).then(data => console.log('getposition: ', data));
 
             // balance = balance / (10**i.decimals);
 
@@ -447,7 +488,7 @@ export default {
             console.log('Balance of ',i.token, ' = ', Number(balance));
 
             // Проверить статус - в кошельке, пул или стейк
-            if (balance > 0) {
+            if (balance >= 0) {
                 portfolio.push({
                     Name: i.token,
                     Status: "-",
@@ -501,9 +542,9 @@ export default {
     },
 
     async deposit() {
-        if (this.collateral.collateralAmount) {  
+        if (this.sythetic.tokensAmount) {  // collateral.collateralAmount
             console.log('Deposit');  
-            const collateralAmount = toDote(this.collateral.collateralAmount);
+            const collateralAmount = toDote(this.sythetic.tokensAmount);
             try {
                 const newDeposit = deposit(collateralAmount);
                 for await (let value of newDeposit) {
@@ -539,9 +580,9 @@ export default {
     },
 
     async withdraw() {
-        if (this.collateral.collateralAmount) {  
+        if (this.sythetic.tokensAmount) { // collateral.collateralAmount
             console.log('Withdraw');  
-            const collateralAmount = toDote(this.collateral.collateralAmount);
+            const collateralAmount = toDote(this.sythetic.tokensAmount);
             try {
                 const newWithdraw = deposit(collateralAmount);
                 for await (let value of newWithdraw) {
@@ -571,33 +612,33 @@ export default {
             collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
             collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString(),
             collateralTokens: (+collateralAmount.collateralAmountFormatted).toFixed(toFix).toString(),
-            collateralRatio: (+collateralRatio).toFixed(toFix).toString()
+            collateralRatio: collateralRatio ? (+collateralRatio).toFixed(toFix).toString() : '0.0000'
         }
 
-        this.sythetic = {
-            name: '',
-            collateralAmount: '',
-            tokensAmount: '',
-            cr: 1,
-            price: '0.0000',
-            rewards: '0',
-            totalSyntTokensOutstanding: '0.0000',
-            totalCollateral: '0.0000',
-            globalCollateralizationRation: '0.0000'
-        }
+        // this.sythetic = {
+        //     name: '',
+        //     collateralAmount: '',
+        //     tokensAmount: '',
+        //     cr: 1,
+        //     price: '0.0000',
+        //     rewards: '0',
+        //     totalSyntTokensOutstanding: '0.0000',
+        //     totalCollateral: '0.0000',
+        //     globalCollateralizationRation: '0.0000'
+        // }
 
-        const select = document.querySelector('#cardtab1 .nice-select');
-        if (select) {
-            select.querySelectorAll('.list li').forEach((li, index) => {
-                if (index === 0) {
-                    li.classList.contains('selected') || li.classList.add('selected');
-                    select.querySelector('.current').innerText = li.innerText;
-                } else {
-                    li.classList.contains('selected') && li.classList.remove('selected');
-                }
-                li.classList.contains('focus') && li.classList.remove('focus');
-            });
-        }
+        // const select = document.querySelector('#cardtab1 .nice-select');
+        // if (select) {
+        //     select.querySelectorAll('.list li').forEach((li, index) => {
+        //         if (index === 0) {
+        //             li.classList.contains('selected') || li.classList.add('selected');
+        //             select.querySelector('.current').innerText = li.innerText;
+        //         } else {
+        //             li.classList.contains('selected') && li.classList.remove('selected');
+        //         }
+        //         li.classList.contains('focus') && li.classList.remove('focus');
+        //     });
+        // }
     },
 
     consider(e) {
@@ -609,7 +650,6 @@ export default {
               this.sythetic.collateralAmount = this.toPrice(e);
             break;
       }
-      console.log(this.sythetic);
     },
 
     clearInputs(portfolio = false) {
@@ -689,20 +729,19 @@ export default {
       this.GET_STABLECOINS_FROM_API();
       this.GET_DEX_LP_FROM_API();
       this.GET_DEFI_TOKENS_FROM_API();
-      console.log('mount');
       window.$('select').niceSelect();
 
-      const portfolioItems = document.querySelector('#cardtab1');
+    //   const portfolioItems = document.querySelector('#cardtab1');
 
-      console.log(portfolioItems);
+    //   console.log(portfolioItems);
 
-      const observer = new MutationObserver(entries => {
-          console.log(entries);
-      });
+    //   const observer = new MutationObserver(entries => {
+    //       console.log(entries);
+    //   });
 
-      observer.observe(portfolioItems, {
-          childList: true,
-      });
+    //   observer.observe(portfolioItems, {
+    //       childList: true,
+    //   });
   },
   updated() {
     if (this.instrumentsList.length && !this.isInstrumentListUpdated) {

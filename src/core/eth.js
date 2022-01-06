@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
+import { ethers } from 'ethers'
 import EMP_ABI from './EMP_ABI.js'
 import {accountPromise} from './metamask.js'
-import {CHAIN_CONFIG, USER_CR} from './config.js'
+import {CHAIN_CONFIG, USER_CR, PRICE_PRECISION} from './config.js'
 import {getPriceFN} from './price.js'
-import { ethers } from 'ethers'
 
 function getChainConfig(){
   return CHAIN_CONFIG[Number(window.ethereum.chainId)]
@@ -102,17 +102,27 @@ export async function getFinancialContractProperties(){
     ),
     minSponsorTokens: financialContract.minSponsorTokens(),
     collateralRequirement: financialContract.collateralRequirement(),
+
     /*
     Comment out because it is only available for perpetual contract
     fundingRate: financialContract.fundingRate(),
     */
+
     outstandingRegularFees: financialContract.getOutstandingRegularFees(
      Math.floor(new Date().getTime() / 1000)
     ).then(tuple => ({
       regularFee: tuple.regularFee.rawValue,
       latePenalty: tuple.latePenalty.rawValue,
       totalPaid: tuple.totalPaid.rawValue,
-    }))
+    })),
+
+    priceIdentifier: ethers.utils.toUtf8String(
+      (await financialContract.priceIdentifier()).slice(0, 32)
+    ),
+
+    /* enum ContractState { Open, ExpiredPriceRequested, ExpiredPriceReceived } */
+    isExpired: (await financialContract.contractState()) != 0,
+
 	})
 
   return {...props,
@@ -135,9 +145,27 @@ export async function getPosition(address = window.ethereum.selectedAddress){
       pos.tokensOutstanding.rawValue
     ),
   })
+
+  let liquidationPrice
+
+  if(pos.tokensOutstanding.isZero()){
+    liquidationPrice = null
+  } else {
+    liquidationPrice = 
+      ethers.FixedNumber.from(pos.collateralAmount.toString())
+        .divUnsafe(
+          ethers.FixedNumber.from(pos.tokensOutstanding.toString())
+        )
+        .mulUnsafe(ethers.FixedNumber.from((10 ** 18).toString()))
+        .divUnsafe(ethers.FixedNumber.from(collateralRequirement.toString()))
+        .round(PRICE_PRECISION)
+  }
+
   return {...pos,
     collateralAmountFormatted: ethers.utils.formatUnits(pos.collateralAmount, collateralTokenDecimals),
     tokensOutstandingFormatted: ethers.utils.formatUnits(pos.tokensOutstanding, tokenCurrencyDecimals),
+    liquidationPrice,
+    liquidationPriceFormatted: liquidationPrice && liquidationPrice.toString(),
   }
 }
 
@@ -227,15 +255,22 @@ export async function* withdraw(collateralAmount) {
   await tx.wait()
 }
 
+export async function* settleExpired() {
+  const balance = await getTokenCurrencyBalance()
+  // Settle expired is going to burn all the sponsor's tokens
+  yield* ensureTokenCurrencyAllowance(balance)
+  yield {message: 'Sending transaction'}
+  const tx = await financialContract.settleExpired()
+  yield {message: 'Waiting for transaction', txHash: tx.hash}
+  await tx.wait()
+}
+
 export function tokenCurrencyByCollateral(collateralAmount) {
   collateralAmount = toBN(collateralAmount, collateralTokenDecimals)
   collateralAmount = ethers.FixedNumber.from(collateralAmount.toString())
     .divUnsafe(ethers.FixedNumber.from((10 ** collateralTokenDecimals).toString()))
   return collateralAmount
     .mulUnsafe(price)
-    .mulUnsafe(ethers.FixedNumber.from(collateralRequirement.toString()))
-    // Scale collateralRequirement
-    .divUnsafe(ethers.FixedNumber.from((10 ** 18).toString()))
     .mulUnsafe(ethers.FixedNumber.from(USER_CR))
     .round(tokenCurrencyDecimals)
     .toString()
@@ -247,10 +282,8 @@ export function collateralByTokenCurrency(tokensAmount) {
     .divUnsafe(ethers.FixedNumber.from((10 ** tokenCurrencyDecimals).toString()))
   return tokensAmount
     .divUnsafe(price)
-    // Scale collateralRequirement
-    .mulUnsafe(ethers.FixedNumber.from((10 ** 18).toString()))
-    .divUnsafe(ethers.FixedNumber.from(collateralRequirement.toString()))
     .divUnsafe(ethers.FixedNumber.from(USER_CR))
     .round(collateralTokenDecimals)
     .toString()
 }
+
