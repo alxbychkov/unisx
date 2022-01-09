@@ -25,8 +25,8 @@
                 <div class="col-md-12 col-sm-12 col-xs-12">
                     <v-table 
                         :tableData="portfolio"
-                        :tableHeaders="['Portfolio', 'Amount', 'Value, USD', 'Rewards']"
-                        :tableRows="['Name', 'Number', 'Value', 'Rewards']"
+                        :tableHeaders="['Portfolio', 'Price', 'Amount', 'Value, USD', 'Rewards']"
+                        :tableRows="['Name', 'Price', 'Number', 'Value', 'Rewards']"
                         @getTableItem="getTableItem"
                     />
                 </div>
@@ -170,7 +170,7 @@
                                         </div>                                                                                                                        
                                         <div class="flex mb-10 flex-row-2 flex j-between align-center color-red">
                                             <span>Liquidation Price:</span>
-                                            <span>0.0000</span>
+                                            <span>{{ selectedItemBalance.liquidationPrice }}</span>
                                         </div>                                        
                                         <div class="but_flex">
                                             <button class="cancelbut disabled" @click="deposit" :disabled="!selectedItem.Value">Supply</button>
@@ -294,7 +294,7 @@ import vTable from '../components/elements/v-table.vue';
 // eslint-disable-next-line no-unused-vars
 import {connectMetamask, accountPromise} from '../core/metamask'; 
 // eslint-disable-next-line no-unused-vars
-import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, getCollateralBalance, getBalance, redeem} from '../core/eth';
+import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, getCollateralBalance, getBalance, redeem, getTokenCurrencyBalance} from '../core/eth';
 // eslint-disable-next-line no-unused-vars
 import {toFix} from '../core/config';
 
@@ -363,7 +363,8 @@ export default {
                 collateralAmountFormatted: '0.0000',
                 collateralBalanceFormatted: '0.0000',
                 collateralTokens: '0.0000',
-                collateralRatio: '0.0000'
+                collateralRatio: '0.0000',
+                liquidationPrice: '0.0000'
             }
         }
         
@@ -492,6 +493,7 @@ export default {
                 portfolio.push({
                     Name: i.token,
                     Status: "-",
+                    Price: i.price, 
                     Number: balance,
                     Value: value,
                     GT: 0,
@@ -601,18 +603,21 @@ export default {
     async updateSelectedItemBalance() {
         const collateralAmount = await getPosition();
         const collateralBalance = await getAccount();
+        const tokenCurrencyBalance = await getTokenCurrencyBalance();
         // const contractProperties = await getFinancialContractProperties();
         // const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
         const collateralRatio = (+collateralAmount.collateralAmountFormatted)/((+collateralAmount.tokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
 
         console.log(collateralAmount, collateralBalance);
         console.log('ratio: ', collateralRatio);
+        console.log('tokenCurrencyBalance: ', tokenCurrencyBalance);
 
         this.selectedItemBalance = {
             collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
             collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString(),
             collateralTokens: (+collateralAmount.collateralAmountFormatted).toFixed(toFix).toString(),
-            collateralRatio: collateralRatio ? (+collateralRatio).toFixed(toFix).toString() : '0.0000'
+            collateralRatio: collateralRatio ? (+collateralRatio).toFixed(toFix).toString() : '0.0000',
+            liquidationPrice: collateralAmount.liquidationPriceFormatted ? (+collateralAmount.liquidationPriceFormatted).toFixed(toFix).toString() : '0.0000'
         }
 
         // this.sythetic = {
