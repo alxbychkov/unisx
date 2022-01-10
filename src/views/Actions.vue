@@ -477,13 +477,15 @@ export default {
                 params: [i.address,'latest']
             });
 
-            const collateralAmount = await getPosition();
+            // const collateralAmount = await getPosition();
+            const collateralAmount = await getAccount();
 
             getPosition(i.address).then(data => console.log('getposition: ', data));
 
             // balance = balance / (10**i.decimals);
 
-            balance = (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString();
+            // balance = (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString();
+            balance = (+collateralAmount.tokenCurrencyBalanceFormatted).toFixed(toFix).toString();
 
             const value = i.price ? (balance * i.price).toFixed(toFix) : 0;
             console.log('Balance of ',i.token, ' = ', Number(balance));
@@ -608,12 +610,13 @@ export default {
         // const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
         const collateralRatio = (+collateralAmount.collateralAmountFormatted)/((+collateralAmount.tokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
 
-        console.log(collateralAmount, collateralBalance);
+        console.log('collateralAmount: ', collateralAmount, 'collateralBalance: ', collateralBalance);
         console.log('ratio: ', collateralRatio);
         console.log('tokenCurrencyBalance: ', tokenCurrencyBalance);
 
         this.selectedItemBalance = {
-            collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
+            // collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
+            collateralAmountFormatted: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString(),
             collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString(),
             collateralTokens: (+collateralAmount.collateralAmountFormatted).toFixed(toFix).toString(),
             collateralRatio: collateralRatio ? (+collateralRatio).toFixed(toFix).toString() : '0.0000',

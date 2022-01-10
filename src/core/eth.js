@@ -69,10 +69,12 @@ export async function getAccount(account = window.ethereum.selectedAddress){
   const props = await promisedProperties({
     balance: getBalance(account),
     collateralBalance: getCollateralBalance(account),
+    tokenCurrencyBalance: getTokenCurrencyBalance(account),
   })
   return {...props,
     balanceFormatted: ethers.utils.formatUnits(props.balance),
-    collateralBalanceFormatted: ethers.utils.formatUnits(props.collateralBalance, collateralTokenDecimals)
+    collateralBalanceFormatted: ethers.utils.formatUnits(props.collateralBalance, collateralTokenDecimals),
+    tokenCurrencyBalanceFormatted: ethers.utils.formatUnits(props.tokenCurrencyBalance, tokenCurrencyDecimals),
   }
 }
 
