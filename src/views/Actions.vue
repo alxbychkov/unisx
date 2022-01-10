@@ -316,7 +316,8 @@ export default {
               collateralTokens: '0.0000',
               collateralRatio: '0.0000',
               cr: 1,
-              liquidationPrice: '0.0000'
+              liquidationPrice: '0.0000',
+              tokenCurrencyBalance: '0.0000'
           },
           sythetic: {
               name: '',
@@ -364,7 +365,8 @@ export default {
                 collateralBalanceFormatted: '0.0000',
                 collateralTokens: '0.0000',
                 collateralRatio: '0.0000',
-                liquidationPrice: '0.0000'
+                liquidationPrice: '0.0000',
+                tokenCurrencyBalance: '0.0000'
             }
         }
         
@@ -565,9 +567,13 @@ export default {
     },
 
     async burn() {
-        if (this.sythetic.collateralAmount) {  
+        if (this.sythetic.collateralAmount) {
             console.log('Burn');  
             const tokensAmount = toDote(this.sythetic.collateralAmount);
+            const portfolioAmount = this.selectedItemBalance.tokenCurrencyBalance;
+            console.log(tokensAmount, portfolioAmount);
+            if (+tokensAmount > +portfolioAmount) return console.error('You have no mush tokens');
+
             try {
                 const newBurn = redeem(tokensAmount);
                 for await (let value of newBurn) {
@@ -614,7 +620,7 @@ export default {
 
         this.selectedItemBalance = {
             collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
-            // collateralAmountFormatted: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString(),
+            tokenCurrencyBalance: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString(),
             collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString(),
             collateralTokens: (+collateralAmount.collateralAmountFormatted).toFixed(toFix).toString(),
             collateralRatio: collateralRatio ? (+collateralRatio).toFixed(toFix).toString() : '0.0000',
