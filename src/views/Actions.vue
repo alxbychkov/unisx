@@ -294,7 +294,7 @@ import vTable from '../components/elements/v-table.vue';
 // eslint-disable-next-line no-unused-vars
 import {connectMetamask, accountPromise} from '../core/metamask'; 
 // eslint-disable-next-line no-unused-vars
-import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, getCollateralBalance, getBalance, redeem, getTokenCurrencyBalance} from '../core/eth';
+import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, getCollateralBalance, getBalance, redeem} from '../core/eth';
 // eslint-disable-next-line no-unused-vars
 import {toFix} from '../core/config';
 
@@ -605,18 +605,16 @@ export default {
     async updateSelectedItemBalance() {
         const collateralAmount = await getPosition();
         const collateralBalance = await getAccount();
-        const tokenCurrencyBalance = await getTokenCurrencyBalance();
         // const contractProperties = await getFinancialContractProperties();
         // const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
         const collateralRatio = (+collateralAmount.collateralAmountFormatted)/((+collateralAmount.tokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
 
         console.log('collateralAmount: ', collateralAmount, 'collateralBalance: ', collateralBalance);
         console.log('ratio: ', collateralRatio);
-        console.log('tokenCurrencyBalance: ', tokenCurrencyBalance);
 
         this.selectedItemBalance = {
-            // collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
-            collateralAmountFormatted: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString(),
+            collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
+            // collateralAmountFormatted: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString(),
             collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString(),
             collateralTokens: (+collateralAmount.collateralAmountFormatted).toFixed(toFix).toString(),
             collateralRatio: collateralRatio ? (+collateralRatio).toFixed(toFix).toString() : '0.0000',
