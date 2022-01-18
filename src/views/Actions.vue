@@ -474,20 +474,19 @@ export default {
 
         // Баланс токенов ERC20
         for (let i of tokenAddress) {
-            let balance = await window.ethereum.request({
-                method: 'eth_getBalance',
-                params: [i.address,'latest']
-            });
-
+            // let balance = await window.ethereum.request({
+            //     method: 'eth_getBalance',
+            //     params: [i.address,'latest']
+            // });
             // const collateralAmount = await getPosition();
             const collateralAmount = await getAccount();
 
-            getPosition(i.address).then(data => console.log('getposition: ', data));
+            console.log('getAccount: ', collateralAmount);
 
             // balance = balance / (10**i.decimals);
 
             // balance = (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString();
-            balance = (+collateralAmount.tokenCurrencyBalanceFormatted).toFixed(toFix).toString();
+            let balance = (+collateralAmount.tokenCurrencyBalanceFormatted).toFixed(toFix).toString();
 
             const value = i.price ? (balance * i.price).toFixed(toFix) : 0;
             console.log('Balance of ',i.token, ' = ', Number(balance));
@@ -508,6 +507,36 @@ export default {
                     CR: i.cr
                 });
             }
+
+            const unisx = {
+                Name: 'UNISX',
+                Status: "-",
+                Price: '', 
+                Number: (+collateralAmount.UNISXBalanceFormatted).toFixed(toFix).toString(),
+                Value: '',
+                GT: 0,
+                UMA: 0,
+                Instrument: "",
+                CollateralName: '',
+                Description: '',
+                CR: ''
+            }
+
+            const xunisx = {
+                Name: 'xUNISX',
+                Status: "-",
+                Price: '', 
+                Number: (+collateralAmount.xUNISXBalanceFormatted).toFixed(toFix).toString(),
+                Value: '',
+                GT: 0,
+                UMA: 0,
+                Instrument: "",
+                CollateralName: '',
+                Description: '',
+                CR: ''
+            }
+
+            portfolio.push(unisx, xunisx);
         }
 
         return portfolio;
