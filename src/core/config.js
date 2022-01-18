@@ -2,6 +2,9 @@ export const CHAIN_CONFIG = {
   // Kovan
   42: {
     financialContractAddress: '0x79572Ef0c78fa199dCF6df631C9A6779F4c1D581',
+    UNISXToken: "0x0fd2dD751D4803EbE981CD39d8dcB0dB656F8D44",
+    xUNISXToken: "0x29DEAB859E99A32083FEeeE870e6e3eb6403e21c",
+    StakingRewards: "0x0C96B835E8107c0D734a6675A595B846fBB16e9b",
   },
 }
 
@@ -11,7 +14,7 @@ export const BASKET = ["DWAC", "IRDM", "PRIM", "TGLS", "MP", "LCID", "GDYN", "SM
 
 export const CORRECTION_FACTOR = '1.0'
 
-export const RAPID_API_KEY = "4678111dccmsh29254e250c6a6d5p13bb96jsn5b3f51220277"
+export const RAPID_API_KEY = "37cec062d9msh1906bc89b032f5fp1c6fc8jsn21883587ddcb"
 
 export const PRICE_PRECISION = 3 // 2 places from USD, 1 place from dividing by 10
 

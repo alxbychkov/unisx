@@ -1,31 +1,23 @@
 /* eslint-disable no-unused-vars */
 import { ethers } from 'ethers'
-import EMP_ABI from './EMP_ABI.js'
+import EMP_ABI from './abi/EMP_ABI.js'
+import StakingRewards_ABI from './abi/StakingRewards_ABI.js'
+import ERC20 from './abi/ERC20_ABI.js'
+
 import {accountPromise} from './metamask.js'
 import {CHAIN_CONFIG, USER_CR, PRICE_PRECISION} from './config.js'
 import {getPriceFN} from './price.js'
+
+const formatUnits = ethers.utils.formatUnits.bind(ethers.utils)
 
 function getChainConfig(){
   return CHAIN_CONFIG[Number(window.ethereum.chainId)]
 }
 
-const ERC20 = [
-	// Read-Only Functions
-	"function balanceOf(address owner) view returns (uint256)",
-	"function decimals() view returns (uint8)",
-	"function symbol() view returns (string)",
-	"function allowance(address owner, address spender) view returns (uint256)",
-
-	// Authenticated Functions
-	"function transfer(address to, uint amount) returns (bool)",
-	"function approve(address to, uint amount) returns (bool)",
-
-	// Events
-	"event Transfer(address indexed from, address indexed to, uint amount)"
-];
-
 export let provider
 export let financialContract
+export let UNISXToken, UNISXDecimals, xUNISXToken, xUNISXDecimals
+export let StakingRewards
 export let collateralTokenAddress, collateralTokenDecimals, collateralToken
 export let tokenCurrencyAddress, tokenCurrencyDecimals, tokenCurrency
 export let collateralRequirement
@@ -39,7 +31,14 @@ export const ethPromise = Promise.all([
 
     provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
+
     financialContract = new ethers.Contract(getChainConfig().financialContractAddress, EMP_ABI, signer)
+    UNISXToken = new ethers.Contract(getChainConfig().UNISXToken, ERC20, signer)
+    xUNISXToken = new ethers.Contract(getChainConfig().xUNISXToken, ERC20, signer)
+    UNISXDecimals = await UNISXToken.decimals()
+    xUNISXDecimals = await xUNISXToken.decimals()
+
+    StakingRewards = new ethers.Contract(getChainConfig().StakingRewards, StakingRewards_ABI, signer)
 
     collateralTokenAddress = await financialContract.collateralCurrency()
     collateralToken = new ethers.Contract(collateralTokenAddress, ERC20, signer)
@@ -65,16 +64,40 @@ export async function getTokenCurrencyBalance(account = window.ethereum.selected
   return tokenCurrency.balanceOf(account)
 }
 
+async function getUNISXStaked(account) {
+  function getStorageKey(index, address) {
+    return ethers.utils.keccak256(
+      ethers.utils.hexConcat([
+        ethers.utils.hexZeroPad(address, 32),
+        ethers.utils.hexZeroPad(ethers.BigNumber.from(index).toHexString(), 32),
+      ])
+    )
+  }
+  const INDEX = 10
+  return ethers.BigNumber.from(
+    await provider.getStorageAt(StakingRewards.address, getStorageKey(INDEX, account))
+  )
+}
+
+
 export async function getAccount(account = window.ethereum.selectedAddress){
   const props = await promisedProperties({
     balance: getBalance(account),
     collateralBalance: getCollateralBalance(account),
     tokenCurrencyBalance: getTokenCurrencyBalance(account),
+    UNISXBalance: UNISXToken.balanceOf(account),
+    xUNISXBalance: xUNISXToken.balanceOf(account),
+    UNISXStaked: getUNISXStaked(account),
+    UNISXRewardEarned: StakingRewards.callStatic.getReward({from: account}),
   })
   return {...props,
-    balanceFormatted: ethers.utils.formatUnits(props.balance),
-    collateralBalanceFormatted: ethers.utils.formatUnits(props.collateralBalance, collateralTokenDecimals),
-    tokenCurrencyBalanceFormatted: ethers.utils.formatUnits(props.tokenCurrencyBalance, tokenCurrencyDecimals),
+    balanceFormatted: formatUnits(props.balance),
+    collateralBalanceFormatted: formatUnits(props.collateralBalance, collateralTokenDecimals),
+    tokenCurrencyBalanceFormatted: formatUnits(props.tokenCurrencyBalance, tokenCurrencyDecimals),
+    UNISXBalanceFormatted: formatUnits(props.UNISXBalance, UNISXDecimals),
+    xUNISXBalanceFormatted: formatUnits(props.xUNISXBalance, xUNISXDecimals),
+    UNISXStakedFormatted: formatUnits(props.UNISXStaked, UNISXDecimals),
+    UNISXRewardEarnedFormatted: formatUnits(props.UNISXRewardEarned, UNISXDecimals),
   }
 }
 
@@ -128,10 +151,10 @@ export async function getFinancialContractProperties(){
 	})
 
   return {...props,
-    totalTokensOutstandingFormatted: ethers.utils.formatUnits(props.totalTokensOutstanding, props.tokenCurrencyDecimals),
-    totalPositionCollateralFormatted: ethers.utils.formatUnits(props.totalPositionCollateral, props.collateralTokenDecimals),
-    minSponsorTokensFormatted: ethers.utils.formatUnits(props.minSponsorTokens, props.collateralTokenDecimals),
-    collateralRequirementFormatted: ethers.utils.formatUnits(props.collateralRequirement),
+    totalTokensOutstandingFormatted: formatUnits(props.totalTokensOutstanding, props.tokenCurrencyDecimals),
+    totalPositionCollateralFormatted: formatUnits(props.totalPositionCollateral, props.collateralTokenDecimals),
+    minSponsorTokensFormatted: formatUnits(props.minSponsorTokens, props.collateralTokenDecimals),
+    collateralRequirementFormatted: formatUnits(props.collateralRequirement),
   }
 }
 
@@ -164,8 +187,8 @@ export async function getPosition(address = window.ethereum.selectedAddress){
   }
 
   return {...pos,
-    collateralAmountFormatted: ethers.utils.formatUnits(pos.collateralAmount, collateralTokenDecimals),
-    tokensOutstandingFormatted: ethers.utils.formatUnits(pos.tokensOutstanding, tokenCurrencyDecimals),
+    collateralAmountFormatted: formatUnits(pos.collateralAmount, collateralTokenDecimals),
+    tokensOutstandingFormatted: formatUnits(pos.tokensOutstanding, tokenCurrencyDecimals),
     liquidationPrice,
     liquidationPriceFormatted: liquidationPrice && liquidationPrice.toString(),
   }
@@ -194,18 +217,22 @@ function toBN(val, decimals) {
   }
 }
 
-async function* ensureAllowance(amount, contract, address = window.ethereum.selectedAddress) {
-  const financialContractAddress = getChainConfig().financialContractAddress
+async function* ensureAllowance(
+  amount,
+  contract, 
+  to = getChainConfig().financialContractAddress, 
+  address = window.ethereum.selectedAddress,
+) {
   yield {message: 'Checking balance'}
   const balance = await contract.balanceOf(address)
   if(balance.lt(amount)){
     throw new Error('Insufficient balance')
   }
   yield {message: 'Checking allowance'}
-  const allowance = await contract.allowance(address, financialContractAddress)
+  const allowance = await contract.allowance(address, to)
   if(allowance.lt(amount)){
     yield {message: 'Sending approve transaction'}
-    const approveTx = await contract.approve(financialContractAddress, amount)
+    const approveTx = await contract.approve(to, amount)
     yield {message: 'Waiting for approve transaction', txHash: approveTx.hash}
     await approveTx.wait()
   }
@@ -250,7 +277,7 @@ export async function* redeem(tokensAmount) {
 }
 
 export async function* withdraw(collateralAmount) {
-  collateralAmount = toBN(collateralAmount)
+  collateralAmount = toBN(collateralAmount, collateralTokenDecimals)
   yield {message: 'Sending transaction'}
   const tx = await financialContract.withdraw({rawValue: collateralAmount})
   yield {message: 'Waiting for transaction', txHash: tx.hash}
@@ -287,5 +314,30 @@ export function collateralByTokenCurrency(tokensAmount) {
     .divUnsafe(ethers.FixedNumber.from(USER_CR))
     .round(collateralTokenDecimals)
     .toString()
+}
+
+export async function* UNISX_stake(amount) {
+  amount = toBN(amount, UNISXDecimals)
+  yield* ensureAllowance(amount, UNISXToken, StakingRewards.address)
+  yield {message: 'Sending transaction'}
+  const tx = await StakingRewards.stake(amount)
+  yield {message: 'Waiting for transaction', txHash: tx.hash}
+  await tx.wait()
+}
+
+export async function* UNISX_getReward() {
+  yield {message: 'Sending transaction'}
+  const tx = await StakingRewards.getReward()
+  yield {message: 'Waiting for transaction', txHash: tx.hash}
+  await tx.wait()
+}
+
+export async function* UNISX_withdraw(amount) {
+  amount = toBN(amount, UNISXDecimals)
+  yield* ensureAllowance(amount, xUNISXToken, StakingRewards.address)
+  yield {message: 'Sending transaction'}
+  const tx = await StakingRewards.withdraw(amount)
+  yield {message: 'Waiting for transaction', txHash: tx.hash}
+  await tx.wait()
 }
 
