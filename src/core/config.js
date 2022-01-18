@@ -18,7 +18,4 @@ export const RAPID_API_KEY = "37cec062d9msh1906bc89b032f5fp1c6fc8jsn21883587ddcb
 
 export const PRICE_PRECISION = 3 // 2 places from USD, 1 place from dividing by 10
 
-export const isDev = !(process.env.NODE_ENV === 'production');
-export const toFix = isDev ? 5 : 4;
-
 

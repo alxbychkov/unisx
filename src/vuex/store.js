@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import {getJSONdata, createPrice} from '../helpers';
+import {getJSONdata, createPrice, getLocalStorage} from '../helpers';
 
 Vue.use(Vuex);
 
@@ -8,7 +8,7 @@ const store = new Vuex.Store({
     state: {
         instruments: [],
         portfolio: [],
-        userAccount: localStorage.getItem('userAccount') ? localStorage.getItem('userAccount') : '',
+        userAccount: getLocalStorage('userAccount') ? getLocalStorage('userAccount') : '',
         networkId: '',
         stablecoins: [],
         dexLP: [],

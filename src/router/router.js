@@ -7,7 +7,7 @@ const router = new VueRouter({
     // mode: 'history',
     routes: [
       { path: '/', name: 'Home', component: () => import('../views/Home.vue') },
-      { path: '/actions', name: 'Actions', component: () => import('../views/Actions.vue') }
+      { path: '/actions', name: 'Actions', component: () => import('../views/Actions/Actions.vue') }
     ]
 });
 

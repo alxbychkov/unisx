@@ -3,25 +3,10 @@
         <div class="container">
             <div class="row" data-aos="fade-up" data-aos-delay="600" data-aos-duration="800">
                 <div class="col-md-12">
-                    <div class="h2_flex">
-                        <button class="orangebut">Vote</button>
-                        <div class="account-id">
-                            <p v-if="NETWORK_ID">{{ NETWORK_ID }}</p>
-                            <p v-if="USER_ACCOUNT">{{ USER_ACCOUNT }}</p>
-                        </div>
-                        <button class="orangebut" @click="connect">Connect Wallet</button>
-                    </div>
+                    <v-account :networkID="NETWORK_ID" :userAccount="USER_ACCOUNT" :onClickConnect="connect"/>
                 </div>
             </div>
             <div class="row flex cards" data-aos="fade-up" data-aos-delay="1000" data-aos-duration="800">
-                <div class="col-md-5 col-sm-12 col-xs-12 hidden">
-                    <v-table 
-                        :tableData="INSTRUMENTS"
-                        :tableHeaders="['Instrument', 'Price, USD', 'Rewards APY']"
-                        :tableRows="['Name', 'Price', 'Rewards']"
-                        @getTableItem="getTableItem"
-                    />
-                </div>
                 <div class="col-md-12 col-sm-12 col-xs-12">
                     <v-table 
                         :tableData="portfolio"
@@ -179,106 +164,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div role="tabpanel" class="tab-pane fade" id="cardtab2">
-                                <div class="row flex cards j-between">
-                                    <div class="col-md-7 col-sm-7 col-xs-12">
-                                        <div class="flex mb-10 flex-row">
-                                            <div class="input-wrapp mr-10">
-                                                <input type="text" placeholder="0.000" class="">
-                                                <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>                                                
-                                            </div>
-                                            <div class="input-wrapp">
-                                                <input type="text" placeholder="Token" :value="selectedItem.Name">
-                                                <p class="flex j-end color-green mb-0"><span>0.000</span></p>
-                                            </div>
-                                            <div class="input-wrapp ml-a">
-                                                <input type="text" placeholder="0.000" class="">
-                                                <p class="flex j-end mb-0"><span>Max price</span></p>
-                                            </div>
-                                        </div>
-                                        <div class="flex mb-10 flex-row">
-                                            <div class="input-wrapp mr-10">
-                                                <input type="text" placeholder="0.000" class="">
-                                                <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>
-                                            </div>
-                                            <div class="input-wrapp">
-                                                <div class="flex-collumn">
-                                                    <select>
-                                                        <option value="" disabled selected>Stable Coin</option>
-                                                        <option 
-                                                            v-for="coin in stableCoinsTypes"
-                                                            :key="coin"
-                                                            :value="coin">{{ coin }}</option>
-                                                    </select>
-                                                </div>
-                                                <p class="flex j-end color-green mb-0"><span>0.000</span></p>
-                                            </div>
-                                            <div class="input-wrapp ml-a">
-                                                <input type="text" placeholder="0.000" class="">
-                                                <p class="flex j-end mb-0"><span>Min price</span></p>
-                                            </div>
-                                        </div>
-                                        <div class="mt-20 half-row">
-                                            <div class="radios mb-10">
-                                                <span>Commision</span>
-                                                <input type="radio" name="commision" value="0.05" id="005" checked="">
-                                                <label for="005">0.05%</label>
-                                                <input type="radio" name="commision" value="0.3" id="03">
-                                                <label for="03">0.3%</label>
-                                                <input type="radio" name="commision" value="1" id="1">
-                                                <label for="1">1%</label>
-                                            </div>
-                                            <input type="text" placeholder="LP Estimated" disabled>
-                                        </div>
-                                        <div class="but_flex ml-0">
-                                            <button class="cancelbut">UnPool</button>
-                                            <button class="blueb">Pool</button>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-5 col-sm-5 col-xs-12"></div>
-                                </div>
-                            </div>
-                            <div role="tabpanel" class="tab-pane fade" id="cardtab3">
-                                <div class="row flex cards j-between">
-                                    <div class="col-md-3 col-sm-4 col-xs-12">
-                                        <div class="mb-10">
-                                            <input type="text" placeholder="0.000" class="">
-                                            <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>
-                                        </div>
-                                        <div>
-                                            <input class="" type="text" placeholder="Token" value="">
-                                            <p class="flex j-end color-green mb-0"><span>0.000</span></p>
-                                        </div>
-                                        <div class="but_flex">
-                                            <button class="cancelbut">UnStake</button>
-                                            <button class="blueb">Stake</button>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 col-sm-4 col-xs-12 flex-collumn">
-                                        <input type="text" value="" placeholder="0.0000 UNSX">
-                                        <button class="orangebut mt-auto">Claim Rewards</button>
-                                    </div>
-                                    <div class="col-md-3 col-sm-4 col-xs-12">
-                                        <div class="mb-10">
-                                            <input type="text" placeholder="0.000" class="">
-                                            <p class="flex j-between color-red mb-0"><span>MAX:</span><span>0.000</span></p>
-                                        </div>
-                                        <div>
-                                            <div class="select-wrapp">
-                                                <select>
-                                                    <option value="" selected disabled>Choose DEX</option>
-                                                    <option v-for="dex in dexLP" :key="dex" :value="dex">{{ dex }}</option>
-                                                </select>
-                                            </div>
-                                            <p class="flex j-end color-green mb-0"><span>0.000</span></p>
-                                        </div>
-                                        <div class="but_flex">
-                                            <button class="cancelbut">UnStake</button>
-                                            <button class="blueb">Stake</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <v-pool id="cardtab2"/>
+                            <v-stake id="cardtab3"/>
                         </div>
                     </div>
                 </div>
@@ -288,27 +175,26 @@
 </template>
 
 <script>
-import {getUnicCoins, toDote} from '../helpers';
+import './index.css';
+import {getUnicCoins, toDote, round, toFix, getLocalStorage, setLocalStorage} from '../../helpers';
 import {mapActions, mapGetters} from 'vuex';
-import vTable from '../components/elements/v-table.vue';
-// eslint-disable-next-line no-unused-vars
-import {connectMetamask, accountPromise} from '../core/metamask'; 
-// eslint-disable-next-line no-unused-vars
-import {ethPromise, getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, getCollateralBalance, getBalance, redeem} from '../core/eth';
-// eslint-disable-next-line no-unused-vars
-import {toFix} from '../core/config';
+
+import {connectMetamask, accountPromise} from '../../core/metamask'; 
+import {getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, redeem} from '../../core/eth';
+
+import vAccount from '../../components/elements/v-account.vue';
+import vTable from '../../components/elements/v-table.vue';
+import vStake from '../../components/elements/tabs/v-Stake.vue';
+import vPool from '../../components/elements/tabs/v-Pool.vue';
 
 export default {
   name: 'Actions',
-  props: {
-      h2: String
-  },
   components: {
-      vTable
+      vTable, vStake, vPool, vAccount
   },
   data(){
       return {
-          portfolio: localStorage.getItem('portfolioList') ? JSON.parse(localStorage.getItem('portfolioList')) : [],
+          portfolio: getLocalStorage('portfolioList') ? JSON.parse(getLocalStorage('portfolioList')) : [],
           selectedItem: '',
           selectedItemBalance: {
               collateralAmountFormatted: '0.0000',
@@ -436,28 +322,6 @@ export default {
         }
     },
 
-    async connectWallet() {
-        /* Подключение кошелька */
-        if (window.detectEthereumProvider()) {
-            if (typeof window.ethereum !== 'undefined') {
-                /* Если тип кошелька MetaMask - подключиться */
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                const account = accounts[0];
-                console.log('MetaMask Connected = ', window.ethereum);
-                localStorage.setItem('userAccount', account);
-                this.GET_USER_ACCOUNT(account);
-                this.portfolio = await this.getPortfolioList(account);
-                localStorage.setItem('portfolioList', JSON.stringify(this.portfolio));
-
-                /* Где-то здесь будем подключать и друие кошельки */
-            } else {
-                console.log('No MetaMask Installed...');
-            }
-        } else {
-            console.log('No Web3 Detected...'); 
-        }
-    },
-
     // eslint-disable-next-line no-unused-vars
     async getPortfolioList(walletAddress = '') {
         /* Перебор всех возможных токенов */
@@ -546,11 +410,11 @@ export default {
         try {
             await connectMetamask();
             await accountPromise.then(account => {
-                localStorage.setItem('userAccount', account);
+                setLocalStorage('userAccount', account);
                 this.GET_USER_ACCOUNT(account);
             });
             this.portfolio = await this.getPortfolioList(this.USER_ACCOUNT);
-            localStorage.setItem('portfolioList', JSON.stringify(this.portfolio));
+            setLocalStorage('portfolioList', JSON.stringify(this.portfolio));
         } catch(e) {
             alert(e);
         }
@@ -640,12 +504,13 @@ export default {
     async updateSelectedItemBalance() {
         const collateralAmount = await getPosition();
         const collateralBalance = await getAccount();
-        // const contractProperties = await getFinancialContractProperties();
+        const contractProperties = await getFinancialContractProperties();
         // const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
         const collateralRatio = (+collateralAmount.collateralAmountFormatted)/((+collateralAmount.tokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
 
         console.log('collateralAmount: ', collateralAmount, 'collateralBalance: ', collateralBalance);
-        console.log('ratio: ', collateralRatio);
+        console.log('isExpired: ', contractProperties.isExpired);
+
 
         this.selectedItemBalance = {
             collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
@@ -712,17 +577,12 @@ export default {
         }
     },
 
-    round(value, precision) {
-        const multiplier = Math.pow(10, precision || 0);
-        return Math.round(value * multiplier) / multiplier;
-    },
-
     toPrice(token) {
         switch (token) {
             case 'collateralAmount':
-                return this.round((toDote(this.sythetic.collateralAmount) * this.sythetic.cr * (this.INSTRUMENTS[0].Price / this.collateralPrice)), 4).toString();
+                return round((toDote(this.sythetic.collateralAmount) * this.sythetic.cr * (this.INSTRUMENTS[0].Price / this.collateralPrice)), 4).toString();
             case 'tokensAmount':
-                return this.round((toDote(this.sythetic.tokensAmount) / this.sythetic.cr * (this.collateralPrice / this.INSTRUMENTS[0].Price)), 4).toString();
+                return round((toDote(this.sythetic.tokensAmount) / this.sythetic.cr * (this.collateralPrice / this.INSTRUMENTS[0].Price)), 4).toString();
             default:
                 return token;
         }
@@ -748,14 +608,6 @@ export default {
         return getUnicCoins(this.DEX_LP, 'dex');
     },
 
-    // PRICE: function() {
-    //     return this.INSTRUMENTS[0] ? this.INSTRUMENTS[0].Price : 0.0000;
-    // },
-
-    // REWARDS: function() {
-    //     return this.INSTRUMENTS[0] ? this.INSTRUMENTS[0].Rewards : 0;
-    // },
-
     instrumentsList: function() {        
         return  this.INSTRUMENTS ? this.INSTRUMENTS.map(instrument => instrument.Name) : [];
     }
@@ -771,18 +623,6 @@ export default {
       this.GET_DEX_LP_FROM_API();
       this.GET_DEFI_TOKENS_FROM_API();
       window.$('select').niceSelect();
-
-    //   const portfolioItems = document.querySelector('#cardtab1');
-
-    //   console.log(portfolioItems);
-
-    //   const observer = new MutationObserver(entries => {
-    //       console.log(entries);
-    //   });
-
-    //   observer.observe(portfolioItems, {
-    //       childList: true,
-    //   });
   },
   updated() {
     if (this.instrumentsList.length && !this.isInstrumentListUpdated) {
@@ -792,114 +632,3 @@ export default {
   }
 }
 </script>
-<style scoped>
-    .account-id {
-        color: #fff;
-        margin: 0 20px 0 auto;
-    }
-    .j-between {
-        justify-content: space-between;
-    }
-    .j-center {
-        justify-content: center;
-    }
-    .j-end {
-        justify-content: end;
-    }
-    .flex-collumn {
-        display: flex;
-        flex-direction: column;
-    }
-    .but_flex {
-        margin-top: 40px;
-    }
-    .mt-auto {
-        margin-top: auto;
-    }
-    .mb-auto {
-        margin-bottom: auto;
-    }
-    .lr-auto {
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .mb-10 {
-        margin-bottom: 10px;
-    }
-    .mb-0 {
-        margin-bottom: 0;
-    }
-    .select-wrapp {
-        height: 42px;
-    }
-    .ml-0 {
-        margin-left: 0;
-    }
-    .flex-row .select-wrapp,
-    .flex-row .input-wrapp {
-        width: 25%;
-    }
-    .flex-row-2 input,
-    .flex-row-2 .input-wrapp {
-        width: 45%;
-    }
-    .flex-row-2 .input-wrapp input {
-        width: 100%;
-    }
-    .mr-10 {
-        margin-right: 10px;
-    }
-    .mt-20 {
-        margin-top: 20px;
-    }
-    .ml-a {
-        margin-left: auto;
-    }
-    .radios {
-        display: flex;
-        align-items: center;
-    }
-    .radios input[type="radio"] {
-        width: auto;
-        height: auto;
-        margin: 0 5px 1px;
-    }
-    .radios label {
-        margin: 0;
-    }
-    .half-row {
-        width: 52%;
-    }
-    .align-center {
-        align-items: center;
-    }
-    h4 {
-        margin-top: 0;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-    .color-red {color: red;}
-    .color-green {color: green;}
-    .disabled:disabled {
-        opacity: .5;
-    }
-    .disabled:hover:disabled {
-        background-color: transparent;
-    }
-    .blueb.disabled:hover:disabled {
-        background: linear-gradient( 
-            0deg, rgba(21, 0, 153, 0.3008) -18.27%, rgba(255, 255, 255, 0.6272) 171.15% ), linear-gradient(
-            0deg, #408cff, #408cff), #f9c02f;
-    }
-    .description.mb-10 {
-        padding: 0 30px;
-    }
-    hr {
-        width: 100%;
-        border-top: 1px solid #000;
-        margin: 5px 0;
-    }
-    .w-45 {
-        width: 45%;
-    }
-</style>
