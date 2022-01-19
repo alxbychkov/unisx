@@ -2,34 +2,53 @@
     <div class="h2_flex">
         <button class="orangebut">Vote</button>
         <div class="account-id">
-            <p v-if="networkID">{{ networkID }}</p>
-            <p v-if="userAccount">{{ userAccount }}</p>
+            <p v-if="NETWORK_ID">{{ NETWORK_ID }}</p>
+            <p v-if="USER_ACCOUNT">{{ USER_ACCOUNT }}</p>
         </div>
-        <button class="orangebut" @click="onClickConnect()">Connect Wallet</button>
+        <button class="orangebut" @click="connectWallet">Connect Wallet</button>
     </div>
 </template>
 <script>
+import {mapGetters, mapActions} from 'vuex';
+
+import {setLocalStorage} from '../../helpers';
+
+import {connectMetamask, accountPromise} from '../../core/metamask';
+import {ethPromise} from '../../core/eth';
+
 export default {
     name: 'Account',
     props: {
-        networkID: {
-            type: String,
-            default() {
-                return ''
-            }
-        },
-        userAccount: {
-            type: String,
-            default() {
-                return ''
-            }
-        },
         onClickConnect: {
             type: Function
         }
     },
+    methods: {
+        ...mapActions([
+            'GET_USER_ACCOUNT',
+            'GET_NETWORK_ID'
+        ]),
+        async connectWallet() {
+            try {
+                await connectMetamask();
+                await ethPromise;
+                await accountPromise.then(account => {
+                    setLocalStorage('userAccount', account);
+                    this.GET_USER_ACCOUNT(account);  
+                });
+                this.onClickConnect(this.USER_ACCOUNT);
+            } catch(e) {
+                alert(e);
+            }
+        },
+    },
+    computed: {
+        ...mapGetters([
+            'USER_ACCOUNT', 'NETWORK_ID'
+        ]),
+    },
     mounted() {
-        console.log('acc: ', this.userAccount);
+        this.GET_NETWORK_ID();
     }
 }
 </script>

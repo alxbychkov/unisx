@@ -10,10 +10,10 @@
                         class="mb-10"
                         v-model="synthetic.collateralAmount" 
                         :disabled="!synthetic.name"
-                        @input="consider('collateralAmount') // !!!!!!!!
+                        @input="consider('collateralAmount')
                     ">
                     <div class="input-wrapp">
-                        <div class="flex-collumn" @click="getInstrumentItem($event)"> // !!!!!!!!
+                        <div class="flex-collumn" @click="onSelectClick($event)">
                             <select id="portfolio">
                                 <option value="" disabled selected>Instrument</option>
                                 <option 
@@ -43,8 +43,8 @@
                     <span>{{ synthetic.globalCollateralizationRation }}</span>
                 </div>                                        
                 <div class="but_flex mt-auto">
-                    <button class="cancelbut disabled" @click="mint" :disabled="!synthetic.tokensAmount">Mint</button> // !!!!!!!!!
-                    <button class="blueb disabled" @click="burn" :disabled="!synthetic.collateralAmount">Burn</button> // !!!!!!!!!
+                    <button class="cancelbut disabled" @click="mint" :disabled="!synthetic.tokensAmount">Mint</button>
+                    <button class="blueb disabled" @click="burn" :disabled="!synthetic.collateralAmount">Burn</button>
                 </div>
             </div>
             <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn">
@@ -64,7 +64,7 @@
                             v-model="synthetic.tokensAmount"
                             :disabled="!selectedItem.CollateralName"
                             @input="consider('tokensAmount')" 
-                        > // !!!!!!!!!!!
+                        >
                     </div>
                     <div class="input-wrapp">
                         <input type="text" placeholder="Token" :value="selectedItem.CollateralName" disabled>
@@ -94,8 +94,8 @@
                     <span>{{ selectedItemBalance.liquidationPrice }}</span>
                 </div>                                        
                 <div class="but_flex">
-                    <button class="cancelbut disabled" @click="deposit" :disabled="!selectedItem.Value">Supply</button> // !!!!!!!!!
-                    <button class="blueb disabled" @click="withdraw" :disabled="!selectedItem.Value">Withdraw</button> // !!!!!!!!!!
+                    <button class="cancelbut disabled" @click="deposit" :disabled="!selectedItem.Value">Supply</button>
+                    <button class="blueb disabled" @click="withdraw" :disabled="!selectedItem.Value">Withdraw</button>
                 </div>
             </div>
         </div>
@@ -103,6 +103,10 @@
 </template>
 <script>
 import {mapActions, mapGetters} from 'vuex';
+
+import {round, toDote, COLLATERAL_PRICE} from '../../../helpers';
+
+import {createPosition, deposit, redeem} from '../../../core/eth';
 
 export default {
     name: 'Mint',
@@ -132,10 +136,16 @@ export default {
             }
         },
         selectedItem: {
-            type: String,
+            type: Object,
             default() {
-                return ''
+                return {}
             }
+        },
+        onAfterClickAction: {
+            type: Function
+        },
+        onSelectClick: {
+            type: Function
         }
     },
     data() {
@@ -156,7 +166,85 @@ export default {
             'GET_INSTRUMENTS_FROM_API'
         ]),
 
+        async mint() {
+            if (this.synthetic.collateralAmount && this.synthetic.tokensAmount) {
+                console.log('Creating');          
+                try {
+                    const collateralAmount = toDote(this.synthetic.tokensAmount);
+                    const tokensAmount = toDote(this.synthetic.collateralAmount);
+                    const newPosition = createPosition(collateralAmount, tokensAmount);
+                    for await (let value of newPosition) {
+                        console.log(value.message);
+                    }
+                    this.onAfterClickAction();
+                } catch(e) {
+                    console.error(e);
+                    return
+                }
+                console.log('Mint success!');  
+            }
+        },
+
+        async deposit() {
+            if (this.synthetic.tokensAmount) {
+                console.log('Deposit');  
+                const collateralAmount = toDote(this.synthetic.tokensAmount);
+                try {
+                    const newDeposit = deposit(collateralAmount);
+                    for await (let value of newDeposit) {
+                        console.log(value.message);
+                    }
+                    this.onAfterClickAction();
+                } catch(e) {
+                    console.error(e);
+                    return
+                }
+                console.log('Deposit success!');  
+            }
+        },
+
+        async burn() {
+            if (this.synthetic.collateralAmount) {
+                console.log('Burn');  
+                const tokensAmount = toDote(this.synthetic.collateralAmount);
+                const portfolioAmount = this.selectedItemBalance.tokenCurrencyBalance;
+
+                if (+tokensAmount > +portfolioAmount) return console.error('You have no much tokens');
+
+                try {
+                    const newBurn = redeem(tokensAmount);
+                    for await (let value of newBurn) {
+                        console.log(value.message);
+                    }
+                    this.onAfterClickAction();
+                } catch(e) {
+                    console.error(e);
+                    return
+                }
+                console.log('Burn success!');  
+            }
+        },
+
+        async withdraw() {
+            if (this.synthetic.tokensAmount) {
+                console.log('Withdraw');  
+                const collateralAmount = toDote(this.synthetic.tokensAmount);
+                try {
+                    const newWithdraw = deposit(collateralAmount);
+                    for await (let value of newWithdraw) {
+                        console.log(value.message);
+                    }
+                    this.onAfterClickAction();
+                } catch(e) {
+                    console.error(e);
+                    return
+                }
+                console.log('Withdraw success!');  
+            }
+        },        
+
         consider(e) {
+            console.log(e);
             switch (e) {
                 case 'collateralAmount':
                     this.synthetic.tokensAmount = (this.toPrice(e) !== '0') ? this.toPrice(e) : '';
@@ -164,6 +252,17 @@ export default {
                 case 'tokensAmount':
                     this.synthetic.collateralAmount = this.toPrice(e);
                     break;
+            }
+        },
+
+        toPrice(token) {
+            switch (token) {
+                case 'collateralAmount':
+                    return round((toDote(this.synthetic.collateralAmount) * this.synthetic.cr * (this.INSTRUMENTS[0].Price / COLLATERAL_PRICE)), 4).toString();
+                case 'tokensAmount':
+                    return round((toDote(this.synthetic.tokensAmount) / this.synthetic.cr * (COLLATERAL_PRICE / this.INSTRUMENTS[0].Price)), 4).toString();
+                default:
+                    return token;
             }
         }
     },

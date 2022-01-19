@@ -3,7 +3,7 @@
         <div class="container">
             <div class="row" data-aos="fade-up" data-aos-delay="600" data-aos-duration="800">
                 <div class="col-md-12">
-                    <v-account :networkID="NETWORK_ID" :userAccount="USER_ACCOUNT" :onClickConnect="connect"/>
+                    <v-account :onClickConnect="handleClickConnect"/>
                 </div>
             </div>
             <div class="row flex cards" data-aos="fade-up" data-aos-delay="1000" data-aos-duration="800">
@@ -26,7 +26,7 @@
                     </ul>
                     <div class="cards_in_tab">
                         <div class="tab-content">
-                            <div role="tabpanel" class="tab-pane fade in active" id="cardtab1">
+                            <div role="tabpanel" class="tab-pane fade in active hidden" id="cardtab1">
                                 <div class="row flex cards j-between">
                                     <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn">
                                         <h4>SYNTHETIC</h4>
@@ -164,6 +164,15 @@
                                     </div>
                                 </div>
                             </div>
+                            <v-mint 
+                                active
+                                id="cardtab1"
+                                :synthetic="sythetic"
+                                :selectedItemBalance="selectedItemBalance"
+                                :selectedItem="selectedItem"
+                                :onAfterClickAction="handleUpdateAfterAction"
+                                :onSelectClick="getInstrumentItem"
+                            />
                             <v-pool id="cardtab2"/>
                             <v-stake id="cardtab3"/>
                         </div>
@@ -175,27 +184,28 @@
 </template>
 
 <script>
+
 import './index.css';
 import {getUnicCoins, toDote, round, toFix, getLocalStorage, setLocalStorage} from '../../helpers';
 import {mapActions, mapGetters} from 'vuex';
 
-import {connectMetamask, accountPromise} from '../../core/metamask'; 
 import {getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, redeem} from '../../core/eth';
 
 import vAccount from '../../components/elements/v-account.vue';
 import vTable from '../../components/elements/v-table.vue';
+import vMint from '../../components/elements/tabs/v-Mint.vue'
 import vStake from '../../components/elements/tabs/v-Stake.vue';
 import vPool from '../../components/elements/tabs/v-Pool.vue';
 
 export default {
   name: 'Actions',
   components: {
-      vTable, vStake, vPool, vAccount
+      vTable, vMint, vStake, vPool, vAccount
   },
   data(){
       return {
           portfolio: getLocalStorage('portfolioList') ? JSON.parse(getLocalStorage('portfolioList')) : [],
-          selectedItem: '',
+          selectedItem: {},
           selectedItemBalance: {
               collateralAmountFormatted: '0.0000',
               collateralBalanceFormatted: '0.0000',
@@ -228,8 +238,6 @@ export default {
     ...mapActions([
         'GET_INSTRUMENTS_FROM_API',
         'GET_PORTFOLIO_FROM_API',
-        'GET_USER_ACCOUNT',
-        'GET_NETWORK_ID',
         'GET_STABLECOINS_FROM_API',
         'GET_DEX_LP_FROM_API',
         'GET_DEFI_TOKENS_FROM_API'
@@ -322,6 +330,11 @@ export default {
         }
     },
 
+    async handleClickConnect(account) {
+        this.portfolio = await this.getPortfolioList(account);
+        setLocalStorage('portfolioList', JSON.stringify(this.portfolio));
+    },
+
     // eslint-disable-next-line no-unused-vars
     async getPortfolioList(walletAddress = '') {
         /* Перебор всех возможных токенов */
@@ -343,7 +356,7 @@ export default {
             //     params: [i.address,'latest']
             // });
             // const collateralAmount = await getPosition();
-            const collateralAmount = await getAccount();
+            const collateralAmount = await getAccount(walletAddress);
 
             console.log('getAccount: ', collateralAmount);
 
@@ -406,20 +419,6 @@ export default {
         return portfolio;
     },
 
-    async connect() {
-        try {
-            await connectMetamask();
-            await accountPromise.then(account => {
-                setLocalStorage('userAccount', account);
-                this.GET_USER_ACCOUNT(account);
-            });
-            this.portfolio = await this.getPortfolioList(this.USER_ACCOUNT);
-            setLocalStorage('portfolioList', JSON.stringify(this.portfolio));
-        } catch(e) {
-            alert(e);
-        }
-    },
-
     async mint() {
         if (this.sythetic.collateralAmount && this.sythetic.tokensAmount) {
             console.log('Creating');          
@@ -465,7 +464,7 @@ export default {
             const tokensAmount = toDote(this.sythetic.collateralAmount);
             const portfolioAmount = this.selectedItemBalance.tokenCurrencyBalance;
             console.log(tokensAmount, portfolioAmount);
-            if (+tokensAmount > +portfolioAmount) return console.error('You have no mush tokens');
+            if (+tokensAmount > +portfolioAmount) return console.error('You have no much tokens');
 
             try {
                 const newBurn = redeem(tokensAmount);
@@ -499,6 +498,11 @@ export default {
             }
             console.log('Success');  
         }
+    },
+
+    async handleUpdateAfterAction() {
+        await this.updateSelectedItemBalance();
+        this.portfolio = await this.getPortfolioList();     
     },
 
     async updateSelectedItemBalance() {
@@ -573,7 +577,7 @@ export default {
               liquidationPrice: '0.0000'
           }
 
-          this.selectedItem = '';
+          this.selectedItem = {};
         }
     },
 
@@ -596,7 +600,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-          'INSTRUMENTS', 'PORTFOLIO', 'USER_ACCOUNT', 'NETWORK_ID', 'STABLECOINS', 'DEX_LP', 'DEFI_TOKENS'
+          'INSTRUMENTS', 'PORTFOLIO', 'STABLECOINS', 'DEX_LP', 'DEFI_TOKENS'
     ]),
 
     stableCoinsTypes: function() {
@@ -618,7 +622,6 @@ export default {
   mounted() {
       this.GET_INSTRUMENTS_FROM_API();
       this.GET_PORTFOLIO_FROM_API();
-      this.GET_NETWORK_ID();
       this.GET_STABLECOINS_FROM_API();
       this.GET_DEX_LP_FROM_API();
       this.GET_DEFI_TOKENS_FROM_API();

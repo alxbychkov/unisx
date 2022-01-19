@@ -3,6 +3,7 @@ import {getPrice} from '../core/price';
 
 export const isDev = !(process.env.NODE_ENV === 'production');
 export const toFix = isDev ? 5 : 4;
+export const COLLATERAL_PRICE = 1;
 
 export async function getJSONdata(url, commit = {}, action = '') {
     return await axios(url)
