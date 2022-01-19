@@ -1,0 +1,23 @@
+export const initialData = {
+    selectedItem: {},
+    selectedItemBalance: {
+        collateralAmountFormatted: '0.0000',
+        collateralBalanceFormatted: '0.0000',
+        collateralTokens: '0.0000',
+        collateralRatio: '0.0000',
+        cr: 1,
+        liquidationPrice: '0.0000',
+        tokenCurrencyBalance: '0.0000'
+    },
+    synthetic: {
+        name: '',
+        collateralAmount: '',
+        tokensAmount: '',
+        cr: 1,
+        price: '0.0000',
+        rewards: '0',
+        totalSyntTokensOutstanding: '0.0000',
+        totalCollateral: '0.0000',
+        globalCollateralizationRation: '0.0000'
+    }
+}

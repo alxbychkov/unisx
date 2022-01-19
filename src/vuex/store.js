@@ -7,7 +7,7 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
     state: {
         instruments: [],
-        portfolio: [],
+        portfolio: getLocalStorage('portfolioList') ? JSON.parse(getLocalStorage('portfolioList')) : [],
         userAccount: getLocalStorage('userAccount') ? getLocalStorage('userAccount') : '',
         networkId: '',
         stablecoins: [],
@@ -51,8 +51,8 @@ const store = new Vuex.Store({
             return instruments;
         },
 
-        async GET_PORTFOLIO_FROM_API({commit}) {
-            return await getJSONdata('./static/json/unisx_portfolio.json', commit, 'SET_PORTFOLIO');
+        GET_PORTFOLIO_FROM_API({commit}, portfolio) {
+            commit('SET_PORTFOLIO', portfolio);
         },
 
         async GET_STABLECOINS_FROM_API({commit}) {

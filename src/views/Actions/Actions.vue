@@ -9,7 +9,7 @@
             <div class="row flex cards" data-aos="fade-up" data-aos-delay="1000" data-aos-duration="800">
                 <div class="col-md-12 col-sm-12 col-xs-12">
                     <v-table 
-                        :tableData="portfolio"
+                        :tableData="PORTFOLIO"
                         :tableHeaders="['Portfolio', 'Price', 'Amount', 'Value, USD', 'Rewards']"
                         :tableRows="['Name', 'Price', 'Number', 'Value', 'Rewards']"
                         @getTableItem="getTableItem"
@@ -26,148 +26,10 @@
                     </ul>
                     <div class="cards_in_tab">
                         <div class="tab-content">
-                            <div role="tabpanel" class="tab-pane fade in active hidden" id="cardtab1">
-                                <div class="row flex cards j-between">
-                                    <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn">
-                                        <h4>SYNTHETIC</h4>
-                                        <div class="flex mb-10 flex-row-2 flex j-between">
-                                            <input 
-                                                type="text"
-                                                placeholder="0.000"
-                                                class="mb-10"
-                                                v-model="sythetic.collateralAmount" 
-                                                :disabled="!sythetic.name"
-                                                @input="consider('collateralAmount')
-                                            ">
-                                            <div class="input-wrapp hidden">
-                                                <input type="text" placeholder="Token" :value="selectedItem.Name" disabled>
-                                                <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.collateralAmountFormatted }}</span></p>
-                                            </div>
-                                            <div class="input-wrapp">
-                                                <div class="flex-collumn" @click="getInstrumentItem($event)">
-                                                    <select id="portfolio">
-                                                        <option value="" disabled selected>Instrument</option>
-                                                        <option 
-                                                            v-for="instrument in instrumentsList"
-                                                            :key="instrument"
-                                                            :value="instrument">{{ instrument }}</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="flex mb-10 flex-row-2 flex j-between hidden">
-                                            <input 
-                                                type="text"
-                                                placeholder="0.000"
-                                                class="mb-10"
-                                                v-model="sythetic.tokensAmount"
-                                                :disabled="!selectedItem.CollateralName"
-                                                @input="consider('tokensAmount')    
-                                            ">
-                                            <div class="input-wrapp">
-                                                <input type="text" placeholder="Token" :value="selectedItem.CollateralName" disabled>
-                                                <p class="flex j-end color-green mb-0"><span>{{ selectedItemBalance.collateralBalanceFormatted }}</span></p>
-                                            </div>
-                                        </div>
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                                            <div class="w-45 flex j-between"><span>Price:</span><span>{{ sythetic.price }}</span></div>
-                                            <div class="w-45 flex j-between"><span>Rewards:</span><span>{{ sythetic.rewards }}</span></div>
-                                        </div>
-                                        <hr>
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                                            <span>Total synt tokens outstanding:</span>
-                                            <span>{{ sythetic.totalSyntTokensOutstanding }}</span>
-                                        </div>
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                                            <span>Total collateral:</span>
-                                            <span>{{ sythetic.totalCollateral }}</span>
-                                        </div>
-                                        <hr>
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                                            <span>Global Collateralization ratio</span>
-                                            <span>{{ sythetic.globalCollateralizationRation }}</span>
-                                        </div>                                        
-                                        <div class="but_flex mt-auto">
-                                            <button class="cancelbut disabled" @click="mint" :disabled="!sythetic.tokensAmount">Mint</button>
-                                            <button class="blueb disabled" @click="burn" :disabled="!sythetic.collateralAmount">Burn</button>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn">
-                                        <div data-type="widget" class="mb-auto" style="display: none"></div>
-                                        <div class="description mb-10" v-if="selectedItem.Description">{{ selectedItem.Description }}</div>
-                                        <div class="flex mb-10 flex-row-2 flex j-center" style="display: none">
-                                            <input type="text" value="" placeholder="0.0000 UNSX" class="mb-10">
-                                            <!-- <input type="text" value="" placeholder="0.0000 UMA"> -->
-                                        </div>
-                                        <button class="orangebut lr-auto" style="display: none">Claim Rewards</button>
-                                    </div>
-                                    <div class="col-md-4 col-sm-4 col-xs-12">
-                                        <h4>COLLATERAL</h4>
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center hidden">
-                                            <span>Global<br>Collateralization ratio</span>
-                                            <input type="text" placeholder="0.000" disabled :value="selectedItemBalance.collateralRatio">
-                                        </div>
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center hidden">
-                                            <span>Liquidation Price:</span>
-                                            <input type="text" placeholder="0.000" disabled>
-                                        </div>
-                                        <div class="flex mb-10 flex-row-2 flex j-between">
-                                            <div class="input-wrapp">
-                                                <!-- <input type="text"
-                                                    placeholder="0.000"
-                                                    v-model="collateral.collateralAmount"
-                                                    :disabled="!selectedItem.CollateralName"
-                                                > -->
-                                                <input type="text"
-                                                    placeholder="0.000"
-                                                    v-model="sythetic.tokensAmount"
-                                                    :disabled="!selectedItem.CollateralName"
-                                                    @input="consider('tokensAmount')" 
-                                                >
-                                                <p class="flex j-between color-red mb-0" style="display: none"><span>MAX:</span>
-                                                    <span>
-                                                        {{ selectedItemBalance.collateralTokens }}
-                                                    </span>
-                                                </p>
-                                            </div>
-                                            <div class="input-wrapp">
-                                                <input type="text" placeholder="Token" :value="selectedItem.CollateralName" disabled>
-                                                <p class="flex j-end color-green mb-0 hidden"><span>{{ selectedItemBalance.collateralBalanceFormatted }}</span></p>
-                                            </div>
-                                        </div>
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                                            <span>Collateral tokens in the wallet:</span>
-                                            <span>{{ selectedItemBalance.collateralBalanceFormatted }}</span>
-                                        </div>
-                                        <hr>
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                                            <span>Position tokens outstanding:</span>
-                                            <span>{{ selectedItemBalance.collateralAmountFormatted }}</span>
-                                        </div>
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                                            <span>Collaterall amount:</span>
-                                            <span>{{ selectedItemBalance.collateralTokens }}</span>
-                                        </div>
-                                        <hr>
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                                            <span>Collateral Ratio:</span>
-                                            <span>{{ selectedItemBalance.collateralRatio }}</span>
-                                        </div>                                                                                                                        
-                                        <div class="flex mb-10 flex-row-2 flex j-between align-center color-red">
-                                            <span>Liquidation Price:</span>
-                                            <span>{{ selectedItemBalance.liquidationPrice }}</span>
-                                        </div>                                        
-                                        <div class="but_flex">
-                                            <button class="cancelbut disabled" @click="deposit" :disabled="!selectedItem.Value">Supply</button>
-                                            <button class="blueb disabled" @click="withdraw" :disabled="!selectedItem.Value">Withdraw</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             <v-mint 
                                 active
                                 id="cardtab1"
-                                :synthetic="sythetic"
+                                :synthetic="synthetic"
                                 :selectedItemBalance="selectedItemBalance"
                                 :selectedItem="selectedItem"
                                 :onAfterClickAction="handleUpdateAfterAction"
@@ -186,10 +48,12 @@
 <script>
 
 import './index.css';
-import {getUnicCoins, toDote, round, toFix, getLocalStorage, setLocalStorage} from '../../helpers';
+
+import {initialData} from '../../helpers/initialData';
+import {getUnicCoins, toFix, setLocalStorage} from '../../helpers';
 import {mapActions, mapGetters} from 'vuex';
 
-import {getAccount, getFinancialContractProperties, getPosition, createPosition, deposit, redeem} from '../../core/eth';
+import {getAccount, getFinancialContractProperties, getPosition} from '../../core/eth';
 
 import vAccount from '../../components/elements/v-account.vue';
 import vTable from '../../components/elements/v-table.vue';
@@ -204,39 +68,13 @@ export default {
   },
   data(){
       return {
-          portfolio: getLocalStorage('portfolioList') ? JSON.parse(getLocalStorage('portfolioList')) : [],
-          selectedItem: {},
-          selectedItemBalance: {
-              collateralAmountFormatted: '0.0000',
-              collateralBalanceFormatted: '0.0000',
-              collateralTokens: '0.0000',
-              collateralRatio: '0.0000',
-              cr: 1,
-              liquidationPrice: '0.0000',
-              tokenCurrencyBalance: '0.0000'
-          },
-          sythetic: {
-              name: '',
-              collateralAmount: '',
-              tokensAmount: '',
-              cr: 1,
-              price: '0.0000',
-              rewards: '0',
-              totalSyntTokensOutstanding: '0.0000',
-              totalCollateral: '0.0000',
-              globalCollateralizationRation: '0.0000'
-          },
-          collateral: {
-              collateralAmount: ''
-          },
-          newPosition: '',
-          collateralPrice: 1,
-          isInstrumentListUpdated: false
+          selectedItem: initialData.selectedItem,
+          selectedItemBalance: initialData.selectedItemBalance,
+          synthetic: initialData.synthetic
       }
   },
   methods: {
     ...mapActions([
-        'GET_INSTRUMENTS_FROM_API',
         'GET_PORTFOLIO_FROM_API',
         'GET_STABLECOINS_FROM_API',
         'GET_DEX_LP_FROM_API',
@@ -249,31 +87,26 @@ export default {
 
         console.log('getTableItem: ', this.selectedItem);
 
-        this.sythetic.cr = item.CR ? +item.CR : 1;
+        this.synthetic.cr = item.CR ? +item.CR : 1;
 
         if (['uSPAC5', 'uSPAC10', 'uSPAC10-test'].includes(item.Name)) {
             await this.updateSelectedItemBalance();
         } else {
-            this.selectedItemBalance = {
-                collateralAmountFormatted: '0.0000',
-                collateralBalanceFormatted: '0.0000',
-                collateralTokens: '0.0000',
-                collateralRatio: '0.0000',
-                liquidationPrice: '0.0000',
-                tokenCurrencyBalance: '0.0000'
-            }
+            this.synthetic = initialData.synthetic;
+            this.selectedItemBalance = initialData.selectedItemBalance;
         }
         
-        // getCollateralBalance().then(data => console.log('getCollateralBalance: ', data));
-        console.log('getTableItem(selectedItemBalance): ', this.selectedItemBalance);
-
         const selectInstrumentValue = document.querySelector(`.list [data-value="${item.Name}"]`);
-        if (selectInstrumentValue) {
+
+        if (selectInstrumentValue && item.Name !== this.synthetic.name) {
             this.getInstrumentItem(selectInstrumentValue);
             selectInstrumentValue.classList.contains('selected') || selectInstrumentValue.classList.add('selected');
             if (selectInstrumentValue.closest('.nice-select').querySelector('.current')) {
                 selectInstrumentValue.closest('.nice-select').querySelector('.current').innerText = item.Name;
             }
+        } else if(!selectInstrumentValue) {
+            document.querySelector('#portfolio').selectedIndex = 0;
+        
         }
     },
 
@@ -284,7 +117,7 @@ export default {
                 
                 const value = e.target.innerText;
                 const selectedValue = this.INSTRUMENTS.find(i => i.Name === value);
-                const portfolioItem = this.portfolio.find(i => i.Name === value);
+                const portfolioItem = this.PORTFOLIO.find(i => i.Name === value);
 
                 console.log('selectedValue: ', selectedValue);
 
@@ -293,7 +126,7 @@ export default {
                 console.log('this.selectedItem: ', this.selectedItem);
                 const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
 
-                this.sythetic = {
+                this.synthetic = {
                     name: selectedValue.Name,
                     cr: selectedValue.CR,
                     price: selectedValue.Price,
@@ -302,23 +135,18 @@ export default {
                     totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
                     globalCollateralizationRation: (+collateralRatio).toFixed(toFix).toString()
                 }
-
-                // this.selectedItem = {
-                //     Description: selectedValue.Description ? selectedValue.Description : ''
-                // }
-
+                console.log('1',this.synthetic);
                 this.getTableItem(portfolioItem);
             }
         } else {
                 this.clearInputs();
-            
                 const value = e.innerText;
                 const selectedValue = this.INSTRUMENTS.find(i => i.Name === value);
 
                 const contractProperties = await getFinancialContractProperties();
                 const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
-
-                this.sythetic = {
+                console.log('2', this.synthetic);
+                this.synthetic = {
                     name: selectedValue.Name,
                     cr: selectedValue.CR,
                     price: selectedValue.Price,
@@ -331,17 +159,12 @@ export default {
     },
 
     async handleClickConnect(account) {
-        this.portfolio = await this.getPortfolioList(account);
-        setLocalStorage('portfolioList', JSON.stringify(this.portfolio));
+        const portfolio = await this.getPortfolioList(account);
+        this.GET_PORTFOLIO_FROM_API(portfolio);
     },
 
-    // eslint-disable-next-line no-unused-vars
-    async getPortfolioList(walletAddress = '') {
-        /* Перебор всех возможных токенов */
-        /*      Проверить количество каждого токена по userAccount */
-        /*      Если количество токенов > 0 то занести токен и его количество в массив */
-        /*          - в отдельные элементы в зависимости от состояния. */
 
+    async getPortfolioList(walletAddress = '') {
         const portfolio = [];
         const instumentsJSON = this.INSTRUMENTS.map(instrument => {return {token: instrument.Name, decimals: instrument.decimals, address: instrument.CollateralAddress, price: instrument.Price, collateral: instrument.CollateralName, description: instrument.Description, cr: instrument.CR}});
 
@@ -351,18 +174,10 @@ export default {
 
         // Баланс токенов ERC20
         for (let i of tokenAddress) {
-            // let balance = await window.ethereum.request({
-            //     method: 'eth_getBalance',
-            //     params: [i.address,'latest']
-            // });
-            // const collateralAmount = await getPosition();
             const collateralAmount = await getAccount(walletAddress);
 
             console.log('getAccount: ', collateralAmount);
 
-            // balance = balance / (10**i.decimals);
-
-            // balance = (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString();
             let balance = (+collateralAmount.tokenCurrencyBalanceFormatted).toFixed(toFix).toString();
 
             const value = i.price ? (balance * i.price).toFixed(toFix) : 0;
@@ -416,93 +231,14 @@ export default {
             portfolio.push(unisx, xunisx);
         }
 
+        setLocalStorage('portfolioList', JSON.stringify(portfolio));
         return portfolio;
-    },
-
-    async mint() {
-        if (this.sythetic.collateralAmount && this.sythetic.tokensAmount) {
-            console.log('Creating');          
-            try {
-                const collateralAmount = toDote(this.sythetic.tokensAmount);
-                const tokensAmount = toDote(this.sythetic.collateralAmount);
-                const newPosition = createPosition(collateralAmount, tokensAmount);
-                for await (let value of newPosition) {
-                    console.log(value.message);
-                }
-                await this.updateSelectedItemBalance();
-                this.portfolio = await this.getPortfolioList();
-            } catch(e) {
-                console.error(e);
-                return
-            }
-            console.log('Success');  
-        }
-    },
-
-    async deposit() {
-        if (this.sythetic.tokensAmount) {  // collateral.collateralAmount
-            console.log('Deposit');  
-            const collateralAmount = toDote(this.sythetic.tokensAmount);
-            try {
-                const newDeposit = deposit(collateralAmount);
-                for await (let value of newDeposit) {
-                    console.log(value.message);
-                }
-                await this.updateSelectedItemBalance();
-                this.portfolio = await this.getPortfolioList();
-            } catch(e) {
-                console.error(e);
-                return
-            }
-            console.log('Success');  
-        }
-    },
-
-    async burn() {
-        if (this.sythetic.collateralAmount) {
-            console.log('Burn');  
-            const tokensAmount = toDote(this.sythetic.collateralAmount);
-            const portfolioAmount = this.selectedItemBalance.tokenCurrencyBalance;
-            console.log(tokensAmount, portfolioAmount);
-            if (+tokensAmount > +portfolioAmount) return console.error('You have no much tokens');
-
-            try {
-                const newBurn = redeem(tokensAmount);
-                for await (let value of newBurn) {
-                    console.log(value.message);
-                }
-                await this.updateSelectedItemBalance();
-                this.portfolio = await this.getPortfolioList();
-            } catch(e) {
-                console.error(e);
-                return
-            }
-            console.log('Success');  
-        }
-    },
-
-    async withdraw() {
-        if (this.sythetic.tokensAmount) { // collateral.collateralAmount
-            console.log('Withdraw');  
-            const collateralAmount = toDote(this.sythetic.tokensAmount);
-            try {
-                const newWithdraw = deposit(collateralAmount);
-                for await (let value of newWithdraw) {
-                    console.log(value.message);
-                }
-                await this.updateSelectedItemBalance();
-                this.portfolio = await this.getPortfolioList();
-            } catch(e) {
-                console.error(e);
-                return
-            }
-            console.log('Success');  
-        }
     },
 
     async handleUpdateAfterAction() {
         await this.updateSelectedItemBalance();
-        this.portfolio = await this.getPortfolioList();     
+        const portfolio = await this.getPortfolioList();
+        this.GET_PORTFOLIO_FROM_API(portfolio);
     },
 
     async updateSelectedItemBalance() {
@@ -524,71 +260,15 @@ export default {
             collateralRatio: collateralRatio ? (+collateralRatio).toFixed(toFix).toString() : '0.0000',
             liquidationPrice: collateralAmount.liquidationPriceFormatted ? (+collateralAmount.liquidationPriceFormatted).toFixed(toFix).toString() : '0.0000'
         }
-
-        // this.sythetic = {
-        //     name: '',
-        //     collateralAmount: '',
-        //     tokensAmount: '',
-        //     cr: 1,
-        //     price: '0.0000',
-        //     rewards: '0',
-        //     totalSyntTokensOutstanding: '0.0000',
-        //     totalCollateral: '0.0000',
-        //     globalCollateralizationRation: '0.0000'
-        // }
-
-        // const select = document.querySelector('#cardtab1 .nice-select');
-        // if (select) {
-        //     select.querySelectorAll('.list li').forEach((li, index) => {
-        //         if (index === 0) {
-        //             li.classList.contains('selected') || li.classList.add('selected');
-        //             select.querySelector('.current').innerText = li.innerText;
-        //         } else {
-        //             li.classList.contains('selected') && li.classList.remove('selected');
-        //         }
-        //         li.classList.contains('focus') && li.classList.remove('focus');
-        //     });
-        // }
-    },
-
-    consider(e) {
-      switch (e) {
-          case 'collateralAmount':
-              this.sythetic.tokensAmount = (this.toPrice(e) !== '0') ? this.toPrice(e) : '';
-              break;
-          case 'tokensAmount':
-              this.sythetic.collateralAmount = this.toPrice(e);
-            break;
-      }
     },
 
     clearInputs(portfolio = false) {
-        this.sythetic.tokensAmount = '';
-        this.sythetic.collateralAmount = '';
-        this.collateral.collateralAmount = '';
+        this.synthetic.tokensAmount = '';
+        this.synthetic.collateralAmount = '';
 
         if (portfolio) {
-         this.selectedItemBalance = {
-              collateralAmountFormatted: '0.0000',
-              collateralBalanceFormatted: '0.0000',
-              collateralTokens: '0.0000',
-              collateralRatio: '0.0000',
-              cr: 1,
-              liquidationPrice: '0.0000'
-          }
-
-          this.selectedItem = {};
-        }
-    },
-
-    toPrice(token) {
-        switch (token) {
-            case 'collateralAmount':
-                return round((toDote(this.sythetic.collateralAmount) * this.sythetic.cr * (this.INSTRUMENTS[0].Price / this.collateralPrice)), 4).toString();
-            case 'tokensAmount':
-                return round((toDote(this.sythetic.tokensAmount) / this.sythetic.cr * (this.collateralPrice / this.INSTRUMENTS[0].Price)), 4).toString();
-            default:
-                return token;
+            this.selectedItemBalance = initialData.selectedItemBalance;
+            this.selectedItem = initialData.selectedItem;
         }
     }
   },
@@ -610,28 +290,17 @@ export default {
 
     dexLP: function() {
         return getUnicCoins(this.DEX_LP, 'dex');
-    },
-
-    instrumentsList: function() {        
-        return  this.INSTRUMENTS ? this.INSTRUMENTS.map(instrument => instrument.Name) : [];
     }
   },
   created() {
-      console.log('create', this.INSTRUMENTS);
+      console.log('created');
   },
   mounted() {
-      this.GET_INSTRUMENTS_FROM_API();
-      this.GET_PORTFOLIO_FROM_API();
       this.GET_STABLECOINS_FROM_API();
       this.GET_DEX_LP_FROM_API();
       this.GET_DEFI_TOKENS_FROM_API();
       window.$('select').niceSelect();
   },
-  updated() {
-    if (this.instrumentsList.length && !this.isInstrumentListUpdated) {
-        window.$('select').niceSelect('update');
-        this.isInstrumentListUpdated = true;
-    }
-  }
+  updated() {}
 }
 </script>
