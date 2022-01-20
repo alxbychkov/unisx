@@ -255,7 +255,6 @@ export default {
         },
 
         toPrice(token) {
-            console.log('3', this.synthetic);
             switch (token) {
                 case 'collateralAmount':
                     return round((toDote(this.synthetic.collateralAmount) * this.synthetic.cr * (this.INSTRUMENTS[0].Price / COLLATERAL_PRICE)), 4).toString();

@@ -81,8 +81,8 @@ export default {
         'GET_DEFI_TOKENS_FROM_API'
     ]),
       
-    async getTableItem(item) {
-        this.clearInputs();
+    async getTableItem(item, isClear = true) {
+        isClear && this.clearInputs();
         this.selectedItem = item;
 
         console.log('getTableItem: ', this.selectedItem);
@@ -135,8 +135,8 @@ export default {
                     totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
                     globalCollateralizationRation: (+collateralRatio).toFixed(toFix).toString()
                 }
-                console.log('1',this.synthetic);
-                this.getTableItem(portfolioItem);
+                console.log('1',portfolioItem);
+                this.getTableItem(portfolioItem, false);
             }
         } else {
                 this.clearInputs();
