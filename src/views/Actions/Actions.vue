@@ -26,7 +26,7 @@
                     </ul>
                     <div class="cards_in_tab">
                         <div class="tab-content">
-                            <v-mint 
+                            <v-mint
                                 active
                                 id="cardtab1"
                                 :synthetic="synthetic"
@@ -35,7 +35,9 @@
                                 :onAfterClickAction="handleUpdateAfterAction"
                                 :onSelectClick="getInstrumentItem"
                             />
-                            <v-pool id="cardtab2"/>
+                            <v-pool 
+                                id="cardtab2"
+                            />
                             <v-stake id="cardtab3"/>
                         </div>
                     </div>
@@ -96,9 +98,10 @@ export default {
             this.selectedItemBalance = initialData.selectedItemBalance;
         }
         
-        const selectInstrumentValue = document.querySelector(`.list [data-value="${item.Name}"]`);
+        const selectInstrumentValue = document.querySelector(`#portfolio .list [data-value="${item.Name}"]`);
 
         if (selectInstrumentValue && item.Name !== this.synthetic.name) {
+            
             this.getInstrumentItem(selectInstrumentValue);
             selectInstrumentValue.classList.contains('selected') || selectInstrumentValue.classList.add('selected');
             if (selectInstrumentValue.closest('.nice-select').querySelector('.current')) {
@@ -145,7 +148,7 @@ export default {
 
                 const contractProperties = await getFinancialContractProperties();
                 const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
-                console.log('2', this.synthetic);
+
                 this.synthetic = {
                     name: selectedValue.Name,
                     cr: selectedValue.CR,

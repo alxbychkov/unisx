@@ -93,3 +93,7 @@ export function setLocalStorage(key, value) {
 //         return str;
 //     }
 // }
+
+export function separate(pair, separator = '/') {
+    return pair.split(separator);
+}

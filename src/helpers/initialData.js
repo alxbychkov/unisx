@@ -19,5 +19,15 @@ export const initialData = {
         totalSyntTokensOutstanding: '0.0000',
         totalCollateral: '0.0000',
         globalCollateralizationRation: '0.0000'
+    },
+    sushiswapPool: {
+        firstToken: '',
+        firstTokenInWallet: '0.0000',
+        secondToken: '',
+        secondTokenInWallet: '0.0000',
+        firstTokenAmount: '',
+        firstTokenAmountInPool: '0.0000',
+        secondTokenAmount: '',
+        secondTokenAmountInPool: '0.0000',
     }
 }
