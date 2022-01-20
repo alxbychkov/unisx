@@ -2,7 +2,7 @@
     <div role="tabpanel" class="tab-pane fade" :class="{active}" :id="id">
         <div class="row flex cards j-between">
             <div class="col-md-5 col-sm-5 col-xs-12 flex-collumn">
-                <h3>SUSHISWAP/UNISWAP v.2</h3>
+                <h4>SUSHISWAP/UNISWAP v.2</h4>
                 <div class="flex mb-10 flex-row-2 flex j-between mb-10">
                     <div class="input-wrapp">
                         <input 
@@ -47,7 +47,7 @@
                         <div class="flex j-between mb-0"><span>In wallet:</span><span class="color-green">{{ selectedItem.secondTokenInWallet }}</span></div>
                     </div>
                 </div>                                    
-                <div class="but_flex mt-auto">
+                <div class="but_flex mt-auto lr-auto">
                     <button class="cancelbut disabled" @click="unPool" :disabled="!selectedItem.firstTokenAmount">unPool</button>
                     <button class="blueb disabled" @click="pool" :disabled="!selectedItem.secondTokenAmount">Pool</button>
                 </div>
@@ -60,7 +60,7 @@
 import {mapActions, mapGetters} from 'vuex';
 
 import {separate} from '../../../helpers';
-import {initialData} from '../../../helpers/initialData';
+// import {initialData} from '../../../helpers/initialData';
 
 export default {
     name: 'Pool',
@@ -76,13 +76,19 @@ export default {
             default() {
                 return 'cardtab2'
             }
+        },
+        selectedItem: {
+            type: Object,
+            default() {
+                return {}
+            }
         }
     },
-    data() {
-        return {
-            selectedItem: initialData.sushiswapPool
-        }
-    },
+    // data() {
+    //     return {
+    //         selectedItem: initialData.sushiswapPool
+    //     }
+    // },
     computed: {
         ...mapGetters([
             'INSTRUMENTS', 'PORTFOLIO'

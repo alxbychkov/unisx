@@ -20,9 +20,9 @@
             <div class="row" data-aos="fade-up" data-aos-delay="1200" data-aos-duration="800">
                 <div class="col-md-12">
                     <ul class="cards_tabs_nav" role="tablist">
-                        <li role="presentation" class="active"><a href="#cardtab1" role="tab" data-toggle="tab">Instrument</a></li>
-                        <li role="presentation"><a href="#cardtab2" role="tab" data-toggle="tab" @click="clearInputs(true)">POOL</a></li>
-                        <li role="presentation"><a href="#cardtab3" role="tab" data-toggle="tab" @click="clearInputs(true)">STAKE</a></li>
+                        <li role="presentation" class="active" @click="clearTab($event)"><a href="#cardtab1" role="tab" data-toggle="tab">Instrument</a></li>
+                        <li role="presentation" @click="clearTab($event)"><a href="#cardtab2" role="tab" data-toggle="tab">POOL</a></li>
+                        <li role="presentation" @click="clearTab($event)"><a href="#cardtab3" role="tab" data-toggle="tab">STAKE</a></li>
                     </ul>
                     <div class="cards_in_tab">
                         <div class="tab-content">
@@ -37,6 +37,7 @@
                             />
                             <v-pool 
                                 id="cardtab2"
+                                :selectedItem="sushiswapPool"
                             />
                             <v-stake id="cardtab3"/>
                         </div>
@@ -72,7 +73,8 @@ export default {
       return {
           selectedItem: initialData.selectedItem,
           selectedItemBalance: initialData.selectedItemBalance,
-          synthetic: initialData.synthetic
+          synthetic: initialData.synthetic,
+          sushiswapPool: initialData.sushiswapPool
       }
   },
   methods: {
@@ -92,24 +94,21 @@ export default {
         this.synthetic.cr = item.CR ? +item.CR : 1;
 
         if (['uSPAC5', 'uSPAC10', 'uSPAC10-test'].includes(item.Name)) {
-            await this.updateSelectedItemBalance();
+            await this.updateSelectedItemBalance(item);
         } else {
             this.synthetic = initialData.synthetic;
             this.selectedItemBalance = initialData.selectedItemBalance;
         }
         
-        const selectInstrumentValue = document.querySelector(`#portfolio .list [data-value="${item.Name}"]`);
-
-        if (selectInstrumentValue && item.Name !== this.synthetic.name) {
-            
-            this.getInstrumentItem(selectInstrumentValue);
+        const selectInstrumentValue = document.querySelector(`#portfolioList .list [data-value="${item.Name}"]`);
+        
+        if (selectInstrumentValue) {
             selectInstrumentValue.classList.contains('selected') || selectInstrumentValue.classList.add('selected');
             if (selectInstrumentValue.closest('.nice-select').querySelector('.current')) {
                 selectInstrumentValue.closest('.nice-select').querySelector('.current').innerText = item.Name;
             }
         } else if(!selectInstrumentValue) {
             document.querySelector('#portfolio').selectedIndex = 0;
-        
         }
     },
 
@@ -119,45 +118,10 @@ export default {
                 this.clearInputs(true);
                 
                 const value = e.target.innerText;
-                const selectedValue = this.INSTRUMENTS.find(i => i.Name === value);
                 const portfolioItem = this.PORTFOLIO.find(i => i.Name === value);
 
-                console.log('selectedValue: ', selectedValue);
-
-                const contractProperties = await getFinancialContractProperties();
-                console.log('contractProperties: ', contractProperties);
-                console.log('this.selectedItem: ', this.selectedItem);
-                const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
-
-                this.synthetic = {
-                    name: selectedValue.Name,
-                    cr: selectedValue.CR,
-                    price: selectedValue.Price,
-                    rewards: selectedValue.Rewards,
-                    totalSyntTokensOutstanding: (+contractProperties.totalTokensOutstandingFormatted).toFixed(toFix).toString(),
-                    totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
-                    globalCollateralizationRation: (+collateralRatio).toFixed(toFix).toString()
-                }
-                console.log('1',portfolioItem);
                 this.getTableItem(portfolioItem, false);
             }
-        } else {
-                this.clearInputs();
-                const value = e.innerText;
-                const selectedValue = this.INSTRUMENTS.find(i => i.Name === value);
-
-                const contractProperties = await getFinancialContractProperties();
-                const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
-
-                this.synthetic = {
-                    name: selectedValue.Name,
-                    cr: selectedValue.CR,
-                    price: selectedValue.Price,
-                    rewards: selectedValue.Rewards,
-                    totalSyntTokensOutstanding: (+contractProperties.totalTokensOutstandingFormatted).toFixed(toFix).toString(),
-                    totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
-                    globalCollateralizationRation: (+collateralRatio).toFixed(toFix).toString()
-                }
         }
     },
 
@@ -244,15 +208,30 @@ export default {
         this.GET_PORTFOLIO_FROM_API(portfolio);
     },
 
-    async updateSelectedItemBalance() {
+    async updateSelectedItemBalance(item = {}) {
         const collateralAmount = await getPosition();
         const collateralBalance = await getAccount();
         const contractProperties = await getFinancialContractProperties();
-        // const collateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
         const collateralRatio = (+collateralAmount.collateralAmountFormatted)/((+collateralAmount.tokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
 
         console.log('collateralAmount: ', collateralAmount, 'collateralBalance: ', collateralBalance);
         console.log('isExpired: ', contractProperties.isExpired);
+
+        if (item.Name) {
+            const value = item.Name;
+            const selectedValue = this.INSTRUMENTS.find(i => i.Name === value);
+            const globalCollateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
+
+            this.synthetic = {
+                name: selectedValue.Name,
+                cr: selectedValue.CR,
+                price: selectedValue.Price,
+                rewards: selectedValue.Rewards,
+                totalSyntTokensOutstanding: (+contractProperties.totalTokensOutstandingFormatted).toFixed(toFix).toString(),
+                totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
+                globalCollateralizationRation: (+globalCollateralRatio).toFixed(toFix).toString()
+            }
+        }
 
 
         this.selectedItemBalance = {
@@ -272,6 +251,15 @@ export default {
         if (portfolio) {
             this.selectedItemBalance = initialData.selectedItemBalance;
             this.selectedItem = initialData.selectedItem;
+        }
+    },
+
+    clearTab(e) {
+        if (!e.currentTarget.classList.contains('active')) {
+            this.selectedItemBalance = initialData.selectedItemBalance;
+            this.synthetic = initialData.synthetic;
+            this.selectedItem = {};
+            document.querySelector('#portfolio').selectedIndex = 0;
         }
     }
   },

@@ -13,7 +13,7 @@
                         @input="consider('collateralAmount')
                     ">
                     <div class="input-wrapp">
-                        <div class="flex-collumn" @click="onSelectClick($event)">
+                        <div class="flex-collumn" id="portfolioList" @click="onSelectClick($event)">
                             <select id="portfolio">
                                 <option value="" disabled selected>Instrument</option>
                                 <option 
@@ -42,7 +42,7 @@
                     <span>Global Collateralization ratio</span>
                     <span>{{ synthetic.globalCollateralizationRation }}</span>
                 </div>                                        
-                <div class="but_flex mt-auto">
+                <div class="but_flex mt-auto lr-auto">
                     <button class="cancelbut disabled" @click="mint" :disabled="!synthetic.tokensAmount">Mint</button>
                     <button class="blueb disabled" @click="burn" :disabled="!synthetic.collateralAmount">Burn</button>
                 </div>
@@ -93,7 +93,7 @@
                     <span>Liquidation Price:</span>
                     <span>{{ selectedItemBalance.liquidationPrice }}</span>
                 </div>                                        
-                <div class="but_flex">
+                <div class="but_flex lr-auto">
                     <button class="cancelbut disabled" @click="deposit" :disabled="!selectedItem.Value">Supply</button>
                     <button class="blueb disabled" @click="withdraw" :disabled="!selectedItem.Value">Withdraw</button>
                 </div>
