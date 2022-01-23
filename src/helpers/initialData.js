@@ -29,5 +29,15 @@ export const initialData = {
         firstTokenAmountInPool: '0.0000',
         secondTokenAmount: '',
         secondTokenAmountInPool: '0.0000',
+    },
+    stakeProfile: {
+        name: '',
+        unisxAmount: '',
+        unisxStaked: '0.0000',
+        unisxBalance: {
+            UNISX: '0.0000',
+            xUNISX: '0.0000'
+        },
+        unisxRewardEarned: '0.0000'
     }
 }

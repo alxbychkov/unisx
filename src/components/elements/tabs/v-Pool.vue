@@ -11,7 +11,7 @@
                             v-model="selectedItem.firstTokenAmount"
                             :disabled="!selectedItem.firstToken"
                         >
-                        <div class="flex j-between mb-0"><span>In pool:</span><span class="color-red">{{ selectedItem.firstTokenAmountInPool }}</span></div>
+                        <div class="flex j-between mb-0"><span>In the pool:</span><span class="color-red">{{ selectedItem.firstTokenAmountInPool }}</span></div>
                     </div>
                     <div class="input-wrapp">
                         <div class="flex-collumn" @click="handleSelectClick($event)">
@@ -24,7 +24,7 @@
                                 </option>
                             </select>
                         </div>
-                        <div class="flex j-between mb-0"><span>In wallet:</span><span class="color-green">{{ selectedItem.firstTokenInWallet }}</span></div>
+                        <div class="flex j-between mb-0"><span>In the wallet:</span><span class="color-green">{{ selectedItem.firstTokenInWallet }}</span></div>
                     </div>
                 </div>   
                 <div class="flex mb-10 flex-row-2 flex j-between mb-10">
@@ -35,7 +35,7 @@
                             v-model="selectedItem.secondTokenAmount"
                             :disabled="!selectedItem.secondToken"
                         >
-                        <div class="flex j-between mb-0"><span>In pool:</span><span class="color-red">{{ selectedItem.secondTokenAmountInPool }}</span></div>
+                        <div class="flex j-between mb-0"><span>In the pool:</span><span class="color-red">{{ selectedItem.secondTokenAmountInPool }}</span></div>
                     </div>
                     <div class="input-wrapp">
                         <input 
@@ -44,7 +44,7 @@
                             disabled
                             v-model="selectedItem.secondToken"
                         >
-                        <div class="flex j-between mb-0"><span>In wallet:</span><span class="color-green">{{ selectedItem.secondTokenInWallet }}</span></div>
+                        <div class="flex j-between mb-0"><span>In the wallet:</span><span class="color-green">{{ selectedItem.secondTokenInWallet }}</span></div>
                     </div>
                 </div>                                    
                 <div class="but_flex mt-auto lr-auto">
@@ -77,27 +77,27 @@ export default {
                 return 'cardtab2'
             }
         },
-        selectedItem: {
+        DEX: {
             type: Object,
             default() {
                 return {}
             }
         }
     },
-    // data() {
-    //     return {
-    //         selectedItem: initialData.sushiswapPool
-    //     }
-    // },
+    data() {
+        return {
+            selectedItem: this.DEX
+        }
+    },
     computed: {
         ...mapGetters([
             'INSTRUMENTS', 'PORTFOLIO'
         ]),
         sushiswapPool: function() {
-            const pool = this.INSTRUMENTS ? this.INSTRUMENTS.map(instrument => instrument["SUSHISWAP_POOL"])[0] : [];
+            const pool = this.INSTRUMENTS ? this.INSTRUMENTS.map(instrument => instrument["DEX"])[0] : [];
             if (pool && pool.length) {
                 const modifiedPool = pool.map(item => {
-                    return {...item, firstToken: separate(item.Pair)[0], secondToken: separate(item.Pair)[1]}
+                    return {...item, firstToken: `${separate(item.Pair)[0]}/${separate(item.Pair)[1]}`, secondToken: separate(item.Pair)[2]}
                 });
                 return modifiedPool;
             }

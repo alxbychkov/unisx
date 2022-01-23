@@ -37,9 +37,13 @@
                             />
                             <v-pool 
                                 id="cardtab2"
-                                :selectedItem="sushiswapPool"
+                                :DEX="sushiswapPool"
                             />
-                            <v-stake id="cardtab3"/>
+                            <v-stake 
+                                id="cardtab3"
+                                :STAKE="stakeProfile"
+                                :onAfterClickAction="handleUpdateAfterAction"
+                            />
                         </div>
                     </div>
                 </div>
@@ -74,7 +78,8 @@ export default {
           selectedItem: initialData.selectedItem,
           selectedItemBalance: initialData.selectedItemBalance,
           synthetic: initialData.synthetic,
-          sushiswapPool: initialData.sushiswapPool
+          sushiswapPool: initialData.sushiswapPool,
+          stakeProfile: {...initialData.stakeProfile}
       }
   },
   methods: {
@@ -94,10 +99,16 @@ export default {
         this.synthetic.cr = item.CR ? +item.CR : 1;
 
         if (['uSPAC5', 'uSPAC10', 'uSPAC10-test'].includes(item.Name)) {
+            this.stakeProfile = {...initialData.stakeProfile};
             await this.updateSelectedItemBalance(item);
+        } else if (['UNISX'].includes(item.Name)){
+            await this.updateStakeProfile(item);
+            this.synthetic = initialData.synthetic;
+            this.selectedItemBalance = initialData.selectedItemBalance;
         } else {
             this.synthetic = initialData.synthetic;
             this.selectedItemBalance = initialData.selectedItemBalance;
+            this.stakeProfile = {...initialData.stakeProfile}
         }
         
         const selectInstrumentValue = document.querySelector(`#portfolioList .list [data-value="${item.Name}"]`);
@@ -203,9 +214,11 @@ export default {
     },
 
     async handleUpdateAfterAction() {
-        await this.updateSelectedItemBalance();
         const portfolio = await this.getPortfolioList();
         this.GET_PORTFOLIO_FROM_API(portfolio);
+
+        await this.updateSelectedItemBalance();
+        await this.updateStakeProfile();
     },
 
     async updateSelectedItemBalance(item = {}) {
@@ -244,6 +257,18 @@ export default {
         }
     },
 
+    async updateStakeProfile(item = {}) {
+        const collateralBalance = await getAccount();
+        this.stakeProfile.name = item.Name ? item.Name : 'UNISX';
+        this.stakeProfile.unisxAmount = '';
+        this.stakeProfile.unisxBalance = {
+            UNISX: (+collateralBalance.UNISXBalanceFormatted).toFixed(toFix).toString(),
+            xUNISX: (+collateralBalance.xUNISXBalanceFormatted).toFixed(toFix).toString()
+        };
+        this.stakeProfile.unisxStaked = (+collateralBalance.UNISXStakedFormatted).toFixed(toFix).toString();
+        this.stakeProfile.unisxRewardEarned = (+collateralBalance.UNISXRewardEarnedFormatted).toFixed(toFix).toString();
+    },
+
     clearInputs(portfolio = false) {
         this.synthetic.tokensAmount = '';
         this.synthetic.collateralAmount = '';
@@ -259,6 +284,7 @@ export default {
             this.selectedItemBalance = initialData.selectedItemBalance;
             this.synthetic = initialData.synthetic;
             this.selectedItem = {};
+            this.stakeProfile = {...initialData.stakeProfile};
             document.querySelector('#portfolio').selectedIndex = 0;
         }
     }
