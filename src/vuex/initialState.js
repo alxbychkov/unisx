@@ -1,1 +1,8 @@
-export const initialState = {}
+export const initialState = {
+    account: '',
+    portfolio: [],
+    selectedItemBalance: {},
+    synthetic: {},
+    sushiswapPool: {},
+    stakeProfile: {}
+}

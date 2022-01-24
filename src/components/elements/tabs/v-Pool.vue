@@ -83,24 +83,18 @@ export default {
             }
         }
     },
-    data() {
-        return {
-            selectedItem: this.DEX
-        }
-    },
+    // data() {
+    //     return {
+    //         selectedItem: this.DEX
+    //     }
+    // },
     computed: {
         ...mapGetters([
             'INSTRUMENTS', 'PORTFOLIO'
         ]),
-        // selectedItem: {
-        //     get() {
-        //         return this.DEX;
-        //     },
-        //     set(value) {
-        //         console.log('value: ', value);
-        //         this.selectedItemData = value;
-        //     }
-        // },
+        selectedItem: function() {
+            return this.DEX;
+        },
         sushiswapPool: function() {
             const pool = this.INSTRUMENTS ? this.INSTRUMENTS.map(instrument => instrument["DEX"])[0] : [];
             if (pool && pool.length) {
@@ -124,17 +118,15 @@ export default {
                     const pair = this.sushiswapPool.find(pair => pair.Pair === value);
                     const firstTokenInWallet = this.PORTFOLIO.find(item => value.indexOf(item.Name) !== -1);
 
-                    this.selectedItem = {
-                        pair: pair.Pair,
-                        firstToken: pair.firstToken,
-                        secondToken: pair.secondToken,
-                        firstTokenInWallet: firstTokenInWallet ? firstTokenInWallet.Number : '0.0000',
-                        secondTokenInWallet: '0.0000',
-                        firstTokenAmountInPool: '0.0000',
-                        secondTokenAmountInPool: '0.0000',
-                    }
-
-
+                    this.selectedItem.pair = pair.Pair;
+                    this.selectedItem.firstToken = pair.firstToken;
+                    this.selectedItem.secondToken = pair.secondToken,
+                    this.selectedItem.firstTokenInWallet = firstTokenInWallet ? firstTokenInWallet.Number : '0.0000';
+                    this.selectedItem.secondTokenInWallet = '0.0000';
+                    this.selectedItem.firstTokenAmountInPool = '0.0000';
+                    this.selectedItem.secondTokenAmountInPool = '0.0000';
+                    this.selectedItem.firstTokenAmount = '';
+                    this.selectedItem.secondTokenAmount = '';
                 }
             }
         },
@@ -154,7 +146,6 @@ export default {
     mounted() {
     },
     updated() {
-        console.log('up');
         const currentLabel = document.querySelector('#pool + .nice-select .current');
                                 
         if (currentLabel) {                        

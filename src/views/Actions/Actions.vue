@@ -142,7 +142,7 @@ export default {
     },
 
 
-    async getPortfolioList(walletAddress = '') {
+    async getPortfolioList(walletAddress = this.USER_ACCOUNT) {
         const portfolio = [];
         const instumentsJSON = this.INSTRUMENTS.map(instrument => {return {token: instrument.Name, decimals: instrument.decimals, address: instrument.CollateralAddress, price: instrument.Price, collateral: instrument.CollateralName, description: instrument.Description, cr: instrument.CR}});
 
@@ -286,7 +286,6 @@ export default {
             this.selectedItem = {};
             this.stakeProfile = {...initialData.stakeProfile};
             this.sushiswapPool = {...initialData.sushiswapPool},
-            console.log(this.sushiswapPool);
             document.querySelector('#portfolio').selectedIndex = 0;
             document.querySelector('#pool').selectedIndex = 0;
         }
@@ -300,7 +299,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-          'INSTRUMENTS', 'PORTFOLIO', 'STABLECOINS', 'DEX_LP', 'DEFI_TOKENS'
+          'INSTRUMENTS', 'PORTFOLIO', 'STABLECOINS', 'DEX_LP', 'DEFI_TOKENS', 'USER_ACCOUNT'
     ]),
 
     stableCoinsTypes: function() {
