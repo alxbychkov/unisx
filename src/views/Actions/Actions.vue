@@ -214,11 +214,10 @@ export default {
     },
 
     async handleUpdateAfterAction() {
-        const portfolio = await this.getPortfolioList();
-        this.GET_PORTFOLIO_FROM_API(portfolio);
-
         await this.updateSelectedItemBalance();
         await this.updateStakeProfile();
+        const portfolio = await this.getPortfolioList();
+        this.GET_PORTFOLIO_FROM_API(portfolio);
     },
 
     async updateSelectedItemBalance(item = {}) {
@@ -255,6 +254,7 @@ export default {
             collateralRatio: collateralRatio ? (+collateralRatio).toFixed(toFix).toString() : '0.0000',
             liquidationPrice: collateralAmount.liquidationPriceFormatted ? (+collateralAmount.liquidationPriceFormatted).toFixed(toFix).toString() : '0.0000'
         }
+
     },
 
     async updateStakeProfile(item = {}) {
@@ -285,7 +285,10 @@ export default {
             this.synthetic = initialData.synthetic;
             this.selectedItem = {};
             this.stakeProfile = {...initialData.stakeProfile};
+            this.sushiswapPool = {...initialData.sushiswapPool},
+            console.log(this.sushiswapPool);
             document.querySelector('#portfolio').selectedIndex = 0;
+            document.querySelector('#pool').selectedIndex = 0;
         }
     }
   },

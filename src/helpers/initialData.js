@@ -21,6 +21,7 @@ export const initialData = {
         globalCollateralizationRation: '0.0000'
     },
     sushiswapPool: {
+        pair: '',
         firstToken: '',
         firstTokenInWallet: '0.0000',
         secondToken: '',

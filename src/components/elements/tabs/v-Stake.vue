@@ -164,8 +164,6 @@ export default {
             }
         }
     },
-    updated() {
-        console.log('updated: ', this.selectedItem);
-    }
+    updated() {}
 }
 </script>

@@ -20,7 +20,7 @@
                                 <option 
                                     v-for="pool in sushiswapPool" 
                                     :key="pool.PoolAddress"
-                                    :value="pool.firstToken">{{ pool.firstToken }}
+                                    :value="pool.Pair">{{ pool.Pair }}
                                 </option>
                             </select>
                         </div>
@@ -60,7 +60,6 @@
 import {mapActions, mapGetters} from 'vuex';
 
 import {separate} from '../../../helpers';
-// import {initialData} from '../../../helpers/initialData';
 
 export default {
     name: 'Pool',
@@ -93,11 +92,20 @@ export default {
         ...mapGetters([
             'INSTRUMENTS', 'PORTFOLIO'
         ]),
+        // selectedItem: {
+        //     get() {
+        //         return this.DEX;
+        //     },
+        //     set(value) {
+        //         console.log('value: ', value);
+        //         this.selectedItemData = value;
+        //     }
+        // },
         sushiswapPool: function() {
             const pool = this.INSTRUMENTS ? this.INSTRUMENTS.map(instrument => instrument["DEX"])[0] : [];
             if (pool && pool.length) {
                 const modifiedPool = pool.map(item => {
-                    return {...item, firstToken: `${separate(item.Pair)[0]}/${separate(item.Pair)[1]}`, secondToken: separate(item.Pair)[2]}
+                    return {...item, firstToken: `${separate(item.Pair)[0]}/${separate(item.Pair)[1]}`, secondToken: separate(item.Pair)[2]};
                 });
                 return modifiedPool;
             }
@@ -109,21 +117,24 @@ export default {
             'GET_INSTRUMENTS_FROM_API'
         ]),
 
-        handleSelectClick(e) {
+        async handleSelectClick(e) {
             if (typeof e.target !== 'undefined') {
                 if (e.target.tagName === 'LI' && e.target.classList.contains('option') && !e.target.classList.contains('disabled') && !e.target.classList.contains('selected')) {
                     const value = e.target.innerText;
-                    const pair = this.sushiswapPool.find(pair => pair.firstToken === value);
+                    const pair = this.sushiswapPool.find(pair => pair.Pair === value);
                     const firstTokenInWallet = this.PORTFOLIO.find(item => value.indexOf(item.Name) !== -1);
 
                     this.selectedItem = {
-                        firstToken: value,
+                        pair: pair.Pair,
+                        firstToken: pair.firstToken,
                         secondToken: pair.secondToken,
                         firstTokenInWallet: firstTokenInWallet ? firstTokenInWallet.Number : '0.0000',
                         secondTokenInWallet: '0.0000',
                         firstTokenAmountInPool: '0.0000',
                         secondTokenAmountInPool: '0.0000',
                     }
+
+
                 }
             }
         },
@@ -141,6 +152,24 @@ export default {
         }
     },
     mounted() {
+    },
+    updated() {
+        console.log('up');
+        const currentLabel = document.querySelector('#pool + .nice-select .current');
+                                
+        if (currentLabel) {                        
+            setTimeout(() => {
+                currentLabel.innerHTML = this.selectedItem.firstToken;
+            },0);
+        }
     }
 }
 </script>
+<style scoped>
+.flex-row-2 .input-wrapp:first-of-type {
+    width: 35%;
+}
+.flex-row-2 .input-wrapp:last-of-type {
+    width: 55%;
+}
+</style>
