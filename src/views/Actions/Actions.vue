@@ -22,7 +22,7 @@
                     <ul class="cards_tabs_nav" role="tablist">
                         <li role="presentation" class="active" @click="clearTab($event)"><a href="#cardtab1" role="tab" data-toggle="tab">Instrument</a></li>
                         <li role="presentation" @click="clearTab($event)"><a href="#cardtab2" role="tab" data-toggle="tab">POOL</a></li>
-                        <li role="presentation" @click="clearTab($event)"><a href="#cardtab3" role="tab" data-toggle="tab">STAKE</a></li>
+                        <li role="presentation" @click="handleClickTab($event)"><a href="#cardtab3" role="tab" data-toggle="tab">STAKE</a></li>
                     </ul>
                     <div class="cards_in_tab">
                         <div class="tab-content">
@@ -99,16 +99,18 @@ export default {
         this.synthetic.cr = item.CR ? +item.CR : 1;
 
         if (['uSPAC5', 'uSPAC10', 'uSPAC10-test'].includes(item.Name)) {
-            this.stakeProfile = {...initialData.stakeProfile};
+            // this.stakeProfile = {...initialData.stakeProfile};
+            // await this.updateStakeProfile(item);
+            await this.updateStakeProfile();
             await this.updateSelectedItemBalance(item);
-        } else if (['UNISX'].includes(item.Name)){
-            await this.updateStakeProfile(item);
+        } else if (['UNISX','xUNISX'].includes(item.Name)){
+            await this.updateStakeProfile();
             this.synthetic = initialData.synthetic;
             this.selectedItemBalance = initialData.selectedItemBalance;
         } else {
             this.synthetic = initialData.synthetic;
             this.selectedItemBalance = initialData.selectedItemBalance;
-            this.stakeProfile = {...initialData.stakeProfile}
+            this.stakeProfile = {...initialData.stakeProfile};
         }
         
         const selectInstrumentValue = document.querySelector(`#portfolioList .list [data-value="${item.Name}"]`);
@@ -289,6 +291,11 @@ export default {
             document.querySelector('#portfolio').selectedIndex = 0;
             document.querySelector('#pool').selectedIndex = 0;
         }
+    },
+
+    async handleClickTab(e) {
+        this.clearTab(e);
+        await this.updateStakeProfile();
     }
   },
 

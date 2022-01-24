@@ -58,8 +58,9 @@
 </template>
 <script>
 import {mapActions, mapGetters} from 'vuex';
+import { getAccount } from '../../../core/eth';
 
-import {separate} from '../../../helpers';
+import {separate, toFix} from '../../../helpers';
 
 export default {
     name: 'Pool',
@@ -117,12 +118,13 @@ export default {
                     const value = e.target.innerText;
                     const pair = this.sushiswapPool.find(pair => pair.Pair === value);
                     const firstTokenInWallet = this.PORTFOLIO.find(item => value.indexOf(item.Name) !== -1);
-
+                    const collateralBalance = await getAccount();
+                    
                     this.selectedItem.pair = pair.Pair;
                     this.selectedItem.firstToken = pair.firstToken;
                     this.selectedItem.secondToken = pair.secondToken,
                     this.selectedItem.firstTokenInWallet = firstTokenInWallet ? firstTokenInWallet.Number : '0.0000';
-                    this.selectedItem.secondTokenInWallet = '0.0000';
+                    this.selectedItem.secondTokenInWallet = (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString();
                     this.selectedItem.firstTokenAmountInPool = '0.0000';
                     this.selectedItem.secondTokenAmountInPool = '0.0000';
                     this.selectedItem.firstTokenAmount = '';
