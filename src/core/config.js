@@ -5,6 +5,8 @@ export const CHAIN_CONFIG = {
     UNISXToken: "0x0fd2dD751D4803EbE981CD39d8dcB0dB656F8D44",
     xUNISXToken: "0x29DEAB859E99A32083FEeeE870e6e3eb6403e21c",
     StakingRewards: "0x0C96B835E8107c0D734a6675A595B846fBB16e9b",
+    SushiV2Router02: "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506",
+    USDC: '0xe22da380ee6B445bb8273C81944ADEB6E8450422',
   },
 }
 
@@ -17,5 +19,3 @@ export const CORRECTION_FACTOR = '1.0'
 export const RAPID_API_KEY = "37cec062d9msh1906bc89b032f5fp1c6fc8jsn21883587ddcb"
 
 export const PRICE_PRECISION = 3 // 2 places from USD, 1 place from dividing by 10
-
-

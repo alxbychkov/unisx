@@ -58,7 +58,8 @@
 </template>
 <script>
 import {mapActions, mapGetters} from 'vuex';
-import { getAccount } from '../../../core/eth';
+// eslint-disable-next-line no-unused-vars
+import { addLiquidity, getAccount, getPoolProperties, removeLiquidity } from '../../../core/eth';
 
 import {separate, toFix} from '../../../helpers';
 
@@ -119,7 +120,10 @@ export default {
                     const pair = this.sushiswapPool.find(pair => pair.Pair === value);
                     const firstTokenInWallet = this.PORTFOLIO.find(item => value.indexOf(item.Name) !== -1);
                     const collateralBalance = await getAccount();
+                    const poolProperties = await getPoolProperties();
                     
+                    console.log('poolProperties: ', poolProperties);
+
                     this.selectedItem.pair = pair.Pair;
                     this.selectedItem.firstToken = pair.firstToken;
                     this.selectedItem.secondToken = pair.secondToken,
