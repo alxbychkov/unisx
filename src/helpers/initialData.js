@@ -22,6 +22,7 @@ export const initialData = {
     },
     sushiswapPool: {
         pair: '',
+        tokenCode: '',
         firstToken: '',
         firstTokenInWallet: '0.0000',
         secondToken: '',

@@ -38,6 +38,7 @@
                             <v-pool 
                                 id="cardtab2"
                                 :DEX="sushiswapPool"
+                                :onAfterClickAction="handleUpdateAfterAction"
                             />
                             <v-stake 
                                 id="cardtab3"

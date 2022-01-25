@@ -61,7 +61,7 @@ import {mapActions, mapGetters} from 'vuex';
 // eslint-disable-next-line no-unused-vars
 import { addLiquidity, getAccount, getPoolProperties, removeLiquidity } from '../../../core/eth';
 
-import {separate, toFix} from '../../../helpers';
+import {separate, toDote, toFix} from '../../../helpers';
 
 export default {
     name: 'Pool',
@@ -83,7 +83,10 @@ export default {
             default() {
                 return {}
             }
-        }
+        },
+        onAfterClickAction: {
+            type: Function
+        },
     },
     // data() {
     //     return {
@@ -101,7 +104,7 @@ export default {
             const pool = this.INSTRUMENTS ? this.INSTRUMENTS.map(instrument => instrument["DEX"])[0] : [];
             if (pool && pool.length) {
                 const modifiedPool = pool.map(item => {
-                    return {...item, firstToken: `${separate(item.Pair)[0]}/${separate(item.Pair)[1]}`, secondToken: separate(item.Pair)[2]};
+                    return {...item, firstToken: `${separate(item.Pair)[0]}/${separate(item.Pair)[1]}`, secondToken: separate(item.Pair)[2], tokenCode: separate(item.Pair)[1]};
                 });
                 return modifiedPool;
             }
@@ -119,18 +122,17 @@ export default {
                     const value = e.target.innerText;
                     const pair = this.sushiswapPool.find(pair => pair.Pair === value);
                     const firstTokenInWallet = this.PORTFOLIO.find(item => value.indexOf(item.Name) !== -1);
-                    const collateralBalance = await getAccount();
                     const poolProperties = await getPoolProperties();
-                    
-                    console.log('poolProperties: ', poolProperties);
-
+                    const selectedItemData = poolProperties[firstTokenInWallet.Name];
+                    // console.log(poolProperties);
                     this.selectedItem.pair = pair.Pair;
+                    this.selectedItem.tokenCode = pair.tokenCode;
                     this.selectedItem.firstToken = pair.firstToken;
-                    this.selectedItem.secondToken = pair.secondToken,
-                    this.selectedItem.firstTokenInWallet = firstTokenInWallet ? firstTokenInWallet.Number : '0.0000';
-                    this.selectedItem.secondTokenInWallet = (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString();
-                    this.selectedItem.firstTokenAmountInPool = '0.0000';
-                    this.selectedItem.secondTokenAmountInPool = '0.0000';
+                    this.selectedItem.secondToken = pair.secondToken;
+                    this.selectedItem.firstTokenInWallet = (+selectedItemData.tokenBalanceFormatted).toFixed(toFix).toString();
+                    this.selectedItem.secondTokenInWallet = (+selectedItemData.USDCBalanceFormatted).toFixed(toFix).toString();
+                    this.selectedItem.firstTokenAmountInPool = (+selectedItemData.tokenAvailableToWithdrawFormatted).toFixed(toFix).toString();
+                    this.selectedItem.secondTokenAmountInPool = (+selectedItemData.USDCAvailableToWithdrawFormatted).toFixed(toFix).toString();
                     this.selectedItem.firstTokenAmount = '';
                     this.selectedItem.secondTokenAmount = '';
                 }
@@ -138,14 +140,46 @@ export default {
         },
 
         async unPool() {
-            if (this.selectedItem.firstToken && this.selectedItem.secondToken) {
-                console.log('unPool');
+            if (this.selectedItem.firstTokenAmount && this.selectedItem.secondTokenAmount && this.selectedItem.tokenCode) {
+                const tokenCode = (this.selectedItem.tokenCode === 'uSPAC10-test') ? 'uSPAC10' : this.selectedItem.tokenCode;
+                const tokenAmount = toDote(this.selectedItem.firstTokenAmount);
+                const USDCAmount = toDote(this.selectedItem.secondTokenAmount);
+
+                console.log('unPool', tokenCode, USDCAmount, tokenAmount);
+
+                try {
+                    const unPool = addLiquidity(tokenCode, USDCAmount, tokenAmount);
+                    for await (let value of unPool) {
+                        console.log(value.message);
+                    }
+                    this.onAfterClickAction();
+                } catch(e) {
+                    console.error(e);
+                    return
+                }
+                console.log('unPool success!'); 
             }
         },
 
         async pool() {
-            if (this.selectedItem.firstToken && this.selectedItem.secondToken) {
+            if (this.selectedItem.firstTokenAmount && this.selectedItem.secondTokenAmount && this.selectedItem.tokenCode) {
+                const tokenCode = (this.selectedItem.tokenCode === 'uSPAC10-test') ? 'uSPAC10' : this.selectedItem.tokenCode;
+                const tokenAmount = toDote(this.selectedItem.firstTokenAmount);
+                const USDCAmount = toDote(this.selectedItem.secondTokenAmount);
+
                 console.log('Pool');
+
+                try {
+                    const pool = removeLiquidity(tokenCode, USDCAmount, tokenAmount);
+                    for await (let value of pool) {
+                        console.log(value.message);
+                    }
+                    this.onAfterClickAction();
+                } catch(e) {
+                    console.error(e);
+                    return
+                }
+                console.log('Pool success!'); 
             }
         }
     },
