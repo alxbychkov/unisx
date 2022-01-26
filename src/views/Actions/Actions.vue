@@ -236,13 +236,13 @@ export default {
         for (let i of poolInstruments[0]) {
             if (i.token.indexOf('SUSHISWAP/UNISX') !== -1 ||  i.token.indexOf('SUSHISWAP/uSPAC10') !== -1) {
                 const key = (separate(i.token)[1] !== 'uSPAC10-test') ? separate(i.token)[1] : 'uSPAC10';
-                const value = (+poolProperties[key].price) * (+poolProperties[key].liquidityFormatted);
+                // const value = (+poolProperties[key].price) * (+poolProperties[key].liquidityFormatted);
                 portfolio.push({
                     Name: i.token,
                     Status: "-",
                     Price: (+poolProperties[key].price).toFixed(toFix) ?? 0, 
                     Number: (+poolProperties[key].liquidityFormatted).toFixed(toFix).toString(),
-                    Value: value ? value.toFixed(toFix).toString() : '0.0000',
+                    Value: '',
                     GT: 0,
                     UMA: 0,
                     Instrument: "",

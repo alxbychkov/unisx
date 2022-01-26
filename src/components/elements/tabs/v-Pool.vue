@@ -122,39 +122,26 @@ export default {
             if (typeof e.target !== 'undefined') {
                 if (e.target.tagName === 'LI' && e.target.classList.contains('option') && !e.target.classList.contains('disabled') && !e.target.classList.contains('selected')) {
                     const value = e.target.innerText;
-                    const pair = this.sushiswapPool.find(pair => pair.Pair === value);
-                    const firstTokenInWallet = this.PORTFOLIO.find(item => value.indexOf(item.Name) !== -1);
-                    const poolProperties = await getPoolProperties();
-                    const selectedItemData = poolProperties[firstTokenInWallet.Name];
-                    // console.log(poolProperties);
-                    this.selectedItem.pair = pair.Pair;
-                    this.selectedItem.tokenCode = pair.tokenCode;
-                    this.selectedItem.firstToken = pair.firstToken;
-                    this.selectedItem.secondToken = pair.secondToken;
-                    this.selectedItem.firstTokenInWallet = (+selectedItemData.tokenBalanceFormatted).toFixed(toFix).toString();
-                    this.selectedItem.secondTokenInWallet = (+selectedItemData.USDCBalanceFormatted).toFixed(toFix).toString();
-                    this.selectedItem.firstTokenAmountInPool = (+selectedItemData.tokenAvailableToWithdrawFormatted).toFixed(toFix).toString();
-                    this.selectedItem.secondTokenAmountInPool = (+selectedItemData.USDCAvailableToWithdrawFormatted).toFixed(toFix).toString();
-                    this.selectedItem.firstTokenAmount = '';
-                    this.selectedItem.secondTokenAmount = '';
-                    this.selectedItem.tokenPrice = (+selectedItemData.price);
+                    await this.updateSelectedItem(value);
                 }
             }
         },
 
-        async unPool() {
+        async pool() {
             if (this.selectedItem.firstTokenAmount && this.selectedItem.secondTokenAmount && this.selectedItem.tokenCode) {
                 const tokenCode = (this.selectedItem.tokenCode === 'uSPAC10-test') ? 'uSPAC10' : this.selectedItem.tokenCode;
                 const tokenAmount = toDote(this.selectedItem.firstTokenAmount);
                 const USDCAmount = toDote(this.selectedItem.secondTokenAmount);
+                const value = this.selectedItem.pair;
 
-                console.log('unPool', tokenCode, USDCAmount, tokenAmount);
+                console.log('unPool');
 
                 try {
                     const unPool = addLiquidity(tokenCode, USDCAmount, tokenAmount);
                     for await (let value of unPool) {
                         console.log(value.message);
                     }
+                    await this.updateSelectedItem(value);
                     this.onAfterClickAction();
                 } catch(e) {
                     console.error(e);
@@ -164,11 +151,12 @@ export default {
             }
         },
 
-        async pool() {
+        async unPool() {
             if (this.selectedItem.firstTokenAmount && this.selectedItem.secondTokenAmount && this.selectedItem.tokenCode) {
                 const tokenCode = (this.selectedItem.tokenCode === 'uSPAC10-test') ? 'uSPAC10' : this.selectedItem.tokenCode;
                 const tokenAmount = toDote(this.selectedItem.firstTokenAmount);
                 const USDCAmount = toDote(this.selectedItem.secondTokenAmount);
+                const value = this.selectedItem.pair;
 
                 console.log('Pool');
 
@@ -177,6 +165,7 @@ export default {
                     for await (let value of pool) {
                         console.log(value.message);
                     }
+                    await this.updateSelectedItem(value);
                     this.onAfterClickAction();
                 } catch(e) {
                     console.error(e);
@@ -206,6 +195,25 @@ export default {
                 default:
                     return token;
             }
+        },
+
+        async updateSelectedItem(value) {
+            const pair = this.sushiswapPool.find(pair => pair.Pair === value);
+            const firstTokenInWallet = this.PORTFOLIO.find(item => value.indexOf(item.Name) !== -1);
+            const poolProperties = await getPoolProperties();
+            const selectedItemData = poolProperties[firstTokenInWallet.Name];
+
+            this.selectedItem.pair = pair.Pair;
+            this.selectedItem.tokenCode = pair.tokenCode;
+            this.selectedItem.firstToken = pair.firstToken;
+            this.selectedItem.secondToken = pair.secondToken;
+            this.selectedItem.firstTokenInWallet = (+selectedItemData.tokenBalanceFormatted).toFixed(toFix).toString();
+            this.selectedItem.secondTokenInWallet = (+selectedItemData.USDCBalanceFormatted).toFixed(toFix).toString();
+            this.selectedItem.firstTokenAmountInPool = (+selectedItemData.tokenAvailableToWithdrawFormatted).toFixed(toFix).toString();
+            this.selectedItem.secondTokenAmountInPool = (+selectedItemData.USDCAvailableToWithdrawFormatted).toFixed(toFix).toString();
+            this.selectedItem.firstTokenAmount = '';
+            this.selectedItem.secondTokenAmount = '';
+            this.selectedItem.tokenPrice = (+selectedItemData.price);
         }
     },
     mounted() {
