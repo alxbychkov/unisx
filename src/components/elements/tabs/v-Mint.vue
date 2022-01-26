@@ -25,6 +25,11 @@
                     </div>
                 </div>
                 <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                    <span>Synthetic tokens in the wallet:</span>
+                    <span>{{ synthetic.syntheticIntheWallet }}</span>
+                </div>
+                <hr>
+                <div class="flex mb-10 flex-row-2 flex j-between align-center">
                     <div class="w-45 flex j-between"><span>Price:</span><span>{{ synthetic.price }}</span></div>
                     <div class="w-45 flex j-between"><span>Rewards:</span><span>{{ synthetic.rewards }}</span></div>
                 </div>

@@ -58,10 +58,10 @@
 import './index.css';
 
 import {initialData} from '../../helpers/initialData';
-import {getUnicCoins, toFix, setLocalStorage} from '../../helpers';
+import {getUnicCoins, toFix, setLocalStorage, separate} from '../../helpers';
 import {mapActions, mapGetters} from 'vuex';
 
-import {getAccount, getFinancialContractProperties, getPosition} from '../../core/eth';
+import {getAccount, getFinancialContractProperties, getPoolProperties, getPosition} from '../../core/eth';
 
 import vAccount from '../../components/elements/v-account.vue';
 import vTable from '../../components/elements/v-table.vue';
@@ -104,7 +104,7 @@ export default {
             // await this.updateStakeProfile(item);
             await this.updateStakeProfile();
             await this.updateSelectedItemBalance(item);
-        } else if (['UNISX','xUNISX'].includes(item.Name)){
+        } else if (['UNISX','xUNISX', 'SUSHISWAP/uSPAC10-test/USDC', 'SUSHISWAP/UNISX/USDC'].includes(item.Name)){
             await this.updateStakeProfile();
             this.synthetic = initialData.synthetic;
             this.selectedItemBalance = initialData.selectedItemBalance;
@@ -147,8 +147,29 @@ export default {
 
     async getPortfolioList(walletAddress = this.USER_ACCOUNT) {
         const portfolio = [];
-        const instumentsJSON = this.INSTRUMENTS.map(instrument => {return {token: instrument.Name, decimals: instrument.decimals, address: instrument.CollateralAddress, price: instrument.Price, collateral: instrument.CollateralName, description: instrument.Description, cr: instrument.CR}});
 
+        const instumentsJSON = this.INSTRUMENTS.map(instrument => {
+            return {
+                token: instrument.Name, 
+                decimals: instrument.decimals, 
+                address: instrument.CollateralAddress, 
+                price: instrument.Price, 
+                collateral: instrument.CollateralName, 
+                description: instrument.Description, 
+                cr: instrument.CR,
+                dex: instrument.DEX
+            }
+        });
+
+        const poolInstruments = instumentsJSON.map(instrument => {
+            return instrument.dex.map(dex => {
+                        return {
+                            token: dex.Pair,
+                            address: dex.PoolAddress
+                        }
+                    });
+        });
+        
         // const tokenAddress =  [...[{token: 'ETH',decimals: 18,address:walletAddress}], ...this.STABLECOINS, ...this.DEFI_TOKENS, ...this.DEX_LP, ...instumentsJSON];
 
         const tokenAddress =  [...instumentsJSON];
@@ -156,8 +177,6 @@ export default {
         // Баланс токенов ERC20
         for (let i of tokenAddress) {
             const collateralAmount = await getAccount(walletAddress);
-
-            console.log('getAccount: ', collateralAmount);
 
             let balance = (+collateralAmount.tokenCurrencyBalanceFormatted).toFixed(toFix).toString();
 
@@ -212,6 +231,28 @@ export default {
             portfolio.push(unisx, xunisx);
         }
 
+        const poolProperties = await getPoolProperties();
+
+        for (let i of poolInstruments[0]) {
+            if (i.token.indexOf('SUSHISWAP/UNISX') !== -1 ||  i.token.indexOf('SUSHISWAP/uSPAC10') !== -1) {
+                const key = (separate(i.token)[1] !== 'uSPAC10-test') ? separate(i.token)[1] : 'uSPAC10';
+                const value = (+poolProperties[key].price) * (+poolProperties[key].liquidityFormatted);
+                portfolio.push({
+                    Name: i.token,
+                    Status: "-",
+                    Price: (+poolProperties[key].price).toFixed(toFix) ?? 0, 
+                    Number: (+poolProperties[key].liquidityFormatted).toFixed(toFix).toString(),
+                    Value: value ? value.toFixed(toFix).toString() : '0.0000',
+                    GT: 0,
+                    UMA: 0,
+                    Instrument: "",
+                    CollateralName: '',
+                    Description: '',
+                    CR: ''
+                });
+            }
+        }
+
         setLocalStorage('portfolioList', JSON.stringify(portfolio));
         return portfolio;
     },
@@ -244,10 +285,10 @@ export default {
                 rewards: selectedValue.Rewards,
                 totalSyntTokensOutstanding: (+contractProperties.totalTokensOutstandingFormatted).toFixed(toFix).toString(),
                 totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
-                globalCollateralizationRation: (+globalCollateralRatio).toFixed(toFix).toString()
+                globalCollateralizationRation: (+globalCollateralRatio).toFixed(toFix).toString(),
+                syntheticIntheWallet: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString()
             }
         }
-
 
         this.selectedItemBalance = {
             collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),

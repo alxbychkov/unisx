@@ -10,6 +10,7 @@
                             placeholder="0.000"
                             v-model="selectedItem.firstTokenAmount"
                             :disabled="!selectedItem.firstToken"
+                            @input="consider('firstToken')" 
                         >
                         <div class="flex j-between mb-0"><span>In the pool:</span><span class="color-red">{{ selectedItem.firstTokenAmountInPool }}</span></div>
                     </div>
@@ -34,6 +35,7 @@
                             placeholder="0.000"
                             v-model="selectedItem.secondTokenAmount"
                             :disabled="!selectedItem.secondToken"
+                            @input="consider('secondToken')" 
                         >
                         <div class="flex j-between mb-0"><span>In the pool:</span><span class="color-red">{{ selectedItem.secondTokenAmountInPool }}</span></div>
                     </div>
@@ -61,7 +63,7 @@ import {mapActions, mapGetters} from 'vuex';
 // eslint-disable-next-line no-unused-vars
 import { addLiquidity, getAccount, getPoolProperties, removeLiquidity } from '../../../core/eth';
 
-import {separate, toDote, toFix} from '../../../helpers';
+import {round, separate, toDote, toFix} from '../../../helpers';
 
 export default {
     name: 'Pool',
@@ -135,6 +137,7 @@ export default {
                     this.selectedItem.secondTokenAmountInPool = (+selectedItemData.USDCAvailableToWithdrawFormatted).toFixed(toFix).toString();
                     this.selectedItem.firstTokenAmount = '';
                     this.selectedItem.secondTokenAmount = '';
+                    this.selectedItem.tokenPrice = (+selectedItemData.price);
                 }
             }
         },
@@ -180,6 +183,28 @@ export default {
                     return
                 }
                 console.log('Pool success!'); 
+            }
+        },
+
+        consider(e) {
+            switch (e) {
+                case 'firstToken':
+                    this.selectedItem.secondTokenAmount = this.toPrice(e);
+                    break;
+                case 'secondToken':
+                    this.selectedItem.firstTokenAmount = this.toPrice(e);
+                    break;
+            }
+        },
+
+        toPrice(token) {
+            switch (token) {
+                case 'firstToken':
+                    return round((toDote(this.selectedItem.firstTokenAmount) * this.selectedItem.tokenPrice), 4).toString();
+                case 'secondToken':
+                    return round((toDote(this.selectedItem.secondTokenAmount) / this.selectedItem.tokenPrice), 4).toString();
+                default:
+                    return token;
             }
         }
     },

@@ -18,7 +18,8 @@ export const initialData = {
         rewards: '0',
         totalSyntTokensOutstanding: '0.0000',
         totalCollateral: '0.0000',
-        globalCollateralizationRation: '0.0000'
+        globalCollateralizationRation: '0.0000',
+        syntheticIntheWallet: '0.0000'
     },
     sushiswapPool: {
         pair: '',
@@ -31,6 +32,7 @@ export const initialData = {
         firstTokenAmountInPool: '0.0000',
         secondTokenAmount: '',
         secondTokenAmountInPool: '0.0000',
+        tokenPrice: '1'
     },
     stakeProfile: {
         name: '',
