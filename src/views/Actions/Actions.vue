@@ -218,7 +218,8 @@ export default {
                     Instrument: "",
                     CollateralName: i.collateral,
                     Description: i.description,
-                    CR: i.cr
+                    CR: i.cr,
+                    Rewards: ''
                 });
             }
 
@@ -233,7 +234,8 @@ export default {
                 Instrument: "",
                 CollateralName: '',
                 Description: '',
-                CR: ''
+                CR: '',
+                Rewards: `${(+collateralAmount.UNISXRewardEarnedFormatted).toFixed(toFix).toString()} (${(+collateralAmount.UNISXStakedFormatted).toFixed(toFix).toString()})`
             }
 
             const xunisx = {
@@ -247,14 +249,15 @@ export default {
                 Instrument: "",
                 CollateralName: '',
                 Description: '',
-                CR: ''
+                CR: '',
+                Rewards: ''
             }
 
             portfolio.push(unisx, xunisx);
         }
 
         const poolProperties = await getPoolProperties();
-
+        console.log('pool ', poolProperties);
         for (let i of poolInstruments[0]) {
             if (i.token.indexOf('SUSHISWAP/UNISX') !== -1 ||  i.token.indexOf('SUSHISWAP/uSPAC10') !== -1) {
                 const key = (separate(i.token)[1] !== 'uSPAC10-test') ? separate(i.token)[1] : 'uSPAC10';
@@ -270,7 +273,8 @@ export default {
                     Instrument: "",
                     CollateralName: '',
                     Description: '',
-                    CR: ''
+                    CR: '',
+                    Rewards: `${(+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString()} (${(+poolProperties[key].stakedFormatted).toFixed(toFix).toString()})`
                 });
             }
         }

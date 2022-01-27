@@ -1,15 +1,19 @@
 /* eslint-disable no-unused-vars */
+import { ethers } from 'ethers'
 import EMP_ABI from './abi/EMP_ABI.js'
 import UniswapV2Router02_ABI from './abi/UniswapV2Router02.js'
 import UniswapV2Factory_ABI from './abi/UniswapV2Factory.js'
 import UniswapV2Pair_ABI from './abi/UniswapV2Pair.js'
-import StakingRewards_ABI from './abi/StakingRewards_ABI.js'
+import UNISXStakingRewards_ABI from './abi/StakingRewards_ABI.js'
+import LPStakingRewards_ABI from './abi/LPStakingRewards.js'
+import LPStakingRewardsFactory_ABI from './abi/LPStakingRewardsFactory.js'
 import ERC20 from './abi/ERC20_ABI.js'
 
 import {accountPromise} from './metamask.js'
 import {CHAIN_CONFIG, USER_CR, PRICE_PRECISION} from './config.js'
 import {getPrice} from './price.js'
-import { ethers } from 'ethers'
+
+const UNISWAP_DECIMALS = 18
 
 const formatUnits = ethers.utils.formatUnits.bind(ethers.utils)
 
@@ -20,12 +24,15 @@ function getChainConfig(){
 export let provider, signer
 export let financialContract
 export let UNISXToken, UNISXDecimals, xUNISXToken, xUNISXDecimals
-export let StakingRewards
+export let UNISXStakingRewards, LPStakingRewardsFactory
 export let collateralTokenAddress, collateralTokenDecimals, collateralToken
 export let tokenCurrencyAddress, tokenCurrencyDecimals, tokenCurrency
 export let collateralRequirement
 export let uniswapV2Router, uniswapV2Factory
 export let USDC, USDCDecimals
+
+let LPPairs
+
 let price
 
 export const ethPromise = Promise.all([
@@ -41,12 +48,10 @@ export const ethPromise = Promise.all([
     financialContract = new ethers.Contract(getChainConfig().financialContractAddress, EMP_ABI, signer)
     UNISXToken = new ethers.Contract(getChainConfig().UNISXToken, ERC20, signer)
     xUNISXToken = new ethers.Contract(getChainConfig().xUNISXToken, ERC20, signer)
-    StakingRewards = new ethers.Contract(getChainConfig().StakingRewards, StakingRewards_ABI, signer)
+    UNISXStakingRewards = new ethers.Contract(getChainConfig().UNISXStakingRewards, UNISXStakingRewards_ABI, signer)
+    LPStakingRewardsFactory = new ethers.Contract(getChainConfig().LPStakingRewardsFactory, LPStakingRewardsFactory_ABI, signer)
 
     await Promise.all([
-      (async () => {
-        uniswapV2Factory = new ethers.Contract(await uniswapV2Router.factory(), UniswapV2Factory_ABI, signer)
-      })(),
 
       (async () => {
         UNISXDecimals = await UNISXToken.decimals()
@@ -63,18 +68,42 @@ export const ethPromise = Promise.all([
       })(),
 
       (async () => {
-        tokenCurrencyAddress = await financialContract.tokenCurrency()
-        tokenCurrency = new ethers.Contract(tokenCurrencyAddress, ERC20, signer)
-        tokenCurrencyDecimals = await tokenCurrency.decimals()
-      })(),
-
-      (async () => {
         collateralRequirement = await financialContract.collateralRequirement()
       })(),
 
       (async () => {
         USDCDecimals = await USDC.decimals()
       })(),
+
+      Promise.all([
+        (async () => {
+          tokenCurrencyAddress = await financialContract.tokenCurrency()
+          tokenCurrency = new ethers.Contract(tokenCurrencyAddress, ERC20, signer)
+          tokenCurrencyDecimals = await tokenCurrency.decimals()
+        })(),
+
+        (async () => {
+          uniswapV2Factory = new ethers.Contract(await uniswapV2Router.factory(), UniswapV2Factory_ABI, signer)
+        })(),
+
+      ]).then(async () => {
+        LPPairs = Object.fromEntries(await Promise.all(
+          Object.entries({
+            UNISX: UNISXToken,
+            uSPAC10: tokenCurrency,
+          })
+          .map(async ([tokenCode, token]) => {
+            const pairAddress = await uniswapV2Factory.getPair(USDC.address, token.address)
+            const pair = new ethers.Contract(pairAddress, UniswapV2Pair_ABI, signer)
+            const stakingRewards = new ethers.Contract(
+              await LPStakingRewardsFactory.stakingRewards(pairAddress), 
+              LPStakingRewards_ABI, 
+              signer
+            )
+            return [tokenCode, {token, pair, stakingRewards}]
+          })
+        ))
+      }),
     ])
   }),
 ])
@@ -102,7 +131,7 @@ async function getUNISXStaked(account) {
   }
   const INDEX = 10
   return ethers.BigNumber.from(
-    await provider.getStorageAt(StakingRewards.address, getStorageKey(INDEX, account))
+    await provider.getStorageAt(UNISXStakingRewards.address, getStorageKey(INDEX, account))
   )
 }
 
@@ -115,7 +144,7 @@ export async function getAccount(account = window.ethereum.selectedAddress){
     UNISXBalance: UNISXToken.balanceOf(account),
     xUNISXBalance: xUNISXToken.balanceOf(account),
     UNISXStaked: getUNISXStaked(account),
-    UNISXRewardEarned: StakingRewards.callStatic.getReward({from: account}),
+    UNISXRewardEarned: UNISXStakingRewards.callStatic.getReward({from: account}),
   })
   return {...props,
     balanceFormatted: formatUnits(props.balance),
@@ -345,41 +374,30 @@ export function collateralByTokenCurrency(tokensAmount) {
 
 export async function* UNISX_stake(amount) {
   amount = toBN(amount, UNISXDecimals)
-  yield* ensureAllowance(amount, UNISXToken, StakingRewards.address)
+  yield* ensureAllowance(amount, UNISXToken, UNISXStakingRewards.address)
   yield {message: 'Sending transaction'}
-  const tx = await StakingRewards.stake(amount)
+  const tx = await UNISXStakingRewards.stake(amount)
   yield {message: 'Waiting for transaction', txHash: tx.hash}
   await tx.wait()
 }
 
 export async function* UNISX_getReward() {
   yield {message: 'Sending transaction'}
-  const tx = await StakingRewards.getReward()
+  const tx = await UNISXStakingRewards.getReward()
   yield {message: 'Waiting for transaction', txHash: tx.hash}
   await tx.wait()
 }
 
 export async function* UNISX_withdraw(amount) {
   amount = toBN(amount, UNISXDecimals)
-  yield* ensureAllowance(amount, xUNISXToken, StakingRewards.address)
+  yield* ensureAllowance(amount, xUNISXToken, UNISXStakingRewards.address)
   yield {message: 'Sending transaction'}
-  const tx = await StakingRewards.withdraw(amount)
+  const tx = await UNISXStakingRewards.withdraw(amount)
   yield {message: 'Waiting for transaction', txHash: tx.hash}
   await tx.wait()
 }
 
-function PoolTokens() {
-  return {
-    UNISX: UNISXToken,
-    uSPAC10: tokenCurrency,
-  }
-}
-
-async function getPairProperties(account, token) {
-
-  const pairAddress = await uniswapV2Factory.getPair(USDC.address, token.address)
-  const pair = new ethers.Contract(pairAddress, UniswapV2Pair_ABI, signer)
-
+async function getPairProperties(account, token, pair, stakingRewards) {
   const [
     token0, 
     token1, 
@@ -390,6 +408,8 @@ async function getPairProperties(account, token) {
     totalSupply,
     tokenBalance,
     USDCBalance,
+    staked,
+    rewardEarned,
   ] = await Promise.all([
     pair.token0(),
     pair.token1(),
@@ -400,6 +420,8 @@ async function getPairProperties(account, token) {
     pair.totalSupply(),
     token.balanceOf(account),
     USDC.balanceOf(account),
+    stakingRewards._balances(account),
+    stakingRewards.callStatic.getReward({from: account}),
   ])
 
   const [reserveUSDC, reserveToken] = token0 == USDC.address
@@ -427,6 +449,8 @@ async function getPairProperties(account, token) {
     )
 
   return {
+    pairAddress: pair.address,
+
     liquidity,
     liquidityFormatted: formatUnits(liquidity, liquidityDecimals),
 
@@ -446,15 +470,21 @@ async function getPairProperties(account, token) {
 
     USDCBalance,
     USDCBalanceFormatted: formatUnits(USDCBalance, USDCDecimals),
+
+    staked,
+    stakedFormatted: formatUnits(staked, liquidityDecimals),
+
+    rewardEarned,
+    rewardEarnedFormatted: formatUnits(rewardEarned, UNISXDecimals),
   }
 }
 
 export async function getPoolProperties(account = window.ethereum.selectedAddress) {
-  const poolTokens = PoolTokens()
   return promisedProperties(
     Object.fromEntries(
-      Object.entries(poolTokens)
-        .map(([key, value]) => [key, getPairProperties(account, value)])
+      Object.entries(LPPairs)
+        .map(([key, {token, pair, stakingRewards}]) => 
+          [key, getPairProperties(account, token, pair, stakingRewards)])
     )
   )
 }
@@ -470,7 +500,7 @@ function amountMin(amount) {
 export async function* addLiquidity(tokenCode, USDCAmount, tokenAmount, to = window.ethereum.selectedAddress) {
   yield {message: 'Preparing'}
 
-  const token = PoolTokens()[tokenCode]
+  const token = LPPairs[tokenCode].token
   if(token == null) {
     throw new Error('unknown token')
   }
@@ -501,7 +531,7 @@ export async function* addLiquidity(tokenCode, USDCAmount, tokenAmount, to = win
 export async function* removeLiquidity(tokenCode, USDCAmount, tokenAmount, to = window.ethereum.selectedAddress) {
   yield {message: 'Preparing'}
 
-  const token = PoolTokens()[tokenCode]
+  const {token, pair} = LPPairs[tokenCode]
   if(token == null) {
     throw new Error('unknown token')
   }
@@ -509,9 +539,6 @@ export async function* removeLiquidity(tokenCode, USDCAmount, tokenAmount, to = 
   USDCAmount = toBN(USDCAmount, USDCDecimals)
   tokenAmount = toBN(tokenAmount, await token.decimals())
   const current = (await provider.getBlock('latest')).timestamp
-
-  const pairAddress = await uniswapV2Factory.getPair(USDC.address, token.address)
-  const pair = new ethers.Contract(pairAddress, UniswapV2Pair_ABI, signer)
 
   const [reserves, token0, totalLiquidity] = await Promise.all(
     [pair.getReserves(), pair.token0(), pair.totalSupply()]
@@ -534,6 +561,48 @@ export async function* removeLiquidity(tokenCode, USDCAmount, tokenAmount, to = 
     to,
     current + 30 * 60 // thirty minutes deadline, same as in sushiswap client
   )
+  yield {message: 'Waiting for transaction', txHash: tx.hash}
+  await tx.wait()
+}
+
+export async function* LP_stake(tokenCode, amount) {
+  amount = toBN(amount, UNISWAP_DECIMALS)
+
+  const {token, pair, stakingRewards} = LPPairs[tokenCode]
+  if(token == null) {
+    throw new Error('unknown token')
+  }
+
+  yield* ensureAllowance(amount, pair, stakingRewards.address)
+
+  yield {message: 'Sending transaction'}
+  const tx = await stakingRewards.stake(amount)
+  yield {message: 'Waiting for transaction', txHash: tx.hash}
+  await tx.wait()
+}
+
+export async function* LP_getReward(tokenCode) {
+  const {token, pair, stakingRewards} = LPPairs[tokenCode]
+  if(token == null) {
+    throw new Error('unknown token')
+  }
+
+  yield {message: 'Sending transaction'}
+  const tx = await stakingRewards.getReward()
+  yield {message: 'Waiting for transaction', txHash: tx.hash}
+  await tx.wait()
+}
+
+export async function* LP_withdraw(tokenCode, amount) {
+  amount = toBN(amount, UNISWAP_DECIMALS)
+
+  const {token, pair, stakingRewards} = LPPairs[tokenCode]
+  if(token == null) {
+    throw new Error('unknown token')
+  }
+
+  yield {message: 'Sending transaction'}
+  const tx = await stakingRewards.withdraw(amount)
   yield {message: 'Waiting for transaction', txHash: tx.hash}
   await tx.wait()
 }
