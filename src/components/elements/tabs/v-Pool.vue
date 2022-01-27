@@ -15,7 +15,7 @@
                         <div class="flex j-between mb-0"><span>In the pool:</span><span class="color-red">{{ selectedItem.firstTokenAmountInPool }}</span></div>
                     </div>
                     <div class="input-wrapp">
-                        <div class="flex-collumn" @click="handleSelectClick($event)">
+                        <div class="flex-collumn" id="poolList" @click="handleSelectClick($event)">
                             <select id="pool">
                                 <option value="" disabled selected>Pool</option>
                                 <option 
@@ -89,6 +89,12 @@ export default {
         onAfterClickAction: {
             type: Function
         },
+        onSelectClick: {
+            type: Function
+        },
+        onTableClick: {
+            type: Function
+        }
     },
     // data() {
     //     return {
@@ -122,7 +128,12 @@ export default {
             if (typeof e.target !== 'undefined') {
                 if (e.target.tagName === 'LI' && e.target.classList.contains('option') && !e.target.classList.contains('disabled') && !e.target.classList.contains('selected')) {
                     const value = e.target.innerText;
-                    await this.updateSelectedItem(value);
+                    console.log(value);
+                    this.onSelectClick(e);
+
+                    if (['UNISWAPv2/uSPAC10-test/USDC', 'UNISWAPv2/UNISX/USDC'].includes(value)) {
+                        await this.updateSelectedItem(value);
+                    } 
                 }
             }
         },
@@ -202,7 +213,7 @@ export default {
             const firstTokenInWallet = this.PORTFOLIO.find(item => value.indexOf(item.Name) !== -1);
             const poolProperties = await getPoolProperties();
             const selectedItemData = poolProperties[firstTokenInWallet.Name];
-
+            console.log(value);
             this.selectedItem.pair = pair.Pair;
             this.selectedItem.tokenCode = pair.tokenCode;
             this.selectedItem.firstToken = pair.firstToken;

@@ -12,6 +12,7 @@
                         :tableData="PORTFOLIO"
                         :tableHeaders="['Portfolio', 'Price', 'Amount', 'Value, USD', 'Rewards']"
                         :tableRows="['Name', 'Price', 'Number', 'Value', 'Rewards']"
+                        :selectedItem="selectedItem"
                         @getTableItem="getTableItem"
                     />
                 </div>
@@ -39,6 +40,8 @@
                                 id="cardtab2"
                                 :DEX="sushiswapPool"
                                 :onAfterClickAction="handleUpdateAfterAction"
+                                :onSelectClick="getInstrumentItem"
+                                ref="dex"
                             />
                             <v-stake 
                                 id="cardtab3"
@@ -58,7 +61,7 @@
 import './index.css';
 
 import {initialData} from '../../helpers/initialData';
-import {getUnicCoins, toFix, setLocalStorage, separate} from '../../helpers';
+import {getUnicCoins, toFix, setLocalStorage, separate, defaultSelect} from '../../helpers';
 import {mapActions, mapGetters} from 'vuex';
 
 import {getAccount, getFinancialContractProperties, getPoolProperties, getPosition} from '../../core/eth';
@@ -93,18 +96,24 @@ export default {
       
     async getTableItem(item, isClear = true) {
         isClear && this.clearInputs();
-        this.selectedItem = item;
 
-        console.log('getTableItem: ', this.selectedItem);
-
-        this.synthetic.cr = item.CR ? +item.CR : 1;
-
-        if (['uSPAC5', 'uSPAC10', 'uSPAC10-test'].includes(item.Name)) {
+        if (['uSPAC5', 'uSPAC10', 'uSPAC10-test'].includes(item?.Name)) {
             // this.stakeProfile = {...initialData.stakeProfile};
             // await this.updateStakeProfile(item);
+            this.sushiswapPool = {...initialData.sushiswapPool};
+            this.selectedItem = item;
+            this.synthetic.cr = item.CR ? +item.CR : 1;
             await this.updateStakeProfile();
             await this.updateSelectedItemBalance(item);
-        } else if (['UNISX','xUNISX', 'SUSHISWAP/uSPAC10-test/USDC', 'SUSHISWAP/UNISX/USDC'].includes(item.Name)){
+        } else if (['SUSHISWAP/uSPAC10-test/USDC', 'SUSHISWAP/UNISX/USDC'].includes(item?.Name)){
+            this.selectedItem = item;
+            await this.updateStakeProfile();
+            await this.$refs.dex.updateSelectedItem(item.Name);
+            this.synthetic = initialData.synthetic;
+            this.selectedItemBalance = initialData.selectedItemBalance;
+        } else if (['UNISX','xUNISX'].includes(item?.Name)){
+            this.sushiswapPool = {...initialData.sushiswapPool};
+            this.selectedItem = item;
             await this.updateStakeProfile();
             this.synthetic = initialData.synthetic;
             this.selectedItemBalance = initialData.selectedItemBalance;
@@ -112,17 +121,30 @@ export default {
             this.synthetic = initialData.synthetic;
             this.selectedItemBalance = initialData.selectedItemBalance;
             this.stakeProfile = {...initialData.stakeProfile};
+            this.sushiswapPool = {...initialData.sushiswapPool};
         }
-        
-        const selectInstrumentValue = document.querySelector(`#portfolioList .list [data-value="${item.Name}"]`);
+
+        console.log('getTableItem: ', this.selectedItem);
+
+        const selectInstrumentValue = document.querySelector(`#portfolioList .list [data-value="${item?.Name}"]`);
+        const selectPoolValue = document.querySelector(`#poolList .list [data-value="${item?.Name}"]`);
         
         if (selectInstrumentValue) {
             selectInstrumentValue.classList.contains('selected') || selectInstrumentValue.classList.add('selected');
             if (selectInstrumentValue.closest('.nice-select').querySelector('.current')) {
-                selectInstrumentValue.closest('.nice-select').querySelector('.current').innerText = item.Name;
+                selectInstrumentValue.closest('.nice-select').querySelector('.current').innerText = item?.Name;
             }
         } else if(!selectInstrumentValue) {
-            document.querySelector('#portfolio').selectedIndex = 0;
+            defaultSelect('#portfolio');
+        }
+
+        if (selectPoolValue) {
+            selectPoolValue.classList.contains('selected') || selectPoolValue.classList.add('selected');
+            if (selectPoolValue.closest('.nice-select').querySelector('.current')) {
+                selectPoolValue.closest('.nice-select').querySelector('.current').innerText = item?.Name;
+            }
+        } else if(!selectPoolValue) {
+            defaultSelect('#pool');
         }
     },
 
@@ -133,7 +155,7 @@ export default {
                 
                 const value = e.target.innerText;
                 const portfolioItem = this.PORTFOLIO.find(i => i.Name === value);
-
+                
                 this.getTableItem(portfolioItem, false);
             }
         }
@@ -241,7 +263,7 @@ export default {
                     Name: i.token,
                     Status: "-",
                     Price: (+poolProperties[key].price).toFixed(toFix) ?? 0, 
-                    Number: (+poolProperties[key].liquidityFormatted).toFixed(toFix).toString(),
+                    Number: (+poolProperties[key].liquidityFormatted).toString(),
                     Value: '',
                     GT: 0,
                     UMA: 0,

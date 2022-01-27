@@ -7,7 +7,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(instrument, index) in tableData" :key="index" @click="getTableItem(instrument)">
+                <tr :class="{active: selectedItem.Name === instrument.Name}" v-for="(instrument, index) in tableData" :key="index" @click="getTableItem(instrument)">
                     <td v-for="(row) in tableRows" :key="instrument[row[0]]">{{ instrument[row] }}</td>
                 </tr>
             </tbody>
@@ -34,6 +34,12 @@ export default {
             type: Array,
             default() {
                 return []
+            }
+        },
+        selectedItem: {
+            type: Object,
+            default() {
+                return {}
             }
         }
     },

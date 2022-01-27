@@ -98,3 +98,18 @@ export function setLocalStorage(key, value) {
 export function separate(pair, separator = '/') {
     return pair.split(separator);
 }
+
+export function defaultSelect(selector) {
+    if (selector) {
+        const select = document.querySelector(selector);
+        if (select) {
+            select.selectedIndex = 0;
+
+            const current = select.parentNode.querySelector('.current');
+            const disabledText = select.parentNode.querySelector('.list [data-value=""]').innerText;
+            const list = select.parentNode.querySelectorAll('.list [data-value]');
+            if (list) list.forEach(li => li.classList.contains('selected') && li.classList.remove('selected'));
+            if (current && disabledText) current.innerText = disabledText;
+        }
+    }
+}
