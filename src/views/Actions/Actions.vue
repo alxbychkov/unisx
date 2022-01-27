@@ -329,14 +329,28 @@ export default {
 
     async updateStakeProfile(item = {}) {
         const collateralBalance = await getAccount();
+        const poolProperties = await getPoolProperties();
+        console.log('pool ', poolProperties);
+
         this.stakeProfile.name = item.Name ? item.Name : 'UNISX';
-        this.stakeProfile.unisxAmount = '';
-        this.stakeProfile.unisxBalance = {
-            UNISX: (+collateralBalance.UNISXBalanceFormatted).toFixed(toFix).toString(),
-            xUNISX: (+collateralBalance.xUNISXBalanceFormatted).toFixed(toFix).toString()
-        };
-        this.stakeProfile.unisxStaked = (+collateralBalance.UNISXStakedFormatted).toFixed(toFix).toString();
-        this.stakeProfile.unisxRewardEarned = (+collateralBalance.UNISXRewardEarnedFormatted).toFixed(toFix).toString();
+
+        if (this.stakeProfile.name === 'UNISX') {
+            this.stakeProfile.unisxAmount = '';
+            this.stakeProfile.unisxBalance = {
+                UNISX: (+collateralBalance.UNISXBalanceFormatted).toFixed(toFix).toString(),
+                xUNISX: (+collateralBalance.xUNISXBalanceFormatted).toFixed(toFix).toString()
+            };
+            this.stakeProfile.unisxStaked = (+collateralBalance.UNISXStakedFormatted).toFixed(toFix).toString();
+            this.stakeProfile.unisxRewardEarned = (+collateralBalance.UNISXRewardEarnedFormatted).toFixed(toFix).toString();
+        } else {
+            const key = (separate(this.stakeProfile.name)[1] === 'uSPAC10-test') ? 'uSPAC10' : separate(this.stakeProfile.name)[1];
+            this.stakeProfile.unisxAmount = '';
+            this.stakeProfile.unisxBalance = {
+                [this.stakeProfile.name]: (+poolProperties[key].liquidityFormatted).toFixed(toFix).toString()
+            };
+            this.stakeProfile.unisxStaked = poolProperties[key].stakedFormatted;
+            this.stakeProfile.unisxRewardEarned = (+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString();
+        }
     },
 
     clearInputs(portfolio = false) {
