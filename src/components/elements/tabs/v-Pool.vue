@@ -213,7 +213,7 @@ export default {
             const firstTokenInWallet = this.PORTFOLIO.find(item => value.indexOf(item.Name) !== -1);
             const poolProperties = await getPoolProperties();
             const selectedItemData = poolProperties[firstTokenInWallet.Name];
-            console.log(value);
+
             this.selectedItem.pair = pair.Pair;
             this.selectedItem.tokenCode = pair.tokenCode;
             this.selectedItem.firstToken = pair.firstToken;

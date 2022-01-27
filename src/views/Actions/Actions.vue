@@ -107,7 +107,7 @@ export default {
             await this.updateSelectedItemBalance(item);
         } else if (['SUSHISWAP/uSPAC10-test/USDC', 'SUSHISWAP/UNISX/USDC'].includes(item?.Name)){
             this.selectedItem = item;
-            await this.updateStakeProfile();
+            await this.updateStakeProfile(item);
             await this.$refs.dex.updateSelectedItem(item.Name);
             this.synthetic = initialData.synthetic;
             this.selectedItemBalance = initialData.selectedItemBalance;
@@ -257,7 +257,7 @@ export default {
         }
 
         const poolProperties = await getPoolProperties();
-        console.log('pool ', poolProperties);
+
         for (let i of poolInstruments[0]) {
             if (i.token.indexOf('SUSHISWAP/UNISX') !== -1 ||  i.token.indexOf('SUSHISWAP/uSPAC10') !== -1) {
                 const key = (separate(i.token)[1] !== 'uSPAC10-test') ? separate(i.token)[1] : 'uSPAC10';
@@ -330,7 +330,6 @@ export default {
     async updateStakeProfile(item = {}) {
         const collateralBalance = await getAccount();
         const poolProperties = await getPoolProperties();
-        console.log('pool ', poolProperties);
 
         this.stakeProfile.name = item.Name ? item.Name : 'UNISX';
 

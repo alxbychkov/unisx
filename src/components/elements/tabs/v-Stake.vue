@@ -50,14 +50,14 @@
                 >Claim Rewards</button>
             </div>
             <div class="col-md-3 col-sm-4 col-xs-12">
-                <div class="mb-10">
+                <div class="mb-10 hidden">
                     <input 
                         type="text" 
                         placeholder="0.000" 
                     >
                     <p class="flex j-between color-red mb-0"><span>In the stake:</span><span>0.000</span></p>
                 </div>
-                <div>
+                <div class="hidden">
                     <div class="select-wrapp">
                         <select>
                             <option value="" selected disabled>Choose DEX</option>
@@ -65,7 +65,7 @@
                     </div>
                     <p class="flex j-between color-green mb-0"><span>In the wallet:</span><span>0.000</span></p>
                 </div>
-                <div class="but_flex">
+                <div class="but_flex hidden">
                     <button class="cancelbut">UnStake</button>
                     <button class="blueb">Stake</button>
                 </div>
@@ -74,8 +74,8 @@
     </div>
 </template>
 <script>
-import { UNISX_getReward, UNISX_stake, UNISX_withdraw } from '../../../core/eth';
-import { toDote } from '../../../helpers';
+import { LP_getReward, LP_stake, LP_withdraw, UNISX_getReward, UNISX_stake, UNISX_withdraw } from '../../../core/eth';
+import { separate, toDote } from '../../../helpers';
 
 export default {
     name: 'Stake',
@@ -111,19 +111,38 @@ export default {
         async unStake() {
             if (this.selectedItem.unisxAmount) {
                 const unisxAmount = toDote(this.selectedItem.unisxAmount);
+                console.log(this.selectedItem);
                 if (unisxAmount > +this.selectedItem.unisxStaked) return console.error('You have no much tokens');
-                console.log('unStake');
-                try {
-                    const unStake = UNISX_withdraw(unisxAmount);
-                    for await (let value of unStake) {
-                        console.log(value.message);
+                if (this.selectedItem.name === 'UNISX') {
+                    console.log('unStake UNISX');
+                    try {
+                        const unStake = UNISX_withdraw(unisxAmount);
+                        for await (let value of unStake) {
+                            console.log(value.message);
+                        }
+                        this.onAfterClickAction();
+                    } catch(e) {
+                        console.error(e);
+                        return
                     }
-                    this.onAfterClickAction();
-                } catch(e) {
-                    console.error(e);
-                    return
+                    console.log('unStake UNISX success!');  
+                } else {
+                    console.log('unStake LP');
+                    try {
+                        const token = separate(this.selectedItem.name)[1];
+                        const tokenCode = (token === 'uSPAC10-test') ? 'uSPAC10' : token;
+
+                        const unStake = LP_withdraw(tokenCode, unisxAmount);
+                        for await (let value of unStake) {
+                            console.log(value.message);
+                        }
+                        this.onAfterClickAction();
+                    } catch(e) {
+                        console.error(e);
+                        return
+                    }
+                    console.log('unStake LP success!');  
                 }
-                console.log('unStake success!');  
             }
         },
 
@@ -131,36 +150,74 @@ export default {
             if (this.selectedItem.unisxAmount) {
                 const unisxAmount = toDote(this.selectedItem.unisxAmount);
                 if (unisxAmount > +this.selectedItem.unisxBalance.UNISX) return console.error('You have no much tokens');
-                console.log('Stake');
-                try {
-                    const stake = UNISX_stake(unisxAmount);
-                    for await (let value of stake) {
-                        console.log(value.message);
+                if (this.selectedItem.name === 'UNISX') {
+                    console.log('Stake UNISX');
+                    try {
+                        const stake = UNISX_stake(unisxAmount);
+                        for await (let value of stake) {
+                            console.log(value.message);
+                        }
+                        this.onAfterClickAction();
+                    } catch(e) {
+                        console.error(e);
+                        return
                     }
-                    this.onAfterClickAction();
-                } catch(e) {
-                    console.error(e);
-                    return
-                }
-                console.log('Stake success!');                  
+                    console.log('Stake UNISX success!');   
+                } else {
+                    console.log('Stake LP');
+                    try {
+                        const token = separate(this.selectedItem.name)[1];
+                        const tokenCode = (token === 'uSPAC10-test') ? 'uSPAC10' : token;
+
+                        const stake = LP_stake(tokenCode, unisxAmount);
+                        for await (let value of stake) {
+                            console.log(value.message);
+                        }
+                        this.onAfterClickAction();
+                    } catch(e) {
+                        console.error(e);
+                        return
+                    }
+                    console.log('Stake LP success!');   
+                }               
             }
         },
 
         async getReward() {
             if (+this.selectedItem.unisxRewardEarned) {
                 const unisxReward = toDote(this.selectedItem.unisxRewardEarned);
-                console.log('Reward');
-                try {
-                    const reward = UNISX_getReward(unisxReward);
-                    for await (let value of reward) {
-                        console.log(value.message);
+
+                if (this.selectedItem.name === 'UNISX') {
+                    console.log('Reward UNISX');
+                    try {
+                        const reward = UNISX_getReward(unisxReward);
+                        for await (let value of reward) {
+                            console.log(value.message);
+                        }
+                        this.onAfterClickAction();
+                    } catch(e) {
+                        console.error(e);
+                        return
                     }
-                    this.onAfterClickAction();
-                } catch(e) {
-                    console.error(e);
-                    return
+                    console.log('Reward UNISX success!'); 
+                } else {
+                    console.log('Reward LP');
+                    try {
+                        const token = separate(this.selectedItem.name)[1];
+                        const tokenCode = (token === 'uSPAC10-test') ? 'uSPAC10' : token;
+
+                        const reward = LP_getReward(tokenCode);
+                        
+                        for await (let value of reward) {
+                            console.log(value.message);
+                        }
+                        this.onAfterClickAction();
+                    } catch(e) {
+                        console.error(e);
+                        return
+                    }
+                    console.log('Reward LP success!'); 
                 }
-                console.log('Reward success!');    
             }
         }
     },
