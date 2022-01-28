@@ -1,7 +1,7 @@
 <template>
     <div role="tabpanel" class="tab-pane fade" :class="{active}" :id="id">
         <div class="row flex cards j-between">
-            <div class="col-md-3 col-sm-4 col-xs-12">
+            <div class="col-md-4 col-sm-4 col-xs-12">
                 <div class="mb-10">
                     <input 
                         type="text" 
@@ -11,7 +11,7 @@
                     >
                     <p class="flex j-between color-red mb-0"><span>In the stake:</span><span>{{ selectedItem.unisxStaked }}</span></p>
                 </div>
-                <div>
+                <div class="hidden">
                     <input 
                         type="text"
                         placeholder="Token" 
@@ -22,6 +22,19 @@
                         <span>In the wallet:</span>
                         <span>{{ selectedItem.name ? selectedItem.unisxBalance[selectedItem.name] : '0.0000' }}</span>
                     </p>
+                </div>
+                <div class="input-wrapp">
+                    <div class="flex-collumn" id="stakeList" @click="handleSelectClick($event)">
+                        <select id="stake">
+                            <option value="" disabled selected>Token</option>
+                            <option 
+                                v-for="pool in sushiswapPool" 
+                                :key="pool.PoolAddress"
+                                :value="pool.Pair">{{ pool.Pair }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="flex j-between color-green mb-0"><span>In the wallet:</span><span>{{ selectedItem.name ? selectedItem.unisxBalance[selectedItem.name] : '0.0000' }}</span></div>
                 </div>
                 <div class="but_flex">
                     <button 
@@ -74,6 +87,7 @@
     </div>
 </template>
 <script>
+import {mapActions, mapGetters} from 'vuex';
 import { LP_getReward, LP_stake, LP_withdraw, UNISX_getReward, UNISX_stake, UNISX_withdraw } from '../../../core/eth';
 import { separate, toDote } from '../../../helpers';
 
@@ -101,13 +115,53 @@ export default {
         onAfterClickAction: {
             type: Function
         },
+        onSelectClick: {
+            type: Function
+        }
     },
     computed: {
+        ...mapGetters([
+            'INSTRUMENTS', 'PORTFOLIO'
+        ]),
         selectedItem: function() {
             return this.STAKE;
+        },
+        sushiswapPool: function() {
+            const pool = this.INSTRUMENTS ? this.INSTRUMENTS.map(instrument => instrument["DEX"])[0] : [];
+            if (pool && pool.length) {
+                const modifiedPool = {
+                    0: {
+                        Pair: 'UNISX',
+                        PoolAddress: ''
+                    }
+                };
+                Object.values(pool).forEach((i, index) => {
+                    if (index < 2)
+                        modifiedPool[index+1] = i;
+                });
+                return modifiedPool;
+            }
+            return [];
         }
     },
     methods: {
+        ...mapActions([
+            'GET_INSTRUMENTS_FROM_API'
+        ]),
+
+        handleSelectClick(e) {
+            if (typeof e.target !== 'undefined') {
+                if (e.target.tagName === 'LI' && e.target.classList.contains('option') && !e.target.classList.contains('disabled') && !e.target.classList.contains('selected')) {
+                    const value = e.target.innerText;
+                    console.log(value);
+                    this.onSelectClick(e);
+                    // if (['UNISWAPv2/uSPAC10-test/USDC', 'UNISWAPv2/UNISX/USDC'].includes(value)) {
+                    //     console
+                    // } 
+                }
+            }
+        },
+
         async unStake() {
             if (this.selectedItem.unisxAmount) {
                 const unisxAmount = toDote(this.selectedItem.unisxAmount);

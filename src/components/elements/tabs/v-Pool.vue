@@ -210,6 +210,7 @@ export default {
 
         async updateSelectedItem(value) {
             const pair = this.sushiswapPool.find(pair => pair.Pair === value);
+            if (!pair) return false;
             const firstTokenInWallet = this.PORTFOLIO.find(item => value.indexOf(item.Name) !== -1);
             const poolProperties = await getPoolProperties();
             const selectedItemData = poolProperties[firstTokenInWallet.Name];

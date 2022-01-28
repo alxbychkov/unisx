@@ -47,6 +47,7 @@
                                 id="cardtab3"
                                 :STAKE="stakeProfile"
                                 :onAfterClickAction="handleUpdateAfterAction"
+                                :onSelectClick="getInstrumentItem"
                             />
                         </div>
                     </div>
@@ -114,7 +115,7 @@ export default {
         } else if (['UNISX','xUNISX'].includes(item?.Name)){
             this.sushiswapPool = {...initialData.sushiswapPool};
             this.selectedItem = item;
-            await this.updateStakeProfile();
+            (item?.Name === 'xUNISX') ? await this.updateStakeProfile() : await this.updateStakeProfile(item);
             this.synthetic = initialData.synthetic;
             this.selectedItemBalance = initialData.selectedItemBalance;
         } else {
@@ -128,6 +129,7 @@ export default {
 
         const selectInstrumentValue = document.querySelector(`#portfolioList .list [data-value="${item?.Name}"]`);
         const selectPoolValue = document.querySelector(`#poolList .list [data-value="${item?.Name}"]`);
+        const selectStakeValue = document.querySelector(`#stakeList .list [data-value="${item?.Name}"]`);
         
         if (selectInstrumentValue) {
             selectInstrumentValue.classList.contains('selected') || selectInstrumentValue.classList.add('selected');
@@ -145,6 +147,15 @@ export default {
             }
         } else if(!selectPoolValue) {
             defaultSelect('#pool');
+        }
+
+        if (selectStakeValue) {
+            selectStakeValue.classList.contains('selected') || selectStakeValue.classList.add('selected');
+            if (selectStakeValue.closest('.nice-select').querySelector('.current')) {
+                selectStakeValue.closest('.nice-select').querySelector('.current').innerText = item?.Name;
+            }
+        } else if(!selectStakeValue) {
+            defaultSelect('#stake');
         }
     },
 
@@ -261,12 +272,12 @@ export default {
         for (let i of poolInstruments[0]) {
             if (i.token.indexOf('SUSHISWAP/UNISX') !== -1 ||  i.token.indexOf('SUSHISWAP/uSPAC10') !== -1) {
                 const key = (separate(i.token)[1] !== 'uSPAC10-test') ? separate(i.token)[1] : 'uSPAC10';
-                // const value = (+poolProperties[key].price) * (+poolProperties[key].liquidityFormatted);
+
                 portfolio.push({
                     Name: i.token,
                     Status: "-",
                     Price: (+poolProperties[key].price).toFixed(toFix) ?? 0, 
-                    Number: (+poolProperties[key].liquidityFormatted).toString(),
+                    Number: (+poolProperties[key].liquidityFormatted).toFixed(15).toString(),
                     Value: '',
                     GT: 0,
                     UMA: 0,
@@ -274,7 +285,7 @@ export default {
                     CollateralName: '',
                     Description: '',
                     CR: '',
-                    Rewards: `${(+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString()} (${(+poolProperties[key].stakedFormatted).toFixed(toFix).toString()})`
+                    Rewards: `${(+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString()} (${(+poolProperties[key].stakedFormatted).toFixed(15).toString()})`
                 });
             }
         }
@@ -284,10 +295,11 @@ export default {
     },
 
     async handleUpdateAfterAction() {
-        await this.updateSelectedItemBalance();
-        await this.updateStakeProfile();
         const portfolio = await this.getPortfolioList();
         this.GET_PORTFOLIO_FROM_API(portfolio);
+        await this.updateSelectedItemBalance();
+        await this.updateStakeProfile();
+        await this.$refs.dex.updateSelectedItem(this.selectedItem.Name);
     },
 
     async updateSelectedItemBalance(item = {}) {
@@ -331,6 +343,10 @@ export default {
         const collateralBalance = await getAccount();
         const poolProperties = await getPoolProperties();
 
+        if (!item.Name) {
+            return this.stakeProfile = {...initialData.stakeProfile};
+        }
+
         this.stakeProfile.name = item.Name ? item.Name : 'UNISX';
 
         if (this.stakeProfile.name === 'UNISX') {
@@ -345,9 +361,9 @@ export default {
             const key = (separate(this.stakeProfile.name)[1] === 'uSPAC10-test') ? 'uSPAC10' : separate(this.stakeProfile.name)[1];
             this.stakeProfile.unisxAmount = '';
             this.stakeProfile.unisxBalance = {
-                [this.stakeProfile.name]: (+poolProperties[key].liquidityFormatted).toFixed(toFix).toString()
+                [this.stakeProfile.name]: (+poolProperties[key].liquidityFormatted).toFixed(15).toString()
             };
-            this.stakeProfile.unisxStaked = poolProperties[key].stakedFormatted;
+            this.stakeProfile.unisxStaked = (+poolProperties[key].stakedFormatted).toFixed(15).toString();
             this.stakeProfile.unisxRewardEarned = (+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString();
         }
     },
@@ -376,7 +392,7 @@ export default {
 
     async handleClickTab(e) {
         this.clearTab(e);
-        await this.updateStakeProfile();
+        // await this.updateStakeProfile();
     }
   },
 
