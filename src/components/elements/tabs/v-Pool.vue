@@ -152,8 +152,8 @@ export default {
                     for await (let value of unPool) {
                         console.log(value.message);
                     }
+                    await this.onAfterClickAction();
                     await this.updateSelectedItem(value);
-                    this.onAfterClickAction();
                 } catch(e) {
                     console.error(e);
                     return
@@ -176,8 +176,8 @@ export default {
                     for await (let value of pool) {
                         console.log(value.message);
                     }
+                    await this.onAfterClickAction();
                     await this.updateSelectedItem(value);
-                    this.onAfterClickAction();
                 } catch(e) {
                     console.error(e);
                     return

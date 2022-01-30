@@ -65,7 +65,7 @@ import {initialData} from '../../helpers/initialData';
 import {getUnicCoins, toFix, setLocalStorage, separate, defaultSelect} from '../../helpers';
 import {mapActions, mapGetters} from 'vuex';
 
-import {getAccount, getFinancialContractProperties, getPoolProperties, getPosition} from '../../core/eth';
+import {ethPromise, getAccount, getFinancialContractProperties, getPoolProperties, getPosition} from '../../core/eth';
 
 import vAccount from '../../components/elements/v-account.vue';
 import vTable from '../../components/elements/v-table.vue';
@@ -295,6 +295,7 @@ export default {
     },
 
     async handleUpdateAfterAction() {
+        await ethPromise;
         const portfolio = await this.getPortfolioList();
         this.GET_PORTFOLIO_FROM_API(portfolio);
         await this.updateSelectedItemBalance();

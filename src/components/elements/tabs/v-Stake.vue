@@ -174,7 +174,7 @@ export default {
                         for await (let value of unStake) {
                             console.log(value.message);
                         }
-                        this.onAfterClickAction();
+                        await this.onAfterClickAction();
                     } catch(e) {
                         console.error(e);
                         return
@@ -190,7 +190,7 @@ export default {
                         for await (let value of unStake) {
                             console.log(value.message);
                         }
-                        this.onAfterClickAction();
+                        await this.onAfterClickAction();
                     } catch(e) {
                         console.error(e);
                         return
@@ -211,7 +211,7 @@ export default {
                         for await (let value of stake) {
                             console.log(value.message);
                         }
-                        this.onAfterClickAction();
+                        await this.onAfterClickAction();
                     } catch(e) {
                         console.error(e);
                         return
@@ -227,7 +227,7 @@ export default {
                         for await (let value of stake) {
                             console.log(value.message);
                         }
-                        this.onAfterClickAction();
+                        await this.onAfterClickAction();
                     } catch(e) {
                         console.error(e);
                         return
@@ -248,7 +248,7 @@ export default {
                         for await (let value of reward) {
                             console.log(value.message);
                         }
-                        this.onAfterClickAction();
+                        await this.onAfterClickAction();
                     } catch(e) {
                         console.error(e);
                         return
@@ -265,7 +265,7 @@ export default {
                         for await (let value of reward) {
                             console.log(value.message);
                         }
-                        this.onAfterClickAction();
+                        await this.onAfterClickAction();
                     } catch(e) {
                         console.error(e);
                         return
