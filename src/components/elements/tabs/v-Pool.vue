@@ -1,7 +1,7 @@
 <template>
     <div role="tabpanel" class="tab-pane fade" :class="{active}" :id="id">
         <div class="row flex cards j-between">
-            <div class="col-md-5 col-sm-5 col-xs-12 flex-collumn">
+            <div class="col-md-8 col-sm-8 col-xs-12 flex-collumn">
                 <h4>SUSHISWAP/UNISWAP v.2</h4>
                 <div class="flex mb-10 flex-row-2 flex j-between mb-10">
                     <div class="input-wrapp">
@@ -54,7 +54,7 @@
                     <button class="blueb disabled" @click="pool" :disabled="!selectedItem.secondTokenAmount">Pool</button>
                 </div>
             </div>
-            <div class="col-md-6 col-sm-6 col-xs-12" style="height: 300px"></div>
+            <div class="col-md-4 col-sm-4 col-xs-12" style="height: 300px"></div>
         </div>
     </div>
 </template>
@@ -86,6 +86,9 @@ export default {
             default() {
                 return {}
             }
+        },
+        onMessage: {
+            type: Function
         },
         onAfterClickAction: {
             type: Function
@@ -149,19 +152,23 @@ export default {
                 console.log('Pool');
 
                 if ((+tokenAmount) > (+tokenInWallet)) {
+                    this.onMessage(errorStatus('poolTokensCount', value));
                     return console.error(errorStatus('poolTokensCount', value));
                 }
 
                 try {
                     const unPool = addLiquidity(tokenCode, USDCAmount, tokenAmount);
+                    this.onMessage(errorStatus('proccess'));
                     console.log(errorStatus('proccess'));
                     for await (let value of unPool) {
                         console.log(value.message);
                     }
+                    this.onMessage(errorStatus('success'));
                     console.log(errorStatus('success'));
                     await this.onAfterClickAction();
                     await this.updateSelectedItem(value);
                 } catch(e) {
+                    this.onMessage(errorStatus('failed'));
                     console.error(errorStatus('failed'));
                     console.error(e);
                     return
@@ -181,19 +188,23 @@ export default {
                 console.log('unPool');
 
                 if ((+tokenAmount) > (+tokensInPool)) {
+                    this.onMessage(errorStatus('unPoolTokensCount', value));
                     return console.error(errorStatus('unPoolTokensCount', value));
                 }
 
                 try {
                     const pool = removeLiquidity(tokenCode, USDCAmount, tokenAmount);
+                    this.onMessage(errorStatus('proccess'));
                     console.error(errorStatus('proccess'));
                     for await (let value of pool) {
                         console.log(value.message);
                     }
+                    this.onMessage(errorStatus('success'));
                     console.log(errorStatus('success'));
                     await this.onAfterClickAction();
                     await this.updateSelectedItem(value);
                 } catch(e) {
+                    this.onMessage(errorStatus('failed'));
                     console.error(errorStatus('failed'));
                     console.error(e);
                     return

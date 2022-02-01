@@ -1,34 +1,34 @@
 export default function errorStatus(error = '', value = '') {
     switch (error) {
         case 'connect':
-            return 'Подключение Metamask не удалось';
+            return {isError: true, text: 'Подключение Metamask не удалось'};
         case 'mintTokensCount':
-            return 'Недостаточно токенов коллатерала в кошельке для минтинга или пополнения коллатерала';
+            return {isError: true, text: 'Недостаточно токенов коллатерала в кошельке для минтинга или пополнения коллатерала'};
         case 'mintGlobalRatio':
-            return 'Недостаточно обеспечения (???)';
+            return {isError: true, text: 'Недостаточно обеспечения (???)'};
         case 'mintSponsorTokens':
-            return `Слишком маленькая позиция. Должна быть не менее ${value} sponsors tokens (???)`;
+            return {isError: true, text: `Слишком маленькая позиция. Должна быть не менее ${value} sponsors tokens (???)`};
         case 'burnTokensCount':
-            return 'Указано слишком большое количество синетиков для сжигания';
+            return {isError: true, text: 'Указано слишком большое количество синетиков для сжигания'};
         case 'withdrawCollateralCount':
-            return 'Указано слишком большое количество токенов коллатерала для вывода';
+            return {isError: true, text: 'Указано слишком большое количество токенов коллатерала для вывода'};
         case 'mintExpired':
-            return 'Контракт в экспирации';
+            return {isError: true, text: 'Контракт в экспирации'};
         case 'poolTokensCount':
-            return `Количество токенов ${value} превышает имеющееся в кошельке`;
+            return {isError: true, text: `Количество токенов ${value} превышает имеющееся в кошельке`};
         case 'unPoolTokensCount':
-            return `Количество токенов ${value} превышает имеющееся в пуле`;
+            return {isError: true, text: `Количество токенов ${value} превышает имеющееся в пуле`};
         case 'stakeTokensCount':
-            return 'Количество токенов ХХХ превышает имеющееся в кошельке';
+            return {isError: true, text: `Количество токенов ${value} превышает имеющееся в кошельке`};
         case 'unStakeTokensCount':
-            return 'Количество токенов ХХХ превышает имеющееся в стейке';
+            return {isError: true, text: `Количество токенов ${value} превышает имеющееся в стейке`};
         case 'unStakeUNISXTokensCount':
-            return 'Количество токенов ХХХ превышает имеющееся в кошельке количество токенов xUNISX';
+            return {isError: true, text: `Количество токенов ${value} превышает имеющееся в кошельке количество токенов xUNISX`};
         case 'proccess':
-            return 'Выполняется';
+            return {isError: false, text: 'Выполняется'};
         case 'failed':
-            return 'Отказано';
-        case 'success':
+            return {isError: true, text: 'Отказано'};
+        case {isError: false, text: 'success'}:
             return 'Успешно';
         default:
             return '';

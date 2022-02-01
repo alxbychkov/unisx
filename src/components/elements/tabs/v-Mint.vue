@@ -1,7 +1,7 @@
 <template>
     <div role="tabpanel" class="tab-pane fade in" :class="{active}" :id="id">
         <div class="row flex cards j-between">
-            <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn">
+            <div class="col-md-6 col-sm-6 col-xs-12 flex-collumn">
                 <h4>SYNTHETIC</h4>
                 <div class="flex mb-10 flex-row-2 flex j-between">
                     <input 
@@ -55,7 +55,7 @@
                     <button class="blueb disabled" @click="setExpired">Settle Expired</button>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn">
+            <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn hidden">
                 <div data-type="widget" class="mb-auto hidden"></div>
                 <div class="description mb-10" v-if="selectedItem.Description">{{ selectedItem.Description }}</div>
                 <div class="flex mb-10 flex-row-2 flex j-center hidden">
@@ -63,7 +63,7 @@
                 </div>
                 <button class="orangebut lr-auto hidden">Claim Rewards</button>
             </div>
-            <div class="col-md-4 col-sm-4 col-xs-12">
+            <div class="col-md-6 col-sm-6 col-xs-12">
                 <h4>COLLATERAL</h4>
                 <div class="flex mb-10 flex-row-2 flex j-between">
                     <div class="input-wrapp">
@@ -150,6 +150,9 @@ export default {
                 return {}
             }
         },
+        onMessage: {
+            type: Function
+        },
         onAfterClickAction: {
             type: Function
         },
@@ -168,6 +171,9 @@ export default {
         ]),
         instrumentsList: function() {        
             return  this.INSTRUMENTS ? this.INSTRUMENTS.map(instrument => instrument.Name) : [];
+        },
+        message: function() {
+            return this.msg;
         }
     },
     methods: {
@@ -182,19 +188,23 @@ export default {
                 const syntheticInWallet = this.synthetic.syntheticIntheWallet;
 
                 if ((+tokensAmount) > (+syntheticInWallet)) {
+                    this.onMessage(errorStatus('mintTokensCount'));
                     console.error(errorStatus('mintTokensCount'));
                 } else {
                     console.log('Creating');          
                     try {
                         const newPosition = createPosition(collateralAmount, tokensAmount);
+                        this.onMessage(errorStatus('proccess'));
                         console.log(errorStatus('proccess'));
                         for await (let value of newPosition) {
                             console.log(value.message);
                         }
+                        this.onMessage( errorStatus('success'));
                         console.log(errorStatus('success'));
                         this.onAfterClickAction();
                     } catch(e) {
                         console.error(e);
+                        this.onMessage(errorStatus('failed'));
                         console.error(errorStatus('failed'));
                         return
                     }
@@ -211,17 +221,21 @@ export default {
                 const syntheticInWallet = this.synthetic.syntheticIntheWallet;
 
                 if ((+tokensAmount) > (+syntheticInWallet)) {
+                    this.onMessage(errorStatus('mintTokensCount')); 
                     console.error(errorStatus('mintTokensCount'));
                 } else {
                     try {
                         const newDeposit = deposit(collateralAmount);
+                        this.onMessage(errorStatus('proccess'));
                         console.log(errorStatus('proccess'));
                         for await (let value of newDeposit) {
                             console.log(value.message);
                         }
+                        this.onMessage(errorStatus('success')); 
                         console.log(errorStatus('success'));
                         this.onAfterClickAction();
                     } catch(e) {
+                        this.onMessage(errorStatus('failed'));
                         console.error(e);
                         console.error(errorStatus('failed'));
                         return
@@ -238,19 +252,23 @@ export default {
                 const portfolioAmount = this.selectedItemBalance.tokenCurrencyBalance;
 
                 if (+tokensAmount > +portfolioAmount) {
+                    this.onMessage(errorStatus('burnTokensCount')); 
                     console.error(errorStatus('burnTokensCount'));
                     return console.error('You have no much tokens');
                 }
 
                 try {
                     const newBurn = redeem(tokensAmount);
+                    this.onMessage(errorStatus('proccess'));
                     console.log(errorStatus('proccess'));
                     for await (let value of newBurn) {
                         console.log(value.message);
                     }
+                    this.onMessage(errorStatus('success'));
                     console.error(errorStatus('success'));
                     this.onAfterClickAction();
                 } catch(e) {
+                    this.onMessage(errorStatus('failed'));
                     console.error(errorStatus('failed'));
                     console.error(e);
                     return
@@ -266,18 +284,22 @@ export default {
                 const collateralInWallet = this.selectedItemBalance.collateralBalanceFormatted;
 
                 if ((+collateralAmount) > (+collateralInWallet)) {
+                    this.onMessage(errorStatus('withdrawCollateralCount'));
                     return console.error(errorStatus('withdrawCollateralCount'));
                 }
 
                 try {
                     const newWithdraw = deposit(collateralAmount);
+                    this.onMessage(errorStatus('proccess'));
                     console.log(errorStatus('proccess'));
                     for await (let value of newWithdraw) {
                         console.log(value.message);
                     }
+                    this.onMessage(errorStatus('success'));
                     console.log(errorStatus('success'));
                     this.onAfterClickAction();
                 } catch(e) {
+                    this.onMessage(errorStatus('failed'));
                     console.error(errorStatus('failed'));
                     console.error(e);
                     return
@@ -290,17 +312,19 @@ export default {
             console.log('settleExpired');          
             try {
                 const newExpired = settleExpired();
+                this.onMessage(errorStatus('proccess'));
                 console.log(errorStatus('proccess'));
                 for await (let value of newExpired) {
                     console.log(value.message);
                 }
+                this.onMessage(errorStatus('success'));
                 this.onAfterClickAction();
             } catch(e) {
+                this.onMessage(errorStatus('failed'));
                 console.error(errorStatus('failed'));
                 console.error(e);
                 return
             }
-            console.log(errorStatus('success'));
             console.log('settleExpired success!'); 
         },
 

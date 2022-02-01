@@ -125,3 +125,18 @@ hr {
   letter-spacing: -0.01em;
   color: #161828;
 }
+
+.info-message {
+  padding: 10px 0;
+  margin-bottom: 10px;
+  background: #fff8df;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.info-message-text {
+  font-size: 15px;
+  line-height: 130%;
+  transition: 0.3s;
+  letter-spacing: -0.01em;
+}

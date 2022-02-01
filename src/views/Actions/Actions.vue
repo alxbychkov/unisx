@@ -19,7 +19,7 @@
             </div>
             
             <div class="row" data-aos="fade-up" data-aos-delay="1200" data-aos-duration="800">
-                <div class="col-md-12">
+                <div class="col-md-8">
                     <ul class="cards_tabs_nav" role="tablist">
                         <li role="presentation" class="active" @click="clearTab($event)"><a href="#cardtab1" role="tab" data-toggle="tab">Instrument</a></li>
                         <li role="presentation" @click="clearTab($event)"><a href="#cardtab2" role="tab" data-toggle="tab">POOL</a></li>
@@ -27,18 +27,26 @@
                     </ul>
                     <div class="cards_in_tab">
                         <div class="tab-content">
+                            <div v-if="message.text" class="info-message">
+                                <div 
+                                    class="info-message-text"
+                                    :class="message.isError ? 'color-red' : 'color-green'"
+                                >{{ message.text }}</div>
+                            </div>
                             <v-mint
                                 active
                                 id="cardtab1"
                                 :synthetic="synthetic"
                                 :selectedItemBalance="selectedItemBalance"
                                 :selectedItem="selectedItem"
+                                :onMessage="handleShowMessage"
                                 :onAfterClickAction="handleUpdateAfterAction"
                                 :onSelectClick="getInstrumentItem"
                             />
                             <v-pool 
                                 id="cardtab2"
                                 :DEX="sushiswapPool"
+                                :onMessage="handleShowMessage"
                                 :onAfterClickAction="handleUpdateAfterAction"
                                 :onSelectClick="getInstrumentItem"
                                 ref="dex"
@@ -46,6 +54,7 @@
                             <v-stake 
                                 id="cardtab3"
                                 :STAKE="stakeProfile"
+                                :onMessage="handleShowMessage"
                                 :onAfterClickAction="handleUpdateAfterAction"
                                 :onSelectClick="getInstrumentItem"
                             />
@@ -85,7 +94,8 @@ export default {
           selectedItemBalance: initialData.selectedItemBalance,
           synthetic: initialData.synthetic,
           sushiswapPool: initialData.sushiswapPool,
-          stakeProfile: {...initialData.stakeProfile}
+          stakeProfile: {...initialData.stakeProfile},
+          message: initialData.message
       }
   },
   methods: {
@@ -98,6 +108,7 @@ export default {
       
     async getTableItem(item, isClear = true) {
         isClear && this.clearInputs();
+        this.message = {...initialData.message};
 
         if (['uSPAC5', 'uSPAC10', 'uSPAC10-test'].includes(item?.Name)) {
             // this.stakeProfile = {...initialData.stakeProfile};
@@ -335,7 +346,6 @@ export default {
                 this.synthetic.isOracle = getOracle;
             }
 
-            console.log(this.synthetic);
         }
 
         this.selectedItemBalance = {
@@ -395,14 +405,19 @@ export default {
             this.selectedItem = {};
             this.stakeProfile = {...initialData.stakeProfile};
             this.sushiswapPool = {...initialData.sushiswapPool},
+            this.message = {...initialData.message}
             document.querySelector('#portfolio').selectedIndex = 0;
             document.querySelector('#pool').selectedIndex = 0;
+            document.querySelector('#stake').selectedIndex = 0;
         }
     },
 
     async handleClickTab(e) {
         this.clearTab(e);
-        // await this.updateStakeProfile();
+    },
+
+    handleShowMessage(message) {
+        this.message = message;
     }
   },
 
@@ -425,9 +440,7 @@ export default {
         return getUnicCoins(this.DEX_LP, 'dex');
     }
   },
-  created() {
-      console.log('created');
-  },
+  created() {},
   mounted() {
       this.GET_STABLECOINS_FROM_API();
       this.GET_DEX_LP_FROM_API();

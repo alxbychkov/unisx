@@ -45,5 +45,9 @@ export const initialData = {
             xUNISX: '0.0000'
         },
         unisxRewardEarned: '0.0000'
+    },
+    message: {
+        isError: false,
+        text: ''
     }
 }
