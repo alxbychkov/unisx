@@ -15,6 +15,7 @@ import {setLocalStorage} from '../../helpers';
 
 import {connectMetamask, accountPromise} from '../../core/metamask';
 import {ethPromise} from '../../core/eth';
+import errorStatus from '../../helpers/errors';
 
 export default {
     name: 'Account',
@@ -38,6 +39,7 @@ export default {
                 });
                 this.onClickConnect(this.USER_ACCOUNT);
             } catch(e) {
+                console.error(errorStatus('connect'));
                 alert(e);
             }
         },

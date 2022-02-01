@@ -47,9 +47,12 @@
                     <span>Global Collateralization ratio</span>
                     <span>{{ synthetic.globalCollateralizationRation }}</span>
                 </div>                                        
-                <div class="but_flex mt-auto lr-auto">
+                <div v-if="!synthetic.isExpired" class="but_flex mt-auto lr-auto">
                     <button class="cancelbut disabled" @click="mint" :disabled="!synthetic.tokensAmount">Mint</button>
                     <button class="blueb disabled" @click="burn" :disabled="!synthetic.collateralAmount">Burn</button>
+                </div>
+                <div v-if="synthetic.isOracle" class="but_flex mt-auto lr-auto">
+                    <button class="blueb disabled" @click="setExpired">Settle Expired</button>
                 </div>
             </div>
             <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn">
@@ -98,7 +101,7 @@
                     <span>Liquidation Price:</span>
                     <span>{{ selectedItemBalance.liquidationPrice }}</span>
                 </div>                                        
-                <div class="but_flex lr-auto">
+                <div v-if="!synthetic.isExpired" class="but_flex lr-auto">
                     <button class="cancelbut disabled" @click="deposit" :disabled="!selectedItem.Value">Supply</button>
                     <button class="blueb disabled" @click="withdraw" :disabled="!selectedItem.Value">Withdraw</button>
                 </div>
@@ -111,7 +114,8 @@ import {mapActions, mapGetters} from 'vuex';
 
 import {round, toDote, COLLATERAL_PRICE} from '../../../helpers';
 
-import {createPosition, deposit, redeem} from '../../../core/eth';
+import {createPosition, deposit, redeem, settleExpired} from '../../../core/eth';
+import errorStatus from '../../../helpers/errors';
 
 export default {
     name: 'Mint',
@@ -173,20 +177,29 @@ export default {
 
         async mint() {
             if (this.synthetic.collateralAmount && this.synthetic.tokensAmount) {
-                console.log('Creating');          
-                try {
-                    const collateralAmount = toDote(this.synthetic.tokensAmount);
-                    const tokensAmount = toDote(this.synthetic.collateralAmount);
-                    const newPosition = createPosition(collateralAmount, tokensAmount);
-                    for await (let value of newPosition) {
-                        console.log(value.message);
+                const collateralAmount = toDote(this.synthetic.tokensAmount);
+                const tokensAmount = toDote(this.synthetic.collateralAmount);
+                const syntheticInWallet = this.synthetic.syntheticIntheWallet;
+
+                if ((+tokensAmount) > (+syntheticInWallet)) {
+                    console.error(errorStatus('mintTokensCount'));
+                } else {
+                    console.log('Creating');          
+                    try {
+                        const newPosition = createPosition(collateralAmount, tokensAmount);
+                        console.log(errorStatus('proccess'));
+                        for await (let value of newPosition) {
+                            console.log(value.message);
+                        }
+                        console.log(errorStatus('success'));
+                        this.onAfterClickAction();
+                    } catch(e) {
+                        console.error(e);
+                        console.error(errorStatus('failed'));
+                        return
                     }
-                    this.onAfterClickAction();
-                } catch(e) {
-                    console.error(e);
-                    return
-                }
-                console.log('Mint success!');  
+                    console.log('Mint success!'); 
+                } 
             }
         },
 
@@ -194,17 +207,27 @@ export default {
             if (this.synthetic.tokensAmount) {
                 console.log('Deposit');  
                 const collateralAmount = toDote(this.synthetic.tokensAmount);
-                try {
-                    const newDeposit = deposit(collateralAmount);
-                    for await (let value of newDeposit) {
-                        console.log(value.message);
+                const tokensAmount = toDote(this.synthetic.collateralAmount);
+                const syntheticInWallet = this.synthetic.syntheticIntheWallet;
+
+                if ((+tokensAmount) > (+syntheticInWallet)) {
+                    console.error(errorStatus('mintTokensCount'));
+                } else {
+                    try {
+                        const newDeposit = deposit(collateralAmount);
+                        console.log(errorStatus('proccess'));
+                        for await (let value of newDeposit) {
+                            console.log(value.message);
+                        }
+                        console.log(errorStatus('success'));
+                        this.onAfterClickAction();
+                    } catch(e) {
+                        console.error(e);
+                        console.error(errorStatus('failed'));
+                        return
                     }
-                    this.onAfterClickAction();
-                } catch(e) {
-                    console.error(e);
-                    return
-                }
-                console.log('Deposit success!');  
+                    console.log('Deposit success!'); 
+                } 
             }
         },
 
@@ -214,15 +237,21 @@ export default {
                 const tokensAmount = toDote(this.synthetic.collateralAmount);
                 const portfolioAmount = this.selectedItemBalance.tokenCurrencyBalance;
 
-                if (+tokensAmount > +portfolioAmount) return console.error('You have no much tokens');
+                if (+tokensAmount > +portfolioAmount) {
+                    console.error(errorStatus('burnTokensCount'));
+                    return console.error('You have no much tokens');
+                }
 
                 try {
                     const newBurn = redeem(tokensAmount);
+                    console.log(errorStatus('proccess'));
                     for await (let value of newBurn) {
                         console.log(value.message);
                     }
+                    console.error(errorStatus('success'));
                     this.onAfterClickAction();
                 } catch(e) {
+                    console.error(errorStatus('failed'));
                     console.error(e);
                     return
                 }
@@ -234,19 +263,46 @@ export default {
             if (this.synthetic.tokensAmount) {
                 console.log('Withdraw');  
                 const collateralAmount = toDote(this.synthetic.tokensAmount);
+                const collateralInWallet = this.selectedItemBalance.collateralBalanceFormatted;
+
+                if ((+collateralAmount) > (+collateralInWallet)) {
+                    return console.error(errorStatus('withdrawCollateralCount'));
+                }
+
                 try {
                     const newWithdraw = deposit(collateralAmount);
+                    console.log(errorStatus('proccess'));
                     for await (let value of newWithdraw) {
                         console.log(value.message);
                     }
+                    console.log(errorStatus('success'));
                     this.onAfterClickAction();
                 } catch(e) {
+                    console.error(errorStatus('failed'));
                     console.error(e);
                     return
                 }
                 console.log('Withdraw success!');  
             }
         },        
+
+        async setExpired() {
+            console.log('settleExpired');          
+            try {
+                const newExpired = settleExpired();
+                console.log(errorStatus('proccess'));
+                for await (let value of newExpired) {
+                    console.log(value.message);
+                }
+                this.onAfterClickAction();
+            } catch(e) {
+                console.error(errorStatus('failed'));
+                console.error(e);
+                return
+            }
+            console.log(errorStatus('success'));
+            console.log('settleExpired success!'); 
+        },
 
         consider(e) {
             switch (e) {

@@ -19,7 +19,9 @@ export const initialData = {
         totalSyntTokensOutstanding: '0.0000',
         totalCollateral: '0.0000',
         globalCollateralizationRation: '0.0000',
-        syntheticIntheWallet: '0.0000'
+        syntheticIntheWallet: '0.0000',
+        isExpired: false,
+        isOracle: false
     },
     sushiswapPool: {
         pair: '',

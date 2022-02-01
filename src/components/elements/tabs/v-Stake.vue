@@ -90,6 +90,7 @@
 import {mapActions, mapGetters} from 'vuex';
 import { LP_getReward, LP_stake, LP_withdraw, UNISX_getReward, UNISX_stake, UNISX_withdraw } from '../../../core/eth';
 import { separate, toDote } from '../../../helpers';
+import errorStatus from '../../../helpers/errors';
 
 export default {
     name: 'Stake',
@@ -166,16 +167,24 @@ export default {
             if (this.selectedItem.unisxAmount) {
                 const unisxAmount = toDote(this.selectedItem.unisxAmount);
                 console.log(this.selectedItem);
-                if (unisxAmount > +this.selectedItem.unisxStaked) return console.error('You have no much tokens');
+                if (unisxAmount > +this.selectedItem.unisxStaked) {
+                    return console.error(errorStatus('unStakeTokensCount'));
+                }
                 if (this.selectedItem.name === 'UNISX') {
+                    if (unisxAmount > +this.selectedItem.unisxBalance.xUNISX) {
+                        return console.error(errorStatus('unStakeUNISXTokensCount'));
+                    }
                     console.log('unStake UNISX');
                     try {
                         const unStake = UNISX_withdraw(unisxAmount);
+                        console.log(errorStatus('proccess'));
                         for await (let value of unStake) {
                             console.log(value.message);
                         }
+                        console.log(errorStatus('success'));
                         await this.onAfterClickAction();
                     } catch(e) {
+                        console.error(errorStatus('failed'));
                         console.error(e);
                         return
                     }
@@ -187,11 +196,14 @@ export default {
                         const tokenCode = (token === 'uSPAC10-test') ? 'uSPAC10' : token;
 
                         const unStake = LP_withdraw(tokenCode, unisxAmount);
+                        console.log(errorStatus('proccess'));
                         for await (let value of unStake) {
                             console.log(value.message);
                         }
+                        console.log(errorStatus('success'));
                         await this.onAfterClickAction();
                     } catch(e) {
+                        console.error(errorStatus('failed'));
                         console.error(e);
                         return
                     }
@@ -203,16 +215,22 @@ export default {
         async stake() {
             if (this.selectedItem.unisxAmount) {
                 const unisxAmount = toDote(this.selectedItem.unisxAmount);
-                if (unisxAmount > +this.selectedItem.unisxBalance.UNISX) return console.error('You have no much tokens');
+                console.log(this.selectedItem);
+                if (unisxAmount > +this.selectedItem.unisxBalance[this.selectedItem.name]) {
+                    return console.error(errorStatus('stakeTokensCount'));
+                } 
                 if (this.selectedItem.name === 'UNISX') {
                     console.log('Stake UNISX');
                     try {
                         const stake = UNISX_stake(unisxAmount);
+                        console.log(errorStatus('proccess'));
                         for await (let value of stake) {
                             console.log(value.message);
                         }
+                        console.log(errorStatus('success'));
                         await this.onAfterClickAction();
                     } catch(e) {
+                        console.error(errorStatus('failed'));
                         console.error(e);
                         return
                     }
@@ -224,11 +242,14 @@ export default {
                         const tokenCode = (token === 'uSPAC10-test') ? 'uSPAC10' : token;
 
                         const stake = LP_stake(tokenCode, unisxAmount);
+                        console.log(errorStatus('proccess'));
                         for await (let value of stake) {
                             console.log(value.message);
                         }
+                        console.log(errorStatus('success'));
                         await this.onAfterClickAction();
                     } catch(e) {
+                        console.error(errorStatus('failed'));
                         console.error(e);
                         return
                     }

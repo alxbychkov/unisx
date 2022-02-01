@@ -64,6 +64,7 @@ import {mapActions, mapGetters} from 'vuex';
 import { addLiquidity, getAccount, getPoolProperties, removeLiquidity } from '../../../core/eth';
 
 import {round, separate, toDote, toFix} from '../../../helpers';
+import errorStatus from '../../../helpers/errors';
 
 export default {
     name: 'Pool',
@@ -128,7 +129,6 @@ export default {
             if (typeof e.target !== 'undefined') {
                 if (e.target.tagName === 'LI' && e.target.classList.contains('option') && !e.target.classList.contains('disabled') && !e.target.classList.contains('selected')) {
                     const value = e.target.innerText;
-                    console.log(value);
                     this.onSelectClick(e);
 
                     if (['UNISWAPv2/uSPAC10-test/USDC', 'UNISWAPv2/UNISX/USDC'].includes(value)) {
@@ -144,21 +144,29 @@ export default {
                 const tokenAmount = toDote(this.selectedItem.firstTokenAmount);
                 const USDCAmount = toDote(this.selectedItem.secondTokenAmount);
                 const value = this.selectedItem.pair;
+                const tokenInWallet = this.selectedItem.firstTokenInWallet;
 
-                console.log('unPool');
+                console.log('Pool');
+
+                if ((+tokenAmount) > (+tokenInWallet)) {
+                    return console.error(errorStatus('poolTokensCount', value));
+                }
 
                 try {
                     const unPool = addLiquidity(tokenCode, USDCAmount, tokenAmount);
+                    console.log(errorStatus('proccess'));
                     for await (let value of unPool) {
                         console.log(value.message);
                     }
+                    console.log(errorStatus('success'));
                     await this.onAfterClickAction();
                     await this.updateSelectedItem(value);
                 } catch(e) {
+                    console.error(errorStatus('failed'));
                     console.error(e);
                     return
                 }
-                console.log('unPool success!'); 
+                console.log('Pool success!'); 
             }
         },
 
@@ -168,21 +176,29 @@ export default {
                 const tokenAmount = toDote(this.selectedItem.firstTokenAmount);
                 const USDCAmount = toDote(this.selectedItem.secondTokenAmount);
                 const value = this.selectedItem.pair;
+                const tokensInPool = this.selectedItem.firstTokenAmountInPool;
 
-                console.log('Pool');
+                console.log('unPool');
+
+                if ((+tokenAmount) > (+tokensInPool)) {
+                    return console.error(errorStatus('unPoolTokensCount', value));
+                }
 
                 try {
                     const pool = removeLiquidity(tokenCode, USDCAmount, tokenAmount);
+                    console.error(errorStatus('proccess'));
                     for await (let value of pool) {
                         console.log(value.message);
                     }
+                    console.log(errorStatus('success'));
                     await this.onAfterClickAction();
                     await this.updateSelectedItem(value);
                 } catch(e) {
+                    console.error(errorStatus('failed'));
                     console.error(e);
                     return
                 }
-                console.log('Pool success!'); 
+                console.log('unPool success!'); 
             }
         },
 

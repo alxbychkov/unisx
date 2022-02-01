@@ -63,6 +63,7 @@ import './index.css';
 
 import {initialData} from '../../helpers/initialData';
 import {getUnicCoins, toFix, setLocalStorage, separate, defaultSelect} from '../../helpers';
+import errorStatus from '../../helpers/errors';
 import {mapActions, mapGetters} from 'vuex';
 
 import {ethPromise, getAccount, getFinancialContractProperties, getPoolProperties, getPosition} from '../../core/eth';
@@ -310,7 +311,6 @@ export default {
         const collateralRatio = (+collateralAmount.collateralAmountFormatted)/((+collateralAmount.tokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
 
         console.log('collateralAmount: ', collateralAmount, 'collateralBalance: ', collateralBalance);
-        console.log('isExpired: ', contractProperties.isExpired);
 
         if (item.Name) {
             const value = item.Name;
@@ -325,8 +325,17 @@ export default {
                 totalSyntTokensOutstanding: (+contractProperties.totalTokensOutstandingFormatted).toFixed(toFix).toString(),
                 totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
                 globalCollateralizationRation: (+globalCollateralRatio).toFixed(toFix).toString(),
-                syntheticIntheWallet: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString()
+                syntheticIntheWallet: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString(),
+                isExpired: contractProperties.isExpired
             }
+
+            if (contractProperties.isExpired) {
+                console.error(errorStatus('mintExpired'));
+                const getOracle = false;
+                this.synthetic.isOracle = getOracle;
+            }
+
+            console.log(this.synthetic);
         }
 
         this.selectedItemBalance = {
