@@ -2,7 +2,6 @@
     <div role="tabpanel" class="tab-pane fade" :class="{active}" :id="id">
         <div class="row flex cards j-between">
             <div class="col-md-8 col-sm-8 col-xs-12 flex-collumn">
-                <h4>SUSHISWAP/UNISWAP v.2</h4>
                 <div class="flex mb-10 flex-row-2 flex j-between mb-10">
                     <div class="input-wrapp">
                         <input 
