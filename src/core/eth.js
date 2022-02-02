@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-import { ethers } from 'ethers'
 import EMP_ABI from './abi/EMP_ABI.js'
 import UniswapV2Router02_ABI from './abi/UniswapV2Router02.js'
 import UniswapV2Factory_ABI from './abi/UniswapV2Factory.js'
@@ -8,6 +7,7 @@ import UNISXStakingRewards_ABI from './abi/StakingRewards_ABI.js'
 import LPStakingRewards_ABI from './abi/LPStakingRewards.js'
 import LPStakingRewardsFactory_ABI from './abi/LPStakingRewardsFactory.js'
 import ERC20 from './abi/ERC20_ABI.js'
+import { ethers } from 'ethers'
 
 import {accountPromise} from './metamask.js'
 import {CHAIN_CONFIG, USER_CR, PRICE_PRECISION} from './config.js'
