@@ -161,6 +161,7 @@ export default {
                     console.log(errorStatus('proccess'));
                     for await (let value of unPool) {
                         console.log(value.message);
+                        this.onMessage({isError: false, text: value.message});
                     }
                     this.onMessage(errorStatus('success'));
                     console.log(errorStatus('success'));
@@ -197,6 +198,7 @@ export default {
                     console.error(errorStatus('proccess'));
                     for await (let value of pool) {
                         console.log(value.message);
+                        this.onMessage({isError: false, text: value.message});
                     }
                     this.onMessage(errorStatus('success'));
                     console.log(errorStatus('success'));

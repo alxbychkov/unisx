@@ -202,6 +202,7 @@ export default {
                         console.log(errorStatus('proccess'));
                         for await (let value of newPosition) {
                             console.log(value.message);
+                            this.onMessage({isError: false, text: value.message});
                         }
                         this.onMessage( errorStatus('success'));
                         console.log(errorStatus('success'));
@@ -234,6 +235,7 @@ export default {
                         console.log(errorStatus('proccess'));
                         for await (let value of newDeposit) {
                             console.log(value.message);
+                            this.onMessage({isError: false, text: value.message});
                         }
                         this.onMessage(errorStatus('success')); 
                         console.log(errorStatus('success'));
@@ -267,6 +269,7 @@ export default {
                     console.log(errorStatus('proccess'));
                     for await (let value of newBurn) {
                         console.log(value.message);
+                        this.onMessage({isError: false, text: value.message});
                     }
                     this.onMessage(errorStatus('success'));
                     console.error(errorStatus('success'));
@@ -298,6 +301,7 @@ export default {
                     console.log(errorStatus('proccess'));
                     for await (let value of newWithdraw) {
                         console.log(value.message);
+                        this.onMessage({isError: false, text: value.message});
                     }
                     this.onMessage(errorStatus('success'));
                     console.log(errorStatus('success'));
@@ -320,6 +324,7 @@ export default {
                 console.log(errorStatus('proccess'));
                 for await (let value of newExpired) {
                     console.log(value.message);
+                    this.onMessage({isError: false, text: value.message});
                 }
                 this.onMessage(errorStatus('success'));
                 this.onAfterClickAction();

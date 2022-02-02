@@ -186,6 +186,7 @@ export default {
                         console.log(errorStatus('proccess'));
                         for await (let value of unStake) {
                             console.log(value.message);
+                            this.onMessage({isError: false, text: value.message});
                         }
                         this.onMessage(errorStatus('success'));
                         console.log(errorStatus('success'));
@@ -208,6 +209,7 @@ export default {
                         console.log(errorStatus('proccess'));
                         for await (let value of unStake) {
                             console.log(value.message);
+                            this.onMessage({isError: false, text: value.message});
                         }
                         this.onMessage(errorStatus('success'));
                         console.log(errorStatus('success'));
@@ -239,6 +241,7 @@ export default {
                         console.log(errorStatus('proccess'));
                         for await (let value of stake) {
                             console.log(value.message);
+                            this.onMessage({isError: false, text: value.message});
                         }
                         this.onMessage(errorStatus('success'));
                         console.log(errorStatus('success'));
@@ -261,6 +264,7 @@ export default {
                         console.log(errorStatus('proccess'));
                         for await (let value of stake) {
                             console.log(value.message);
+                            this.onMessage({isError: false, text: value.message});
                         }
                         this.onMessage(errorStatus('success'));
                         console.log(errorStatus('success'));
@@ -287,6 +291,7 @@ export default {
                         this.message(errorStatus('proccess'));
                         for await (let value of reward) {
                             console.log(value.message);
+                            this.onMessage({isError: false, text: value.message});
                         }
                         this.onMessage(errorStatus('success'));
                         await this.onAfterClickAction();
@@ -306,6 +311,7 @@ export default {
                         this.onMessage(errorStatus('proccess'));
                         for await (let value of reward) {
                             console.log(value.message);
+                            this.onMessage({isError: false, text: value.message});
                         }
                         this.onMessage(errorStatus('success'));
                         await this.onAfterClickAction();
