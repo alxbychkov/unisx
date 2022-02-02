@@ -405,8 +405,8 @@ export default {
             this.synthetic = initialData.synthetic;
             this.selectedItem = {};
             this.stakeProfile = {...initialData.stakeProfile};
-            this.sushiswapPool = {...initialData.sushiswapPool},
-            this.message = {...initialData.message}
+            this.sushiswapPool = {...initialData.sushiswapPool};
+            this.message = {...initialData.message};
             document.querySelector('#portfolio').selectedIndex = 0;
             document.querySelector('#pool').selectedIndex = 0;
             document.querySelector('#stake').selectedIndex = 0;
