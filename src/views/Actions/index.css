@@ -129,9 +129,13 @@ hr {
 .info-message {
   padding: 10px 0;
   margin-bottom: 10px;
-  background: #fff8df;
   text-align: center;
   border-radius: 4px;
+  min-height: 39.5px;
+}
+
+.info-message-bg {
+  background: #fff8df;
 }
 
 .info-message-text {

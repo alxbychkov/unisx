@@ -186,10 +186,14 @@ export default {
                 const collateralAmount = toDote(this.synthetic.tokensAmount);
                 const tokensAmount = toDote(this.synthetic.collateralAmount);
                 const syntheticInWallet = this.synthetic.syntheticIntheWallet;
+                const minSponsorTokens = this.synthetic.minSponsorTokens;
 
                 if ((+tokensAmount) > (+syntheticInWallet)) {
                     this.onMessage(errorStatus('mintTokensCount'));
                     console.error(errorStatus('mintTokensCount'));
+                } else if ((+tokensAmount) < (+minSponsorTokens)) {
+                    this.onMessage(errorStatus('mintSponsorTokens', minSponsorTokens));
+                    console.error(errorStatus('mintSponsorTokens', minSponsorTokens));
                 } else {
                     console.log('Creating');          
                     try {

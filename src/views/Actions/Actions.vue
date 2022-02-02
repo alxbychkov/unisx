@@ -27,7 +27,7 @@
                     </ul>
                     <div class="cards_in_tab">
                         <div class="tab-content">
-                            <div v-if="message.text" class="info-message">
+                            <div class="info-message" :class="message.text ? 'info-message-bg' : ''">
                                 <div 
                                     class="info-message-text"
                                     :class="message.isError ? 'color-red' : 'color-green'"
@@ -321,7 +321,7 @@ export default {
         const contractProperties = await getFinancialContractProperties();
         const collateralRatio = (+collateralAmount.collateralAmountFormatted)/((+collateralAmount.tokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
 
-        console.log('collateralAmount: ', collateralAmount, 'collateralBalance: ', collateralBalance);
+        console.log('collateralAmount: ', collateralAmount, 'collateralBalance: ', collateralBalance, 'contractProperties: ', contractProperties);
 
         if (item.Name) {
             const value = item.Name;
@@ -337,6 +337,7 @@ export default {
                 totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
                 globalCollateralizationRation: (+globalCollateralRatio).toFixed(toFix).toString(),
                 syntheticIntheWallet: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString(),
+                minSponsorTokens: (+contractProperties.minSponsorTokensFormatted).toFixed(toFix).toString(),
                 isExpired: contractProperties.isExpired
             }
 

@@ -20,6 +20,7 @@ export const initialData = {
         totalCollateral: '0.0000',
         globalCollateralizationRation: '0.0000',
         syntheticIntheWallet: '0.0000',
+        minSponsorTokens: '0.0000',
         isExpired: false,
         isOracle: false
     },
