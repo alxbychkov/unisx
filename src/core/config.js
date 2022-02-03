@@ -17,4 +17,6 @@ export const BASKET = ["DWAC", "IRDM", "PRIM", "TGLS", "MP", "LCID", "GDYN", "SM
 
 export const CORRECTION_FACTOR = '1.0'
 
+export const MINTER_REWARDS_PER_TOKEN_DAY = 1
+
 export const PRICE_PRECISION = 3 // 2 places from USD, 1 place from dividing by 10

@@ -10,8 +10,9 @@ import ERC20 from './abi/ERC20_ABI.js'
 import { ethers } from 'ethers'
 
 import {accountPromise} from './metamask.js'
-import {CHAIN_CONFIG, USER_CR, PRICE_PRECISION} from './config.js'
+import {CHAIN_CONFIG, USER_CR, PRICE_PRECISION, MINTER_REWARDS_PER_TOKEN_DAY} from './config.js'
 import {getPrice} from './price.js'
+import {getRewards} from './minter_rewards.js'
 
 const UNISWAP_DECIMALS = 18
 
@@ -242,11 +243,19 @@ export async function getPosition(address = window.ethereum.selectedAddress){
         .round(PRICE_PRECISION)
   }
 
+  const minterReward = getRewards({
+    rewardPerTokenDay: MINTER_REWARDS_PER_TOKEN_DAY,
+    rewardTokenDecimals: UNISXDecimals,
+    sponsors: [address],
+  }).then(rewards => rewards[ethers.utils.getAddress(address)])
+
   return {...pos,
     collateralAmountFormatted: formatUnits(pos.collateralAmount, collateralTokenDecimals),
     tokensOutstandingFormatted: formatUnits(pos.tokensOutstanding, tokenCurrencyDecimals),
     liquidationPrice,
     liquidationPriceFormatted: liquidationPrice && liquidationPrice.toString(),
+    minterReward: minterReward.then(reward => reward.reward),
+    minterRewardFormatted: minterReward.then(reward => reward.rewardFormatted),
   }
 }
 
