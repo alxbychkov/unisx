@@ -311,7 +311,7 @@ export default {
         const portfolio = await this.getPortfolioList();
         this.GET_PORTFOLIO_FROM_API(portfolio);
         await this.updateSelectedItemBalance();
-        await this.updateStakeProfile();
+        await this.updateStakeProfile(this.selectedItem);
         await this.$refs.dex.updateSelectedItem(this.selectedItem.Name);
     },
 
@@ -378,7 +378,7 @@ export default {
             };
             this.stakeProfile.unisxStaked = (+collateralBalance.UNISXStakedFormatted).toFixed(toFix).toString();
             this.stakeProfile.unisxRewardEarned = (+collateralBalance.UNISXRewardEarnedFormatted).toFixed(toFix).toString();
-        } else {
+        } else if (['SUSHISWAP/uSPAC10-test/USDC', 'SUSHISWAP/UNISX/USDC'].includes(this.stakeProfile.name)) {
             const key = (separate(this.stakeProfile.name)[1] === 'uSPAC10-test') ? 'uSPAC10' : separate(this.stakeProfile.name)[1];
             this.stakeProfile.unisxAmount = '';
             this.stakeProfile.unisxBalance = {
@@ -386,6 +386,8 @@ export default {
             };
             this.stakeProfile.unisxStaked = (+poolProperties[key].stakedFormatted).toFixed(15).toString();
             this.stakeProfile.unisxRewardEarned = (+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString();
+        } else {
+            this.stakeProfile = {...initialData.stakeProfile};
         }
     },
 

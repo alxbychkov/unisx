@@ -157,11 +157,8 @@ export default {
             if (typeof e.target !== 'undefined') {
                 if (e.target.tagName === 'LI' && e.target.classList.contains('option') && !e.target.classList.contains('disabled') && !e.target.classList.contains('selected')) {
                     const value = e.target.innerText;
-                    console.log(value);
+                    console.log(value, e);
                     this.onSelectClick(e);
-                    // if (['UNISWAPv2/uSPAC10-test/USDC', 'UNISWAPv2/UNISX/USDC'].includes(value)) {
-                    //     console
-                    // } 
                 }
             }
         },
