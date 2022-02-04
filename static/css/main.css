@@ -1017,3 +1017,14 @@ textarea:focus {
 .ovh {
   overflow: hidden;
 }
+div#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+header {
+  margin-bottom: auto;
+}
+footer {
+  margin-top: auto;
+}
