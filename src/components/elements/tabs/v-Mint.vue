@@ -185,7 +185,7 @@ export default {
             if (this.synthetic.collateralAmount && this.synthetic.tokensAmount) {
                 const collateralAmount = toDote(this.synthetic.tokensAmount);
                 const tokensAmount = toDote(this.synthetic.collateralAmount);
-                const syntheticInWallet = this.synthetic.syntheticIntheWallet;
+                const syntheticInWallet = this.selectedItemBalance.collateralBalanceFormatted;
                 const minSponsorTokens = this.synthetic.minSponsorTokens;
 
                 if ((+tokensAmount) > (+syntheticInWallet)) {
