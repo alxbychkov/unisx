@@ -320,7 +320,7 @@ export default {
         await ethPromise;
         const portfolio = await this.getPortfolioList();
         this.GET_PORTFOLIO_FROM_API(portfolio);
-        await this.updateSelectedItemBalance();
+        await this.updateSelectedItemBalance(this.selectedItem);
         await this.updateStakeProfile(this.selectedItem);
         await this.$refs.dex.updateSelectedItem(this.selectedItem.Name);
     },
@@ -333,7 +333,7 @@ export default {
 
         console.log('collateralAmount: ', collateralAmount, 'collateralBalance: ', collateralBalance, 'contractProperties: ', contractProperties);
 
-        if (item.Name) {
+        if (item.Name && ['uSPAC5', 'uSPAC10', 'uSPAC10-test'].includes(item.Name)) {
             const value = item.Name;
             const selectedValue = this.INSTRUMENTS.find(i => i.Name === value);
             const globalCollateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
