@@ -1,7 +1,7 @@
 export const CHAIN_CONFIG = {
   // Kovan
   42: {
-    financialContractAddress: '0x79572Ef0c78fa199dCF6df631C9A6779F4c1D581',
+    financialContractAddress: '0x204A60b2d31e4795fbF031837D5dD210eb44263a',
     UNISXToken: "0x0fd2dD751D4803EbE981CD39d8dcB0dB656F8D44",
     xUNISXToken: "0x29DEAB859E99A32083FEeeE870e6e3eb6403e21c",
     LPStakingRewardsFactory: "0xbd384d9943D450aEdD1aFa708B5d746d88a9c5A7",
