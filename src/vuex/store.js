@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import Vue from 'vue';
 import Vuex from 'vuex';
 import {getJSONdata, createPrice, getLocalStorage} from '../helpers';
@@ -7,12 +8,15 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
     state: {
         instruments: [],
-        portfolio: getLocalStorage('portfolioList') ? JSON.parse(getLocalStorage('portfolioList')) : [],
-        userAccount: getLocalStorage('userAccount') ? getLocalStorage('userAccount') : '',
+        // portfolio: getLocalStorage('portfolioList') ? JSON.parse(getLocalStorage('portfolioList')) : [],
+        portfolio: [],
+        // userAccount: getLocalStorage('userAccount') ? getLocalStorage('userAccount') : '',
+        userAccount: '',
         networkId: '',
         stablecoins: [],
         dexLP: [],
-        defiTokens: []
+        defiTokens: [],
+        isMetamaskConnected: getLocalStorage('isMetamaskConnected') ? !!getLocalStorage('isMetamaskConnected') : false
     },
     mutations: {
         SET_INSTRUMENTS: (state, instruments) => {
@@ -25,6 +29,10 @@ const store = new Vuex.Store({
 
         SET_USER_ACCOUNT(state, account) {
             state.userAccount = account;
+        },
+
+        SET_isCONNECTED(state, isConnected) {
+            state.isMetamaskConnected = isConnected;
         },
 
         SET_NETWORK_ID(state, networkId) {
@@ -71,6 +79,10 @@ const store = new Vuex.Store({
             commit('SET_USER_ACCOUNT', account);
         },
 
+        GET_isCONNECTED({commit}, account) {
+            commit('SET_isCONNECTED', account);
+        },
+
         GET_NETWORK_ID({commit}) {
             const chainId = Number(window.ethereum?.chainId);
             const chainType = [0, 'Ethereum Main Network: ', 2, 'Ropsten Test Network: ',
@@ -108,6 +120,10 @@ const store = new Vuex.Store({
 
         DEFI_TOKENS(state) {
             return state.defiTokens;
+        },
+
+        isCONNECTED(state) {
+            return state.isMetamaskConnected;
         }
     }
 });

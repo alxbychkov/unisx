@@ -10,7 +10,7 @@
                             </div>
                             <div class="col-md-8 col-sm-8 col-xs-12">
                                 <div class="foot_flex">
-                                    <ul class="soc_list">
+                                    <ul class="soc_list" style="visibility: hidden;">
                                         <li>
                                             <a href=""><img src="../assets/img/soc1.svg" alt=""></a>
                                         </li>

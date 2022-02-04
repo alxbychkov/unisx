@@ -1,9 +1,9 @@
 <template>
-    <section class="operations_section">
+    <section v-if="isCONNECTED" class="operations_section">
         <div class="container">
             <div class="row" data-aos="fade-up" data-aos-delay="600" data-aos-duration="800">
                 <div class="col-md-12">
-                    <v-account :onClickConnect="handleClickConnect"/>
+                    <v-account :onClickConnect="handleClickConnect" ref="wallet"/>
                 </div>
             </div>
             <div class="row flex cards" data-aos="fade-up" data-aos-delay="1000" data-aos-duration="800">
@@ -64,10 +64,19 @@
             </div>
         </div>
     </section>
+    <section v-else class="not-connected">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <v-account :onClickConnect="handleClickConnect" ref="wallet"/>
+                </div>
+            </div>
+        </div>
+    </section>
 </template>
 
 <script>
-
+/* eslint-disable no-unused-vars */
 import './index.css';
 
 import {initialData} from '../../helpers/initialData';
@@ -103,7 +112,8 @@ export default {
         'GET_PORTFOLIO_FROM_API',
         'GET_STABLECOINS_FROM_API',
         'GET_DEX_LP_FROM_API',
-        'GET_DEFI_TOKENS_FROM_API'
+        'GET_DEFI_TOKENS_FROM_API',
+        'GET_INSTRUMENTS_FROM_API'
     ]),
       
     async getTableItem(item, isClear = true) {
@@ -302,7 +312,7 @@ export default {
             }
         }
 
-        setLocalStorage('portfolioList', JSON.stringify(portfolio));
+        // setLocalStorage('portfolioList', JSON.stringify(portfolio));
         return portfolio;
     },
 
@@ -431,7 +441,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-          'INSTRUMENTS', 'PORTFOLIO', 'STABLECOINS', 'DEX_LP', 'DEFI_TOKENS', 'USER_ACCOUNT'
+          'INSTRUMENTS', 'PORTFOLIO', 'STABLECOINS', 'DEX_LP', 'DEFI_TOKENS', 'USER_ACCOUNT', 'isCONNECTED'
     ]),
 
     stableCoinsTypes: function() {
@@ -449,7 +459,21 @@ export default {
       this.GET_DEX_LP_FROM_API();
       this.GET_DEFI_TOKENS_FROM_API();
       window.$('select').niceSelect();
+
+      if (this.isCONNECTED) {
+          this.$refs.wallet.connectWallet();
+      } else {
+          this.GET_INSTRUMENTS_FROM_API();
+      }
   },
-  updated() {}
+  updated() {
+      window.$('select').niceSelect();
+  }
 }
 </script>
+<style scoped>
+    .not-connected {
+        margin: auto;
+        width: 100%;
+    }
+</style>

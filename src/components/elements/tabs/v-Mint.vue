@@ -63,11 +63,12 @@
                 </div>
                 <button class="orangebut lr-auto hidden">Claim Rewards</button>
             </div>
-            <div class="col-md-6 col-sm-6 col-xs-12">
+            <div class="col-md-6 col-sm-6 col-xs-12 flex-collumn">
                 <h4>COLLATERAL</h4>
                 <div class="flex mb-10 flex-row-2 flex j-between">
                     <div class="input-wrapp">
                         <input type="text"
+                            class="mb-10"
                             placeholder="0.000"
                             v-model="synthetic.tokensAmount"
                             :disabled="!selectedItem.CollateralName"
