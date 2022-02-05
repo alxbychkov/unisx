@@ -285,7 +285,7 @@ export default {
                     console.log('Reward UNISX');
                     try {
                         const reward = UNISX_getReward(unisxReward);
-                        this.message(errorStatus('proccess'));
+                        this.onMessage(errorStatus('proccess'));
                         for await (let value of reward) {
                             console.log(value.message);
                             this.onMessage({isError: false, text: value.message});

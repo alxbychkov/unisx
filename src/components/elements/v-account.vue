@@ -44,7 +44,6 @@ export default {
             } catch(e) {
                 this.GET_isCONNECTED(false);
                 console.error(errorStatus('connect'));
-                alert(e);
             }
         },
     },
