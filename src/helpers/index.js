@@ -113,3 +113,14 @@ export function defaultSelect(selector) {
         }
     }
 }
+
+// export function truncate(v, p) {
+//     var s = Math.pow(10, p || 0);
+//     return Math.trunc(s * v) / s;
+// }
+
+export function truncate(number, digits) {
+    var reg_ex = new RegExp("(\\d+\\.\\d{" + digits + "})(\\d)")
+    var array = number.toString().match(reg_ex);
+    return array ? parseFloat(array[1]) : number.valueOf()
+}

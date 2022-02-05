@@ -80,7 +80,7 @@
 import './index.css';
 
 import {initialData} from '../../helpers/initialData';
-import {getUnicCoins, toFix, setLocalStorage, separate, defaultSelect} from '../../helpers';
+import {getUnicCoins, toFix, setLocalStorage, separate, defaultSelect, truncate} from '../../helpers';
 import errorStatus from '../../helpers/errors';
 import {mapActions, mapGetters} from 'vuex';
 
@@ -299,7 +299,7 @@ export default {
                     Name: i.token,
                     Status: "-",
                     Price: (+poolProperties[key].price).toFixed(toFix) ?? 0, 
-                    Number: (+poolProperties[key].liquidityFormatted).toFixed(15).toString(),
+                    Number: (poolProperties[key].liquidityFormatted).toString(),
                     Value: '',
                     GT: 0,
                     UMA: 0,
@@ -307,7 +307,7 @@ export default {
                     CollateralName: '',
                     Description: '',
                     CR: '',
-                    Rewards: `${(+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString()} (${(+poolProperties[key].stakedFormatted).toFixed(15).toString()})`
+                    Rewards: `${(+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString()} (${(poolProperties[key].stakedFormatted).toString()})`
                 });
             }
         }
@@ -374,6 +374,8 @@ export default {
         const collateralBalance = await getAccount();
         const poolProperties = await getPoolProperties();
 
+        console.log('poolProperties: ', poolProperties);
+
         if (!item.Name) {
             return this.stakeProfile = {...initialData.stakeProfile};
         }
@@ -392,9 +394,9 @@ export default {
             const key = (separate(this.stakeProfile.name)[1] === 'uSPAC10-test') ? 'uSPAC10' : separate(this.stakeProfile.name)[1];
             this.stakeProfile.unisxAmount = '';
             this.stakeProfile.unisxBalance = {
-                [this.stakeProfile.name]: (+poolProperties[key].liquidityFormatted).toFixed(15).toString()
+                [this.stakeProfile.name]: (poolProperties[key].liquidityFormatted).toString()
             };
-            this.stakeProfile.unisxStaked = (+poolProperties[key].stakedFormatted).toFixed(15).toString();
+            this.stakeProfile.unisxStaked = (poolProperties[key].stakedFormatted).toString();
             this.stakeProfile.unisxRewardEarned = (+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString();
         } else {
             this.stakeProfile = {...initialData.stakeProfile};
