@@ -232,6 +232,10 @@ export default {
         // Баланс токенов ERC20
         for (let i of tokenAddress) {
             const collateralAmount = await getAccount(walletAddress);
+            const collateral = await getPosition();
+            const rewards = await collateral.minterRewardFormatted;
+
+            console.log('rewards: ', rewards);
 
             let balance = (+collateralAmount.tokenCurrencyBalanceFormatted).toFixed(toFix).toString();
 
@@ -252,7 +256,7 @@ export default {
                     CollateralName: i.collateral,
                     Description: i.description,
                     CR: i.cr,
-                    Rewards: ''
+                    Rewards: (+rewards).toFixed(toFix).toString()
                 });
             }
 
@@ -470,6 +474,7 @@ export default {
   },
   updated() {
       window.$('select').niceSelect();
+      console.log('update actions: ', this.PORTFOLIO);
   }
 }
 </script>
