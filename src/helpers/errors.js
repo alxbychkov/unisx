@@ -7,7 +7,7 @@ export default function errorStatus(error = '', value = '') {
         case 'mintGlobalRatio':
             return {isError: true, text: 'Not enough collateral'};
         case 'mintSponsorTokens':
-            return {isError: true, text: `The position is too small. Must be at least ${value} sponsors tokens`};
+            return {isError: true, text: `The position is too small. Must be at least ${value} synthetic tokens`};
         case 'burnTokensCount':
             return {isError: true, text: 'Too many synthetics to burn'};
         case 'withdrawCollateralCount':

@@ -5,7 +5,7 @@
                 <div class="flex mb-10 flex-row-2 flex j-between mb-10">
                     <div class="input-wrapp">
                         <input 
-                            type="text"
+                            type="number"
                             placeholder="0.000"
                             v-model="selectedItem.firstTokenAmount"
                             :disabled="!selectedItem.firstToken"
@@ -30,7 +30,7 @@
                 <div class="flex mb-10 flex-row-2 flex j-between mb-10">
                     <div class="input-wrapp">
                         <input 
-                            type="text"
+                            type="number"
                             placeholder="0.000"
                             v-model="selectedItem.secondTokenAmount"
                             :disabled="!selectedItem.secondToken"

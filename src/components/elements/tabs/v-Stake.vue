@@ -4,7 +4,7 @@
             <div class="col-md-5 col-sm-5 col-xs-12">
                 <div class="mb-10">
                     <input 
-                        type="text" 
+                        type="number" 
                         placeholder="0.000"
                         v-model="selectedItem.unisxAmount"
                         :disabled="!selectedItem.name"    
