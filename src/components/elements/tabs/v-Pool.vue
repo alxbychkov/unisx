@@ -62,6 +62,7 @@ import {mapActions, mapGetters} from 'vuex';
 // eslint-disable-next-line no-unused-vars
 import { addLiquidity, getAccount, getPoolProperties, removeLiquidity } from '../../../core/eth';
 
+// eslint-disable-next-line no-unused-vars
 import {round, separate, toDote, toFix} from '../../../helpers';
 import errorStatus from '../../../helpers/errors';
 
@@ -247,10 +248,14 @@ export default {
             this.selectedItem.tokenCode = pair.tokenCode;
             this.selectedItem.firstToken = pair.firstToken;
             this.selectedItem.secondToken = pair.secondToken;
-            this.selectedItem.firstTokenInWallet = (+selectedItemData.tokenBalanceFormatted).toFixed(toFix).toString();
-            this.selectedItem.secondTokenInWallet = (+selectedItemData.USDCBalanceFormatted).toFixed(toFix).toString();
+            // this.selectedItem.firstTokenInWallet = (+selectedItemData.tokenBalanceFormatted).toFixed(toFix).toString();
+            // this.selectedItem.secondTokenInWallet = (+selectedItemData.USDCBalanceFormatted).toFixed(toFix).toString();
             this.selectedItem.firstTokenAmountInPool = (+selectedItemData.tokenAvailableToWithdrawFormatted).toFixed(toFix).toString();
             this.selectedItem.secondTokenAmountInPool = (+selectedItemData.USDCAvailableToWithdrawFormatted).toFixed(toFix).toString();
+            this.selectedItem.firstTokenInWallet = selectedItemData.tokenBalanceFormatted;
+            this.selectedItem.secondTokenInWallet = selectedItemData.USDCBalanceFormatted;
+            // this.selectedItem.firstTokenAmountInPool = selectedItemData.tokenAvailableToWithdrawFormatted;
+            // this.selectedItem.secondTokenAmountInPool = selectedItemData.USDCAvailableToWithdrawFormatted;
             this.selectedItem.firstTokenAmount = '';
             this.selectedItem.secondTokenAmount = '';
             this.selectedItem.tokenPrice = (+selectedItemData.price);

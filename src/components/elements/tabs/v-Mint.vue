@@ -5,7 +5,7 @@
                 <h4>SYNTHETIC</h4>
                 <div class="flex mb-10 flex-row-2 flex j-between">
                     <input 
-                        type="text"
+                        type="number"
                         placeholder="0.000"
                         class="mb-10"
                         v-model="synthetic.collateralAmount" 
@@ -67,7 +67,7 @@
                 <h4>COLLATERAL</h4>
                 <div class="flex mb-10 flex-row-2 flex j-between">
                     <div class="input-wrapp">
-                        <input type="text"
+                        <input type="number"
                             class="mb-10"
                             placeholder="0.000"
                             v-model="synthetic.tokensAmount"
@@ -113,9 +113,11 @@
 <script>
 import {mapActions, mapGetters} from 'vuex';
 
+// eslint-disable-next-line no-unused-vars
 import {round, toDote, COLLATERAL_PRICE} from '../../../helpers';
 
-import {createPosition, deposit, redeem, settleExpired, withdraw} from '../../../core/eth';
+// eslint-disable-next-line no-unused-vars
+import {collateralByTokenCurrency, createPosition, deposit, redeem, settleExpired, tokenCurrencyByCollateral, withdraw} from '../../../core/eth';
 import errorStatus from '../../../helpers/errors';
 
 export default {
@@ -290,10 +292,16 @@ export default {
                 console.log('Withdraw');  
                 const collateralAmount = toDote(this.synthetic.tokensAmount);
                 const collateralInWallet = this.selectedItemBalance.collateralBalanceFormatted;
+                const collateralAvailableForFastWithdrawal = this.selectedItemBalance.collateralAvailableForFastWithdrawal; 
 
                 if ((+collateralAmount) > (+collateralInWallet)) {
                     this.onMessage(errorStatus('withdrawCollateralCount'));
                     return console.error(errorStatus('withdrawCollateralCount'));
+                }
+
+                if ((+collateralAmount) > (+collateralAvailableForFastWithdrawal)) {
+                    this.onMessage(errorStatus('collateralAvailableForFastWithdrawal'));
+                    return console.error(errorStatus('collateralAvailableForFastWithdrawal'));
                 }
 
                 try {
@@ -352,9 +360,11 @@ export default {
         toPrice(token) {
             switch (token) {
                 case 'collateralAmount':
-                    return round((toDote(this.synthetic.collateralAmount) * this.synthetic.cr * (this.INSTRUMENTS[0].Price / COLLATERAL_PRICE)), 4).toString();
+                    // return round((toDote(this.synthetic.collateralAmount) * this.synthetic.cr * (this.INSTRUMENTS[0].Price / COLLATERAL_PRICE)), 4).toString();
+                    return this.synthetic.collateralAmount ? collateralByTokenCurrency(this.synthetic.collateralAmount) : '';
                 case 'tokensAmount':
-                    return round((toDote(this.synthetic.tokensAmount) / this.synthetic.cr * (COLLATERAL_PRICE / this.INSTRUMENTS[0].Price)), 4).toString();
+                    // return round((toDote(this.synthetic.tokensAmount) / this.synthetic.cr * (COLLATERAL_PRICE / this.INSTRUMENTS[0].Price)), 4).toString();
+                    return this.synthetic.tokensAmount ? tokenCurrencyByCollateral(this.synthetic.tokensAmount) : '';
                 default:
                     return token;
             }

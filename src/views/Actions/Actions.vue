@@ -235,12 +235,12 @@ export default {
             const collateral = await getPosition();
             const rewards = await collateral.minterRewardFormatted;
 
-            console.log('rewards: ', rewards);
+            // let balance = (+collateralAmount.tokenCurrencyBalanceFormatted).toFixed(toFix).toString();
+            // const value = i.price ? (balance * i.price).toFixed(toFix) : 0;
 
-            let balance = (+collateralAmount.tokenCurrencyBalanceFormatted).toFixed(toFix).toString();
-
-            const value = i.price ? (balance * i.price).toFixed(toFix) : 0;
-            console.log('Balance of ',i.token, ' = ', Number(balance));
+            
+            let balance = (+collateralAmount.tokenCurrencyBalanceFormatted);
+            const value = i.price ? (balance * i.price) : 0;
 
             // Проверить статус - в кошельке, пул или стейк
             if (balance >= 0) {
@@ -248,7 +248,7 @@ export default {
                     Name: i.token,
                     Status: "-",
                     Price: i.price, 
-                    Number: balance,
+                    Number: balance.toString(),
                     Value: value,
                     GT: 0,
                     UMA: 0,
@@ -256,7 +256,7 @@ export default {
                     CollateralName: i.collateral,
                     Description: i.description,
                     CR: i.cr,
-                    Rewards: (+rewards).toFixed(toFix).toString()
+                    Rewards: rewards
                 });
             }
 
@@ -264,7 +264,8 @@ export default {
                 Name: 'UNISX',
                 Status: "-",
                 Price: '', 
-                Number: (+collateralAmount.UNISXBalanceFormatted).toFixed(toFix).toString(),
+                // Number: (+collateralAmount.UNISXBalanceFormatted).toFixed(toFix).toString(),
+                Number: collateralAmount.UNISXBalanceFormatted,
                 Value: '',
                 GT: 0,
                 UMA: 0,
@@ -272,14 +273,16 @@ export default {
                 CollateralName: '',
                 Description: '',
                 CR: '',
-                Rewards: `${(+collateralAmount.UNISXRewardEarnedFormatted).toFixed(toFix).toString()} (${(+collateralAmount.UNISXStakedFormatted).toFixed(toFix).toString()})`
+                // Rewards: `${(+collateralAmount.UNISXRewardEarnedFormatted).toFixed(toFix).toString()} (${(+collateralAmount.UNISXStakedFormatted).toFixed(toFix).toString()})`
+                Rewards: `${collateralAmount.UNISXRewardEarnedFormatted} (${collateralAmount.UNISXStakedFormatted})`
             }
 
             const xunisx = {
                 Name: 'xUNISX',
                 Status: "-",
                 Price: '', 
-                Number: (+collateralAmount.xUNISXBalanceFormatted).toFixed(toFix).toString(),
+                // Number: (+collateralAmount.xUNISXBalanceFormatted).toFixed(toFix).toString(),
+                Number: collateralAmount.xUNISXBalanceFormatted,
                 Value: '',
                 GT: 0,
                 UMA: 0,
@@ -303,7 +306,8 @@ export default {
                     Name: i.token,
                     Status: "-",
                     Price: (+poolProperties[key].price).toFixed(toFix) ?? 0, 
-                    Number: (poolProperties[key].liquidityFormatted).toString(),
+                    // Number: (poolProperties[key].liquidityFormatted).toString(),
+                    Number: poolProperties[key].liquidityFormatted,
                     Value: '',
                     GT: 0,
                     UMA: 0,
@@ -311,7 +315,8 @@ export default {
                     CollateralName: '',
                     Description: '',
                     CR: '',
-                    Rewards: `${(+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString()} (${(poolProperties[key].stakedFormatted).toString()})`
+                    // Rewards: `${(+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString()} (${(poolProperties[key].stakedFormatted).toString()})`
+                    Rewards: `${poolProperties[key].rewardEarnedFormatted} (${poolProperties[key].stakedFormatted})`
                 });
             }
         }
@@ -341,17 +346,28 @@ export default {
             const value = item.Name;
             const selectedValue = this.INSTRUMENTS.find(i => i.Name === value);
             const globalCollateralRatio = (+contractProperties.totalPositionCollateralFormatted)/((+contractProperties.totalTokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
+            const rewards = await collateralAmount.minterRewardFormatted;
 
             this.synthetic = {
+                // name: selectedValue.Name,
+                // cr: selectedValue.CR,
+                // price: selectedValue.Price,
+                // rewards: selectedValue.Rewards,
+                // totalSyntTokensOutstanding: (+contractProperties.totalTokensOutstandingFormatted).toFixed(toFix).toString(),
+                // totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
+                // globalCollateralizationRation: (+globalCollateralRatio).toFixed(toFix).toString(),
+                // syntheticIntheWallet: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString(),
+                // minSponsorTokens: (+contractProperties.minSponsorTokensFormatted).toFixed(toFix).toString(),
+                // isExpired: contractProperties.isExpired
                 name: selectedValue.Name,
                 cr: selectedValue.CR,
                 price: selectedValue.Price,
-                rewards: selectedValue.Rewards,
-                totalSyntTokensOutstanding: (+contractProperties.totalTokensOutstandingFormatted).toFixed(toFix).toString(),
-                totalCollateral: (+contractProperties.totalPositionCollateralFormatted).toFixed(toFix).toString(),
-                globalCollateralizationRation: (+globalCollateralRatio).toFixed(toFix).toString(),
-                syntheticIntheWallet: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString(),
-                minSponsorTokens: (+contractProperties.minSponsorTokensFormatted).toFixed(toFix).toString(),
+                rewards: (+rewards).toFixed(toFix).toString(),
+                totalSyntTokensOutstanding: contractProperties.totalTokensOutstandingFormatted,
+                totalCollateral: contractProperties.totalPositionCollateralFormatted,
+                globalCollateralizationRation: globalCollateralRatio,
+                syntheticIntheWallet: collateralBalance.tokenCurrencyBalanceFormatted,
+                minSponsorTokens: contractProperties.minSponsorTokensFormatted,
                 isExpired: contractProperties.isExpired
             }
 
@@ -364,12 +380,20 @@ export default {
         }
 
         this.selectedItemBalance = {
-            collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
-            tokenCurrencyBalance: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString(),
-            collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString(),
-            collateralTokens: (+collateralAmount.collateralAmountFormatted).toFixed(toFix).toString(),
-            collateralRatio: collateralRatio ? (+collateralRatio).toFixed(toFix).toString() : '0.0000',
-            liquidationPrice: collateralAmount.liquidationPriceFormatted ? (+collateralAmount.liquidationPriceFormatted).toFixed(toFix).toString() : '0.0000'
+            // collateralAmountFormatted: (+collateralAmount.tokensOutstandingFormatted).toFixed(toFix).toString(),
+            // tokenCurrencyBalance: (+collateralBalance.tokenCurrencyBalanceFormatted).toFixed(toFix).toString(),
+            // collateralBalanceFormatted: (+collateralBalance.collateralBalanceFormatted).toFixed(toFix).toString(),
+            // collateralTokens: (+collateralAmount.collateralAmountFormatted).toFixed(toFix).toString(),
+            // collateralRatio: collateralRatio ? (+collateralRatio).toFixed(toFix).toString() : '0.0000',
+            // liquidationPrice: collateralAmount.liquidationPriceFormatted ? (+collateralAmount.liquidationPriceFormatted).toFixed(toFix).toString() : '0.0000',
+            // collateralAvailableForFastWithdrawal: collateralAmount.collateralAvailableForFastWithdrawalFormatted
+            collateralAmountFormatted: collateralAmount.tokensOutstandingFormatted,
+            tokenCurrencyBalance: collateralBalance.tokenCurrencyBalanceFormatted,
+            collateralBalanceFormatted: collateralBalance.collateralBalanceFormatted,
+            collateralTokens: collateralAmount.collateralAmountFormatted,
+            collateralRatio: collateralRatio ? collateralRatio : '0.0000',
+            liquidationPrice: collateralAmount.liquidationPriceFormatted ? collateralAmount.liquidationPriceFormatted : '0.0000',
+            collateralAvailableForFastWithdrawal: collateralAmount.collateralAvailableForFastWithdrawalFormatted
         }
 
     },
@@ -389,11 +413,15 @@ export default {
         if (this.stakeProfile.name === 'UNISX') {
             this.stakeProfile.unisxAmount = '';
             this.stakeProfile.unisxBalance = {
-                UNISX: (+collateralBalance.UNISXBalanceFormatted).toFixed(toFix).toString(),
-                xUNISX: (+collateralBalance.xUNISXBalanceFormatted).toFixed(toFix).toString()
+                // UNISX: (+collateralBalance.UNISXBalanceFormatted).toFixed(toFix).toString(),
+                // xUNISX: (+collateralBalance.xUNISXBalanceFormatted).toFixed(toFix).toString()
+                UNISX: collateralBalance.UNISXBalanceFormatted,
+                xUNISX: collateralBalance.xUNISXBalanceFormatted
             };
-            this.stakeProfile.unisxStaked = (+collateralBalance.UNISXStakedFormatted).toFixed(toFix).toString();
-            this.stakeProfile.unisxRewardEarned = (+collateralBalance.UNISXRewardEarnedFormatted).toFixed(toFix).toString();
+            // this.stakeProfile.unisxStaked = (+collateralBalance.UNISXStakedFormatted).toFixed(toFix).toString();
+            // this.stakeProfile.unisxRewardEarned = (+collateralBalance.UNISXRewardEarnedFormatted).toFixed(toFix).toString();
+            this.stakeProfile.unisxStaked = collateralBalance.UNISXStakedFormatted;
+            this.stakeProfile.unisxRewardEarned = collateralBalance.UNISXRewardEarnedFormatted;
         } else if (['SUSHISWAP/uSPAC10-test/USDC', 'SUSHISWAP/UNISX/USDC'].includes(this.stakeProfile.name)) {
             const key = (separate(this.stakeProfile.name)[1] === 'uSPAC10-test') ? 'uSPAC10' : separate(this.stakeProfile.name)[1];
             this.stakeProfile.unisxAmount = '';
@@ -401,7 +429,8 @@ export default {
                 [this.stakeProfile.name]: (poolProperties[key].liquidityFormatted).toString()
             };
             this.stakeProfile.unisxStaked = (poolProperties[key].stakedFormatted).toString();
-            this.stakeProfile.unisxRewardEarned = (+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString();
+            // this.stakeProfile.unisxRewardEarned = (+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString();
+            this.stakeProfile.unisxRewardEarned = poolProperties[key].rewardEarnedFormatted;
         } else {
             this.stakeProfile = {...initialData.stakeProfile};
         }
@@ -474,7 +503,6 @@ export default {
   },
   updated() {
       window.$('select').niceSelect();
-      console.log('update actions: ', this.PORTFOLIO);
   }
 }
 </script>

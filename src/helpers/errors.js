@@ -12,6 +12,8 @@ export default function errorStatus(error = '', value = '') {
             return {isError: true, text: 'Too many synthetics to burn'};
         case 'withdrawCollateralCount':
             return {isError: true, text: 'Too many collateral tokens to withdraw'};
+        case 'collateralAvailableForFastWithdrawal':
+            return {isError: true, text: 'Too many collateral tokens to fast withdraw'};            
         case 'mintExpired':
             return {isError: true, text: 'Contract expired'};
         case 'poolTokensCount':

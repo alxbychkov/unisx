@@ -7,7 +7,8 @@ export const initialData = {
         collateralRatio: '0.0000',
         cr: 1,
         liquidationPrice: '0.0000',
-        tokenCurrencyBalance: '0.0000'
+        tokenCurrencyBalance: '0.0000',
+        collateralAvailableForFastWithdrawal: '0.0000'
     },
     synthetic: {
         name: '',

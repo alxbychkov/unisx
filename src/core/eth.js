@@ -18,6 +18,10 @@ const UNISWAP_DECIMALS = 18
 
 const formatUnits = ethers.utils.formatUnits.bind(ethers.utils)
 
+function FN_to_BN(value) {
+  return ethers.BigNumber.from(value.toString().split('.')[0])
+}
+
 function getChainConfig(){
   return CHAIN_CONFIG[Number(window.ethereum.chainId)]
 }
@@ -32,14 +36,16 @@ export let collateralRequirement
 export let uniswapV2Router, uniswapV2Factory
 export let USDC, USDCDecimals
 
+let GCR
+
 let LPPairs
 
 let price
 
 export const ethPromise = Promise.all([
+  accountPromise,
   getPrice().then(_price => price = ethers.FixedNumber.from(_price)),
-
-  accountPromise.then(async () => {
+]).then(async () => {
     provider = new ethers.providers.Web3Provider(window.ethereum)
     signer = provider.getSigner()
 
@@ -70,6 +76,21 @@ export const ethPromise = Promise.all([
 
       (async () => {
         collateralRequirement = await financialContract.collateralRequirement()
+      })(),
+
+      (async () => {
+        const [totalTokensOutstanding, totalPositionCollateral] = await Promise.all([
+          financialContract.totalTokensOutstanding(),
+          financialContract.totalPositionCollateral().then(
+            ({rawValue}) => rawValue
+          ),
+        ])
+        GCR = 
+          ethers.FixedNumber.from(totalPositionCollateral.toString())
+          .divUnsafe(
+            ethers.FixedNumber.from(totalTokensOutstanding.toString())
+          )
+          .divUnsafe(price)
       })(),
 
       (async () => {
@@ -106,8 +127,7 @@ export const ethPromise = Promise.all([
         ))
       }),
     ])
-  }),
-])
+  })
 
 export async function getBalance(account = window.ethereum.selectedAddress){
   return provider.getBalance(account)
@@ -212,6 +232,7 @@ export async function getFinancialContractProperties(){
     totalPositionCollateralFormatted: formatUnits(props.totalPositionCollateral, props.collateralTokenDecimals),
     minSponsorTokensFormatted: formatUnits(props.minSponsorTokens, props.collateralTokenDecimals),
     collateralRequirementFormatted: formatUnits(props.collateralRequirement),
+    GCR,
   }
 }
 
@@ -249,6 +270,18 @@ export async function getPosition(address = window.ethereum.selectedAddress){
     sponsors: [address],
   }).then(rewards => rewards[ethers.utils.getAddress(address)])
 
+  const collateralAvailableForFastWithdrawal = 
+    FN_to_BN(
+      maxFN(
+        ethers.FixedNumber.from(pos.collateralAmount).subUnsafe(
+          ethers.FixedNumber.from(pos.tokensOutstanding.toString())
+            .mulUnsafe(GCR)
+            .mulUnsafe(price)
+        ),
+        ethers.FixedNumber.from(0),
+      )
+    )
+
   return {...pos,
     collateralAmountFormatted: formatUnits(pos.collateralAmount, collateralTokenDecimals),
     tokensOutstandingFormatted: formatUnits(pos.tokensOutstanding, tokenCurrencyDecimals),
@@ -256,12 +289,14 @@ export async function getPosition(address = window.ethereum.selectedAddress){
     liquidationPriceFormatted: liquidationPrice && liquidationPrice.toString(),
     minterReward: minterReward.then(reward => reward.reward),
     minterRewardFormatted: minterReward.then(reward => reward.rewardFormatted),
+    collateralAvailableForFastWithdrawal,
+    collateralAvailableForFastWithdrawalFormatted: formatUnits(collateralAvailableForFastWithdrawal, collateralTokenDecimals),
   }
 }
 
 const BN = ethers.BigNumber.from
 
-function toBN(val, decimals) {
+export function toBN(val, decimals) {
   if(ethers.BigNumber.isBigNumber(val)) {
     return val
   } else if(typeof(val) == 'string') {
@@ -359,25 +394,29 @@ export async function* settleExpired() {
   await tx.wait()
 }
 
+function maxFN(a, b) {
+  return a.toUnsafeFloat() < b.toUnsafeFloat() ? b : a
+}
+
 export function tokenCurrencyByCollateral(collateralAmount) {
   collateralAmount = toBN(collateralAmount, collateralTokenDecimals)
-  collateralAmount = ethers.FixedNumber.from(collateralAmount.toString())
-    .divUnsafe(ethers.FixedNumber.from((10 ** collateralTokenDecimals).toString()))
-  return collateralAmount
-    .mulUnsafe(price)
-    .mulUnsafe(ethers.FixedNumber.from(USER_CR))
-    .round(tokenCurrencyDecimals)
+  return ethers.FixedNumber.from(collateralAmount.toString())
+    .divUnsafe(price)
+    .divUnsafe(maxFN(ethers.FixedNumber.from(USER_CR), GCR))
+    // Floor, because we dont want to create more tokens than GCR allows
+    .floor()
+    .divUnsafe(ethers.FixedNumber.from(10 ** collateralTokenDecimals))
     .toString()
 }
 
 export function collateralByTokenCurrency(tokensAmount) {
   tokensAmount = toBN(tokensAmount, tokenCurrencyDecimals)
-  tokensAmount = ethers.FixedNumber.from(tokensAmount.toString())
-    .divUnsafe(ethers.FixedNumber.from((10 ** tokenCurrencyDecimals).toString()))
-  return tokensAmount
-    .divUnsafe(price)
-    .divUnsafe(ethers.FixedNumber.from(USER_CR))
-    .round(collateralTokenDecimals)
+  return ethers.FixedNumber.from(tokensAmount.toString())
+    .mulUnsafe(price)
+    .mulUnsafe(maxFN(ethers.FixedNumber.from(USER_CR), GCR))
+    // Ceiling, because we dont want to supply less tokens than GCR allows
+    .ceiling()
+    .divUnsafe(ethers.FixedNumber.from(10 ** tokenCurrencyDecimals))
     .toString()
 }
 
