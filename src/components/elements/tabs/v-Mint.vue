@@ -115,7 +115,7 @@ import {mapActions, mapGetters} from 'vuex';
 
 import {round, toDote, COLLATERAL_PRICE} from '../../../helpers';
 
-import {createPosition, deposit, redeem, settleExpired} from '../../../core/eth';
+import {createPosition, deposit, redeem, settleExpired, withdraw} from '../../../core/eth';
 import errorStatus from '../../../helpers/errors';
 
 export default {
@@ -297,7 +297,7 @@ export default {
                 }
 
                 try {
-                    const newWithdraw = deposit(collateralAmount);
+                    const newWithdraw = withdraw(collateralAmount);
                     this.onMessage(errorStatus('proccess'));
                     console.log(errorStatus('proccess'));
                     for await (let value of newWithdraw) {
