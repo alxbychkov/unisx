@@ -1,32 +1,53 @@
 <template>
     <div role="tabpanel" class="tab-pane fade" :class="{active}" :id="id">
         <div class="row flex cards j-between">
-            <div class="col-md-5 col-sm-5 col-xs-12">
-                <div class="mb-10">
-                    <input 
-                        type="number" 
-                        placeholder="0.000"
-                        v-model="selectedItem.unisxAmount"
-                        :disabled="!selectedItem.name"    
-                    >
-                    <p class="flex j-between color-red mb-0"><span>In the stake:</span><span>{{ selectedItem.unisxStaked }}</span></p>
+            <div class="col-md-9 col-sm-9 col-xs-12">
+                <div class="flex mb-10 flex-row-2 flex j-between mb-10">
+                    <div class="input-wrapp">
+                        <input 
+                            type="number" 
+                            placeholder="0.000"
+                            v-model="selectedItem.unisxAmount"
+                            :disabled="!selectedItem.name"    
+                        >
+                        <p class="flex j-between mb-0"><span>In the stake:</span>
+                        <span 
+                            @dblclick="selectedItem.unisxAmount = (+selectedItem.unisxStaked > 0) ? selectedItem.unisxStaked : ''"
+                        >
+                            {{ selectedItem.unisxStaked }}</span></p>
+                    </div>
+                    <div class="input-wrapp">
+                        <div class="flex-collumn" id="stakeList" @click="handleSelectClick($event)">
+                            <select id="stake">
+                                <option value="" disabled selected>Choose Token</option>
+                                <option 
+                                    v-for="pool in sushiswapPool" 
+                                    :key="pool.PoolAddress"
+                                    :value="pool.Pair">{{ pool.Pair }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="flex j-between mb-0"><span>In the wallet:</span>
+                        <span
+                            @dblclick="selectedItem.unisxAmount = (selectedItem.name && +selectedItem.unisxBalance[selectedItem.name]) ? selectedItem.unisxBalance[selectedItem.name] : ''"
+                        >{{ selectedItem.name ? selectedItem.unisxBalance[selectedItem.name] : '0.0000' }}</span></div>
+                    </div>
                 </div>
-                <div class="hidden">
+                <div class="flex flex-row-2 justify-end">
+                    <p class="mb-0 mr-10">Rewards</p>
                     <input 
-                        type="text"
-                        placeholder="Token" 
-                        v-model="STAKE.name"
+                        type="text" 
+                        value="" 
+                        placeholder="0.0000 UNSX"
+                        v-model="selectedItem.unisxRewardEarned"
                         disabled
                     >
-                    <p class="flex j-between color-green mb-0">
-                        <span>In the wallet:</span>
-                        <span>{{ selectedItem.name ? selectedItem.unisxBalance[selectedItem.name] : '0.0000' }}</span>
-                    </p>
+                    <p class="mb-0 ml-10">UNISX</p>
                 </div>
-                <div class="input-wrapp">
+                <div class="input-wrapp hidden">
                     <div class="flex-collumn" id="stakeList" @click="handleSelectClick($event)">
                         <select id="stake">
-                            <option value="" disabled selected>Token</option>
+                            <option value="" disabled selected>Choose Token</option>
                             <option 
                                 v-for="pool in sushiswapPool" 
                                 :key="pool.PoolAddress"
@@ -34,7 +55,10 @@
                             </option>
                         </select>
                     </div>
-                    <div class="flex j-between color-green mb-0"><span>In the wallet:</span><span>{{ selectedItem.name ? selectedItem.unisxBalance[selectedItem.name] : '0.0000' }}</span></div>
+                    <div class="flex j-between mb-0"><span>In the wallet:</span>
+                    <span
+                        @dblclick="selectedItem.unisxAmount = (selectedItem.name && +selectedItem.unisxBalance[selectedItem.name]) ? selectedItem.unisxBalance[selectedItem.name] : ''"
+                    >{{ selectedItem.name ? selectedItem.unisxBalance[selectedItem.name] : '0.0000' }}</span></div>
                 </div>
                 <div class="but_flex">
                     <button 
@@ -46,9 +70,14 @@
                         @click="stake"
                         :disabled="!selectedItem.unisxAmount"
                     >Stake</button>
+                    <button 
+                        class="orangebut mt-auto disabled ml-10"
+                        @click="getReward"
+                        :disabled="!+selectedItem.unisxRewardEarned"
+                    >Claim Rewards</button>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn">
+            <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn hidden">
                 <input 
                     type="text" 
                     value="" 
@@ -325,3 +354,27 @@ export default {
     updated() {}
 }
 </script>
+<style scoped>
+.flex-row-2 .input-wrapp:first-of-type {
+    width: 40%;
+}
+.flex-row-2 .input-wrapp:last-of-type {
+    width: 55%;
+}
+.mr-10 {
+    margin-right: 10px;
+}
+.ml-10 {
+    margin-left: 10px;
+}
+.justify-end {
+    justify-content: flex-end;
+    align-items: center;
+}
+.but_flex {
+    max-width: 100%;
+}
+.but_flex .orangebut {
+    height: 50px;
+}
+</style>

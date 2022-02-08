@@ -11,12 +11,15 @@
                             :disabled="!selectedItem.firstToken"
                             @input="consider('firstToken')" 
                         >
-                        <div class="flex j-between mb-0"><span>In the pool:</span><span class="color-red">{{ selectedItem.firstTokenAmountInPool }}</span></div>
+                        <div class="flex j-between mb-0"><span>In the pool:</span>
+                        <span
+                            @dblclick="selectedItem.firstTokenAmount = +selectedItem.firstTokenAmountInPool ? selectedItem.firstTokenAmountInPool : ''"
+                        >{{ selectedItem.firstTokenAmountInPool }}</span></div>
                     </div>
                     <div class="input-wrapp">
                         <div class="flex-collumn" id="poolList" @click="handleSelectClick($event)">
                             <select id="pool">
-                                <option value="" disabled selected>Pool</option>
+                                <option value="" disabled selected>Choose Pool</option>
                                 <option 
                                     v-for="pool in sushiswapPool" 
                                     :key="pool.PoolAddress"
@@ -24,7 +27,10 @@
                                 </option>
                             </select>
                         </div>
-                        <div class="flex j-between mb-0"><span>In the wallet:</span><span class="color-green">{{ selectedItem.firstTokenInWallet }}</span></div>
+                        <div class="flex j-between mb-0"><span>In the wallet:</span>
+                        <span
+                            @dblclick="selectedItem.firstTokenAmount = +selectedItem.firstTokenInWallet ? selectedItem.firstTokenInWallet : ''"
+                        >{{ selectedItem.firstTokenInWallet }}</span></div>
                     </div>
                 </div>   
                 <div class="flex mb-10 flex-row-2 flex j-between mb-10">
@@ -36,16 +42,21 @@
                             :disabled="!selectedItem.secondToken"
                             @input="consider('secondToken')" 
                         >
-                        <div class="flex j-between mb-0"><span>In the pool:</span><span class="color-red">{{ selectedItem.secondTokenAmountInPool }}</span></div>
+                        <div class="flex j-between mb-0"><span>In the pool:</span>
+                        <span
+                            @dblclick="selectedItem.secondTokenAmount = +selectedItem.secondTokenAmountInPool ? selectedItem.secondTokenAmountInPool : ''"
+                        >{{ selectedItem.secondTokenAmountInPool }}</span></div>
                     </div>
                     <div class="input-wrapp">
                         <input 
                             type="text"
-                            placeholder="Token"
                             disabled
                             v-model="selectedItem.secondToken"
                         >
-                        <div class="flex j-between mb-0"><span>In the wallet:</span><span class="color-green">{{ selectedItem.secondTokenInWallet }}</span></div>
+                        <div class="flex j-between mb-0"><span>In the wallet:</span>
+                        <span
+                            @dblclick="selectedItem.secondTokenAmount = +selectedItem.secondTokenInWallet ? selectedItem.secondTokenInWallet : ''"
+                        >{{ selectedItem.secondTokenInWallet }}</span></div>
                     </div>
                 </div>                                    
                 <div class="but_flex mt-auto lr-auto">
