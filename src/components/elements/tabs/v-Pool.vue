@@ -9,7 +9,7 @@
                             placeholder="0.000"
                             v-model="selectedItem.firstTokenAmount"
                             :disabled="!selectedItem.firstToken"
-                            @input="consider('firstToken')" 
+                            @input="consider('firstToken')"
                         >
                         <div class="flex j-between mb-0"><span>In the pool:</span>
                         <span
@@ -127,7 +127,12 @@ export default {
             const pool = this.INSTRUMENTS ? this.INSTRUMENTS.map(instrument => instrument["DEX"])[0] : [];
             if (pool && pool.length) {
                 const modifiedPool = pool.map(item => {
-                    return {...item, firstToken: `${separate(item.Pair)[0]}/${separate(item.Pair)[1]}`, secondToken: separate(item.Pair)[2], tokenCode: separate(item.Pair)[1]};
+                    return {
+                        ...item, 
+                        firstToken: `${separate(item.Pair)[0]}`, 
+                        secondToken: separate(item.Pair)[1], 
+                        tokenCode: separate(separate(item.Pair)[0], ' ')[1]
+                    };
                 });
                 return modifiedPool;
             }

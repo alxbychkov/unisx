@@ -128,7 +128,7 @@ export default {
             this.synthetic.cr = item.CR ? +item.CR : 1;
             await this.updateStakeProfile();
             await this.updateSelectedItemBalance(item);
-        } else if (['SUSHISWAP/uSPAC10-test/USDC', 'SUSHISWAP/UNISX/USDC'].includes(item?.Name)){
+        } else if (['Sushiswap uSPAC10-test/USDC', 'Sushiswap UNISX/USDC'].includes(item?.Name)){
             this.selectedItem = item;
             await this.updateStakeProfile(item);
             await this.$refs.dex.updateSelectedItem(item.Name);
@@ -297,10 +297,9 @@ export default {
         }
 
         const poolProperties = await getPoolProperties();
-
         for (let i of poolInstruments[0]) {
-            if (i.token.indexOf('SUSHISWAP/UNISX') !== -1 ||  i.token.indexOf('SUSHISWAP/uSPAC10') !== -1) {
-                const key = (separate(i.token)[1] !== 'uSPAC10-test') ? separate(i.token)[1] : 'uSPAC10';
+            if (i.token.indexOf('Sushiswap UNISX') !== -1 ||  i.token.indexOf('Sushiswap uSPAC10') !== -1) {
+                const key = (separate(i.token)[0] !== 'Sushiswap uSPAC10-test') ? separate(separate(i.token)[0], ' ')[1] : 'uSPAC10';
 
                 portfolio.push({
                     Name: i.token,
@@ -422,8 +421,8 @@ export default {
             // this.stakeProfile.unisxRewardEarned = (+collateralBalance.UNISXRewardEarnedFormatted).toFixed(toFix).toString();
             this.stakeProfile.unisxStaked = collateralBalance.UNISXStakedFormatted;
             this.stakeProfile.unisxRewardEarned = collateralBalance.UNISXRewardEarnedFormatted;
-        } else if (['SUSHISWAP/uSPAC10-test/USDC', 'SUSHISWAP/UNISX/USDC'].includes(this.stakeProfile.name)) {
-            const key = (separate(this.stakeProfile.name)[1] === 'uSPAC10-test') ? 'uSPAC10' : separate(this.stakeProfile.name)[1];
+        } else if (['Sushiswap uSPAC10-test/USDC', 'Sushiswap UNISX/USDC'].includes(this.stakeProfile.name)) {
+            const key = (separate(this.stakeProfile.name)[0] === 'Sushiswap uSPAC10-test') ? 'uSPAC10' : separate(separate(this.stakeProfile.name)[0], ' ')[1];
             this.stakeProfile.unisxAmount = '';
             this.stakeProfile.unisxBalance = {
                 [this.stakeProfile.name]: (poolProperties[key].liquidityFormatted).toString()

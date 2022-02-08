@@ -195,7 +195,6 @@ export default {
         async unStake() {
             if (this.selectedItem.unisxAmount) {
                 const unisxAmount = toDote(this.selectedItem.unisxAmount);
-                console.log(this.selectedItem);
                 if (unisxAmount > +this.selectedItem.unisxStaked) {
                     this.onMessage(errorStatus('unStakeTokensCount', this.selectedItem.name));
                     return console.error(errorStatus('unStakeTokensCount'));
@@ -227,8 +226,8 @@ export default {
                 } else {
                     console.log('unStake LP');
                     try {
-                        const token = separate(this.selectedItem.name)[1];
-                        const tokenCode = (token === 'uSPAC10-test') ? 'uSPAC10' : token;
+                        const token = separate(this.selectedItem.name)[0];
+                        const tokenCode = (token === 'Sushiswap uSPAC10-test') ? 'uSPAC10' : separate(token, ' ')[1];
 
                         const unStake = LP_withdraw(tokenCode, unisxAmount);
                         this.onMessage(errorStatus('proccess'));
@@ -282,8 +281,8 @@ export default {
                 } else {
                     console.log('Stake LP');
                     try {
-                        const token = separate(this.selectedItem.name)[1];
-                        const tokenCode = (token === 'uSPAC10-test') ? 'uSPAC10' : token;
+                        const token = separate(this.selectedItem.name)[0];
+                        const tokenCode = (token === 'Sushiswap uSPAC10-test') ? 'uSPAC10' : separate(token, ' ')[1];
 
                         const stake = LP_stake(tokenCode, unisxAmount);
                         this.onMessage(errorStatus('proccess'));
@@ -330,8 +329,8 @@ export default {
                 } else {
                     console.log('Reward LP');
                     try {
-                        const token = separate(this.selectedItem.name)[1];
-                        const tokenCode = (token === 'uSPAC10-test') ? 'uSPAC10' : token;
+                        const token = separate(this.selectedItem.name)[0];
+                        const tokenCode = (token === 'Sushiswap uSPAC10-test') ? 'uSPAC10' : separate(token, ' ')[1];
 
                         const reward = LP_getReward(tokenCode);
                         this.onMessage(errorStatus('proccess'));
