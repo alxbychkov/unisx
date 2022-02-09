@@ -19,7 +19,7 @@
             </div>
             
             <div class="row" data-aos="fade-up" data-aos-delay="1200" data-aos-duration="800">
-                <div class="col-md-8 col-md-offset-2">
+                <div class="col-md-9 col-md-offset-1">
                     <ul class="cards_tabs_nav" role="tablist">
                         <li role="presentation" class="active" @click="clearTab($event)"><a href="#cardtab1" role="tab" data-toggle="tab">Instrument</a></li>
                         <li role="presentation" @click="clearTab($event)"><a href="#cardtab2" role="tab" data-toggle="tab">POOL</a></li>

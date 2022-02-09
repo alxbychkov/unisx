@@ -25,28 +25,39 @@
                     </div>
                 </div>
                 <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                    <span>Synthetic tokens in the wallet:</span>
-                    <span>{{ synthetic.syntheticIntheWallet }}</span>
+                    <span>Synthetic tokens minted:</span>
+                    <span class="ml-a">{{ synthetic.syntheticIntheWallet }}</span>
+                    <span 
+                        v-if="+synthetic.syntheticIntheWallet > 0" 
+                        class="color-green cur-p"
+                    >
+                        &nbsp;MAX
+                    </span>
                 </div>
                 <hr>
                 <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                    <div class="w-45 flex j-between"><span>Price:</span><span>{{ synthetic.price }}</span></div>
-                    <div class="w-45 flex j-between"><span>Rewards:</span><span>{{ synthetic.rewards }}</span></div>
+                    <div class="w-45 flex j-between"><span>SyntPrice:</span><span>{{ synthetic.price }}</span></div>
+                    <div class="w-45 flex j-between"><span>Synt Value:</span><span>0.0000</span></div>
                 </div>
+                <div class="flex mb-10 flex-row-2 flex j-between align-center color-red">
+                    <span>Liquidation Price:</span>
+                    <span>{{ selectedItemBalance.liquidationPrice }}</span>
+                </div>
+                <div class="flex mb-10 flex-row-2 flex j-between align-center color-red" style="height:20px"></div>       
                 <hr>
+                <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                    <span>Global Collateralization ratio</span>
+                    <span>{{ synthetic.globalCollateralizationRation }}</span>
+                </div>
                 <div class="flex mb-10 flex-row-2 flex j-between align-center">
                     <span>Total synt tokens outstanding:</span>
                     <span>{{ synthetic.totalSyntTokensOutstanding }}</span>
                 </div>
                 <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                    <span>Total collateral:</span>
+                    <span>Total Locked collateral:</span>
                     <span>{{ synthetic.totalCollateral }}</span>
                 </div>
-                <hr>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                    <span>Global Collateralization ratio</span>
-                    <span>{{ synthetic.globalCollateralizationRation }}</span>
-                </div>                                        
+                <hr>                                        
                 <div v-if="!synthetic.isExpired" class="but_flex mt-auto lr-auto">
                     <button class="cancelbut disabled" @click="mint" :disabled="!synthetic.tokensAmount">Mint</button>
                     <button class="blueb disabled" @click="burn" :disabled="!synthetic.collateralAmount">Burn</button>
@@ -86,22 +97,26 @@
                 </div>
                 <hr>
                 <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                    <span>Position tokens outstanding:</span>
-                    <span>{{ selectedItemBalance.collateralAmountFormatted }}</span>
+                    <div class="w-45 flex j-between"><span>Rewards:</span><span>{{ synthetic.rewards }} UNISX</span></div>
+                    <div class="w-45 flex j-between"><span>APY:</span><span>0.00%</span></div>
                 </div>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                    <span>Collaterall amount:</span>
-                    <span>{{ selectedItemBalance.collateralTokens }}</span>
-                </div>
+                <div class="flex mb-10 flex-row-2 flex j-between align-center color-red" style="height:20px"></div>
+                <div class="flex mb-10 flex-row-2 flex j-between align-center color-red" style="height:20px"></div>    
                 <hr>
                 <div class="flex mb-10 flex-row-2 flex j-between align-center">
                     <span>Collateral Ratio:</span>
                     <span>{{ selectedItemBalance.collateralRatio }}</span>
-                </div>                                                                                                                        
-                <div class="flex mb-10 flex-row-2 flex j-between align-center color-red">
-                    <span>Liquidation Price:</span>
-                    <span>{{ selectedItemBalance.liquidationPrice }}</span>
-                </div>                                        
+                </div>  
+                <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                    <span>Position tokens outstanding:</span>
+                    <span>{{ selectedItemBalance.collateralAmountFormatted }}</span>
+                </div>
+                <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                    <span>Position Collaterall amount:</span>
+                    <span>{{ selectedItemBalance.collateralTokens }}</span>
+                </div>
+                <hr>
+                                                                                                                                                      
                 <div v-if="!synthetic.isExpired" class="but_flex lr-auto">
                     <button class="cancelbut disabled" @click="deposit" :disabled="!selectedItem.Value">Supply</button>
                     <button class="blueb disabled" @click="withdraw" :disabled="!selectedItem.Value">Withdraw</button>
@@ -192,7 +207,7 @@ export default {
                 const minSponsorTokens = this.synthetic.minSponsorTokens;
 
                 if ((+tokensAmount) > (+syntheticInWallet)) {
-                    this.onMessage(errorStatus('mintTokensCount'));
+                    this.onMessage(errorStatus('mintTokensCount', syntheticInWallet));
                     console.error(errorStatus('mintTokensCount'));
                 } else if ((+tokensAmount) < (+minSponsorTokens)) {
                     this.onMessage(errorStatus('mintSponsorTokens', minSponsorTokens));
@@ -208,6 +223,7 @@ export default {
                             this.onMessage({isError: false, text: value.message});
                         }
                         this.onMessage( errorStatus('success'));
+                        this.onMessage( errorStatus('mintCreate', tokensAmount));
                         console.log(errorStatus('success'));
                         this.onAfterClickAction();
                     } catch(e) {
@@ -226,10 +242,11 @@ export default {
                 console.log('Deposit');  
                 const collateralAmount = toDote(this.synthetic.tokensAmount);
                 const tokensAmount = toDote(this.synthetic.collateralAmount);
-                const syntheticInWallet = this.synthetic.syntheticIntheWallet;
+                // const syntheticInWallet = this.synthetic.syntheticIntheWallet;
+                const syntheticInWallet = this.selectedItemBalance.collateralBalanceFormatted;
 
                 if ((+tokensAmount) > (+syntheticInWallet)) {
-                    this.onMessage(errorStatus('mintTokensCount')); 
+                    this.onMessage(errorStatus('mintTokensCount', syntheticInWallet)); 
                     console.error(errorStatus('mintTokensCount'));
                 } else {
                     try {
@@ -258,10 +275,11 @@ export default {
             if (this.synthetic.collateralAmount) {
                 console.log('Burn');  
                 const tokensAmount = toDote(this.synthetic.collateralAmount);
-                const portfolioAmount = this.selectedItemBalance.tokenCurrencyBalance;
-
+                // const portfolioAmount = this.selectedItemBalance.tokenCurrencyBalance;
+                const portfolioAmount = this.selectedItemBalance.collateralAmountFormatted;
+                
                 if (+tokensAmount > +portfolioAmount) {
-                    this.onMessage(errorStatus('burnTokensCount')); 
+                    this.onMessage(errorStatus('burnTokensCount', portfolioAmount)); 
                     console.error(errorStatus('burnTokensCount'));
                     return console.error('You have no much tokens');
                 }
@@ -291,11 +309,12 @@ export default {
             if (this.synthetic.tokensAmount) {
                 console.log('Withdraw');  
                 const collateralAmount = toDote(this.synthetic.tokensAmount);
-                const collateralInWallet = this.selectedItemBalance.collateralBalanceFormatted;
+                // const collateralInWallet = this.selectedItemBalance.collateralBalanceFormatted;
+                const collateralInWallet = this.selectedItemBalance.collateralTokens;
                 const collateralAvailableForFastWithdrawal = this.selectedItemBalance.collateralAvailableForFastWithdrawal; 
-
+                
                 if ((+collateralAmount) > (+collateralInWallet)) {
-                    this.onMessage(errorStatus('withdrawCollateralCount'));
+                    this.onMessage(errorStatus('withdrawCollateralCount', collateralInWallet));
                     return console.error(errorStatus('withdrawCollateralCount'));
                 }
 

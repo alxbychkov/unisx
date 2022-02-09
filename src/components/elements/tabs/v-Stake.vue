@@ -11,10 +11,14 @@
                             :disabled="!selectedItem.name"    
                         >
                         <p class="flex j-between mb-0"><span>In the stake:</span>
-                        <span 
-                            @dblclick="selectedItem.unisxAmount = (+selectedItem.unisxStaked > 0) ? selectedItem.unisxStaked : ''"
-                        >
-                            {{ selectedItem.unisxStaked }}</span></p>
+                        <span class="ml-a">
+                            {{ selectedItem.unisxStaked }}</span>
+                        <span
+                            v-if="+selectedItem.unisxStaked > 0" 
+                            class="color-green cur-p"
+                            @click="selectedItem.unisxAmount = (+selectedItem.unisxStaked > 0) ? selectedItem.unisxStaked : ''"
+                        >&nbsp;MAX</span>
+                        </p>
                     </div>
                     <div class="input-wrapp">
                         <div class="flex-collumn" id="stakeList" @click="handleSelectClick($event)">
@@ -195,13 +199,15 @@ export default {
         async unStake() {
             if (this.selectedItem.unisxAmount) {
                 const unisxAmount = toDote(this.selectedItem.unisxAmount);
-                if (unisxAmount > +this.selectedItem.unisxStaked) {
-                    this.onMessage(errorStatus('unStakeTokensCount', this.selectedItem.name));
+                const stakeInStake = this.selectedItem.unisxStaked;
+
+                if (unisxAmount > +stakeInStake) {
+                    this.onMessage(errorStatus('unStakeTokensCount', stakeInStake, separate(this.selectedItem.name)[0]));
                     return console.error(errorStatus('unStakeTokensCount'));
                 }
                 if (this.selectedItem.name === 'UNISX') {
                     if (unisxAmount > +this.selectedItem.unisxBalance.xUNISX) {
-                        this.onMessage(errorStatus('unStakeUNISXTokensCount', this.selectedItem.name));
+                        this.onMessage(errorStatus('unStakeUNISXTokensCount', this.selectedItem.unisxBalance.xUNISX));
                         return console.error(errorStatus('unStakeUNISXTokensCount'));
                     }
                     console.log('unStake UNISX');
@@ -253,9 +259,10 @@ export default {
         async stake() {
             if (this.selectedItem.unisxAmount) {
                 const unisxAmount = toDote(this.selectedItem.unisxAmount);
-                console.log(this.selectedItem);
-                if (unisxAmount > +this.selectedItem.unisxBalance[this.selectedItem.name]) {
-                    this.onMessage(errorStatus('stakeTokensCount', this.selectedItem.name));
+                const stakeInWallet = this.selectedItem.unisxBalance[this.selectedItem.name];
+
+                if (unisxAmount > (+stakeInWallet)) {
+                    this.onMessage(errorStatus('stakeTokensCount', stakeInWallet, separate(this.selectedItem.name)[0]));
                     return console.error(errorStatus('stakeTokensCount'));
                 } 
                 if (this.selectedItem.name === 'UNISX') {

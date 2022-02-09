@@ -168,7 +168,7 @@ export default {
                 console.log('Pool');
 
                 if ((+tokenAmount) > (+tokenInWallet)) {
-                    this.onMessage(errorStatus('poolTokensCount', separate(value)[1]));
+                    this.onMessage(errorStatus('poolTokensCount', tokenInWallet, separate(value)[0]));
                     return console.error(errorStatus('poolTokensCount', value));
                 }
 
@@ -205,7 +205,7 @@ export default {
                 console.log('unPool');
 
                 if ((+tokenAmount) > (+tokensInPool)) {
-                    this.onMessage(errorStatus('unPoolTokensCount', separate(value)[1]));
+                    this.onMessage(errorStatus('unPoolTokensCount', tokensInPool, separate(value)[0]));
                     return console.error(errorStatus('unPoolTokensCount', value));
                 }
 

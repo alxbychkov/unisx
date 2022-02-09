@@ -5,7 +5,8 @@
             <p v-if="NETWORK_ID">{{ NETWORK_ID }}</p>
             <p v-if="USER_ACCOUNT">{{ USER_ACCOUNT }}</p>
         </div>
-        <button class="orangebut" @click="connectWallet">Connect Wallet</button>
+        <button v-if="!isCONNECTED" class="orangebut" @click="connectWallet">Connect Wallet</button>
+        <button v-else class="orangebut disconnect">DISCONNECT</button>
     </div>
 </template>
 <script>
@@ -67,5 +68,8 @@ export default {
     }
     .not-connected .orangebut {
         margin: auto;
+    }
+    .disconnect {
+        height: 40px;
     }
 </style>
