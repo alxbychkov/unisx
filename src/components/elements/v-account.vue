@@ -6,7 +6,7 @@
             <p v-if="USER_ACCOUNT">{{ USER_ACCOUNT }}</p>
         </div>
         <button v-if="!isCONNECTED" class="orangebut" @click="connectWallet">Connect Wallet</button>
-        <button v-else class="orangebut disconnect">DISCONNECT</button>
+        <button v-else class="orangebut disconnect">Disconnect</button>
     </div>
 </template>
 <script>

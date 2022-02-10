@@ -12,9 +12,13 @@
                             @input="consider('firstToken')"
                         >
                         <div class="flex j-between mb-0"><span>In the pool:</span>
+                        <span class="ml-a">{{ selectedItem.firstTokenAmountInPool }}</span>
                         <span
-                            @dblclick="selectedItem.firstTokenAmount = +selectedItem.firstTokenAmountInPool ? selectedItem.firstTokenAmountInPool : ''"
-                        >{{ selectedItem.firstTokenAmountInPool }}</span></div>
+                            v-if="+selectedItem.firstTokenAmountInPool > 0"
+                            class="color-green cur-p"
+                            @click="handleMaxClick('firstToken', selectedItem.firstTokenAmountInPool)"
+                        >&nbsp;MAX</span>
+                        </div>
                     </div>
                     <div class="input-wrapp">
                         <div class="flex-collumn" id="poolList" @click="handleSelectClick($event)">
@@ -28,9 +32,12 @@
                             </select>
                         </div>
                         <div class="flex j-between mb-0"><span>In the wallet:</span>
+                        <span class="ml-a">{{ selectedItem.firstTokenInWallet }}</span>
                         <span
-                            @dblclick="selectedItem.firstTokenAmount = +selectedItem.firstTokenInWallet ? selectedItem.firstTokenInWallet : ''"
-                        >{{ selectedItem.firstTokenInWallet }}</span></div>
+                            v-if="+selectedItem.firstTokenInWallet > 0"
+                            class="color-green cur-p"
+                            @click="handleMaxClick('firstToken', selectedItem.firstTokenInWallet)"
+                        >&nbsp;MAX</span></div>
                     </div>
                 </div>   
                 <div class="flex mb-10 flex-row-2 flex j-between mb-10">
@@ -43,9 +50,12 @@
                             @input="consider('secondToken')" 
                         >
                         <div class="flex j-between mb-0"><span>In the pool:</span>
+                        <span class="ml-a">{{ selectedItem.secondTokenAmountInPool }}</span>
                         <span
-                            @dblclick="selectedItem.secondTokenAmount = +selectedItem.secondTokenAmountInPool ? selectedItem.secondTokenAmountInPool : ''"
-                        >{{ selectedItem.secondTokenAmountInPool }}</span></div>
+                            v-if="+selectedItem.secondTokenAmountInPool > 0"
+                            class="color-green cur-p"
+                            @click="handleMaxClick('secondToken', selectedItem.secondTokenAmountInPool)"
+                        >&nbsp;MAX</span></div>
                     </div>
                     <div class="input-wrapp">
                         <input 
@@ -54,9 +64,12 @@
                             v-model="selectedItem.secondToken"
                         >
                         <div class="flex j-between mb-0"><span>In the wallet:</span>
+                        <span class="ml-a">{{ selectedItem.secondTokenInWallet }}</span>
                         <span
-                            @dblclick="selectedItem.secondTokenAmount = +selectedItem.secondTokenInWallet ? selectedItem.secondTokenInWallet : ''"
-                        >{{ selectedItem.secondTokenInWallet }}</span></div>
+                            v-if="+selectedItem.secondTokenInWallet > 0"
+                            class="color-green cur-p"
+                            @click="handleMaxClick('secondToken', selectedItem.secondTokenInWallet)"
+                        >&nbsp;MAX</span></div>
                     </div>
                 </div>                                    
                 <div class="but_flex mt-auto lr-auto">
@@ -275,6 +288,20 @@ export default {
             this.selectedItem.firstTokenAmount = '';
             this.selectedItem.secondTokenAmount = '';
             this.selectedItem.tokenPrice = (+selectedItemData.price);
+        },
+
+        handleMaxClick(row, value) {
+            switch (row) {
+                case 'firstToken':
+                    this.selectedItem.firstTokenAmount = +value ? value : '';
+                    this.consider(row);        
+                    break;
+                case 'secondToken':
+                    this.selectedItem.secondTokenAmount = +value ? value : '';
+                    this.consider(row);
+                    break;
+            }
+            
         }
     },
     mounted() {

@@ -10,8 +10,9 @@
                         class="mb-10"
                         v-model="synthetic.collateralAmount" 
                         :disabled="!synthetic.name"
-                        @input="consider('collateralAmount')
-                    ">
+                        @input="consider('collateralAmount')"
+                        ref="synt"
+                    >
                     <div class="input-wrapp">
                         <div class="flex-collumn" id="portfolioList" @click="onSelectClick($event)">
                             <select id="portfolio">
@@ -24,37 +25,45 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                <div class="flex flex-row-2 flex j-between align-center">
                     <span>Synthetic tokens minted:</span>
-                    <span class="ml-a">{{ synthetic.syntheticIntheWallet }}</span>
+                    <span class="ml-a">{{ selectedItemBalance.collateralAmountFormatted }}</span>
                     <span 
-                        v-if="+synthetic.syntheticIntheWallet > 0" 
+                        v-if="+selectedItemBalance.collateralAmountFormatted > 0" 
                         class="color-green cur-p"
+                        @click="handleMaxClick('synt')"
                     >
                         &nbsp;MAX
                     </span>
                 </div>
                 <hr>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                    <div class="w-45 flex j-between"><span>SyntPrice:</span><span>{{ synthetic.price }}</span></div>
-                    <div class="w-45 flex j-between"><span>Synt Value:</span><span>0.0000</span></div>
+                <div class="flex flex-row-2 flex j-between align-center">
+                    <div class="w-45 flex j-between"><span>Synt Price:</span><span>{{ synthetic.price }}</span></div>
+                    <div class="w-45 flex j-between"><span>Synt Value:</span>
+                        <span>
+                            {{ (+synthetic.price)*(selectedItemBalance.collateralAmountFormatted) || '0.0000' }}
+                        </span>
+                    </div>
                 </div>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center color-red">
-                    <span>Liquidation Price:</span>
-                    <span>{{ selectedItemBalance.liquidationPrice }}</span>
+                <div class="flex mb-10 flex-row-2 j-between align-center">
+                    <div class="w-45 flex j-between"></div>
+                    <div class="w-45 flex j-between color-red">
+                        <span>Liquidation Price:</span>
+                        <span>{{ selectedItemBalance.liquidationPrice }}</span>
+                    </div>
                 </div>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center color-red" style="height:20px"></div>       
+                <div class="flex mb-10 flex-row-2 flex j-between align-center color-red" style="height:40px"></div>       
                 <hr>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                <div class="flex flex-row-2 flex j-between align-center">
                     <span>Global Collateralization ratio</span>
                     <span>{{ synthetic.globalCollateralizationRation }}</span>
                 </div>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                    <span>Total synt tokens outstanding:</span>
+                <div class="flex flex-row-2 flex j-between align-center">
+                    <span class="ml-45">Total synt tokens outstanding:</span>
                     <span>{{ synthetic.totalSyntTokensOutstanding }}</span>
                 </div>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                    <span>Total Locked collateral:</span>
+                <div class="flex flex-row-2 flex j-between align-center">
+                    <span class="ml-45">Total Locked collateral:</span>
                     <span>{{ synthetic.totalCollateral }}</span>
                 </div>
                 <hr>                                        
@@ -83,36 +92,43 @@
                             placeholder="0.000"
                             v-model="synthetic.tokensAmount"
                             :disabled="!selectedItem.CollateralName"
-                            @input="consider('tokensAmount')" 
+                            @input="consider('tokensAmount')"
+                            ref="coll" 
                         >
                     </div>
                     <div class="input-wrapp">
                         <input type="text" placeholder="Token" :value="selectedItem.CollateralName" disabled>
-                        <p class="flex j-end color-green mb-0 hidden"><span>{{ selectedItemBalance.collateralBalanceFormatted }}</span></p>
                     </div>
                 </div>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                <div class="flex flex-row-2 flex j-between align-center">
                     <span>Collateral tokens in the wallet:</span>
-                    <span>{{ selectedItemBalance.collateralBalanceFormatted }}</span>
+                    <span class="ml-a">{{ selectedItemBalance.collateralBalanceFormatted }}</span>
+                    <span 
+                        v-if="+selectedItemBalance.collateralBalanceFormatted > 0" 
+                        class="color-green cur-p"
+                        @click="handleMaxClick('coll')"
+                    >
+                        &nbsp;MAX
+                    </span>
                 </div>
                 <hr>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                <div class="flex flex-row-2 flex j-between align-center">
                     <div class="w-45 flex j-between"><span>Rewards:</span><span>{{ synthetic.rewards }} UNISX</span></div>
                     <div class="w-45 flex j-between"><span>APY:</span><span>0.00%</span></div>
                 </div>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center color-red" style="height:20px"></div>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center color-red" style="height:20px"></div>    
+                <div class="flex mb-10 flex-row-2 flex j-between align-center color-red" style="height:30px"></div>
+                <div class="flex mb-10 flex-row-2 flex j-between align-center color-red" style="height:30px"></div>    
                 <hr>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center">
+                <div class="flex flex-row-2 flex j-between align-center">
                     <span>Collateral Ratio:</span>
                     <span>{{ selectedItemBalance.collateralRatio }}</span>
                 </div>  
-                <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                    <span>Position tokens outstanding:</span>
+                <div class="flex flex-row-2 flex j-between align-center">
+                    <span class="ml-45">Position tokens outstanding:</span>
                     <span>{{ selectedItemBalance.collateralAmountFormatted }}</span>
                 </div>
-                <div class="flex mb-10 flex-row-2 flex j-between align-center">
-                    <span>Position Collaterall amount:</span>
+                <div class="flex flex-row-2 flex j-between align-center">
+                    <span class="ml-45">Position Collaterall amount:</span>
                     <span>{{ selectedItemBalance.collateralTokens }}</span>
                 </div>
                 <hr>
@@ -363,6 +379,23 @@ export default {
                 return
             }
             console.log('settleExpired success!'); 
+        },
+
+        handleMaxClick(token) {
+            switch (token) {
+                case 'synt':
+                    this.synthetic.collateralAmount = this.selectedItemBalance.collateralAmountFormatted;
+                    this.$refs.synt.value = this.synthetic.collateralAmount;
+                    this.consider('collateralAmount');
+                    this.$refs.coll.value = this.synthetic.tokensAmount;
+                    break;
+                case 'coll':
+                    this.synthetic.tokensAmount = this.selectedItemBalance.collateralBalanceFormatted;
+                    this.$refs.coll.value = this.synthetic.tokensAmount;
+                    this.consider('tokensAmount');
+                    this.$refs.synt.value = this.synthetic.collateralAmount;
+                    break;
+            }
         },
 
         consider(e) {

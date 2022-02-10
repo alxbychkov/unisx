@@ -32,9 +32,12 @@
                             </select>
                         </div>
                         <div class="flex j-between mb-0"><span>In the wallet:</span>
+                        <span class="ml-a">{{ selectedItem.name ? selectedItem.unisxBalance[selectedItem.name] : '0.0000' }}</span>
                         <span
-                            @dblclick="selectedItem.unisxAmount = (selectedItem.name && +selectedItem.unisxBalance[selectedItem.name]) ? selectedItem.unisxBalance[selectedItem.name] : ''"
-                        >{{ selectedItem.name ? selectedItem.unisxBalance[selectedItem.name] : '0.0000' }}</span></div>
+                            v-if="(selectedItem.name && +selectedItem.unisxBalance[selectedItem.name])"
+                            class="color-green cur-p"
+                            @click="selectedItem.unisxAmount = (selectedItem.name && +selectedItem.unisxBalance[selectedItem.name]) ? selectedItem.unisxBalance[selectedItem.name] : ''"
+                        >&nbsp;MAX</span></div>
                     </div>
                 </div>
                 <div class="flex flex-row-2 justify-end">

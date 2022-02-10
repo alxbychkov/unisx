@@ -158,3 +158,6 @@ input[type='number'] {
 .cur-p {
   cursor: pointer;
 }
+.ml-45 {
+  margin-left: 45px;
+}

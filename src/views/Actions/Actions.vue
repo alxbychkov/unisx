@@ -7,7 +7,7 @@
                 </div>
             </div>
             <div class="row flex cards" data-aos="fade-up" data-aos-delay="1000" data-aos-duration="800">
-                <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-2">
                     <v-table 
                         :tableData="PORTFOLIO"
                         :tableHeaders="['Portfolio', 'Price', 'Amount', 'Value, USD', 'Rewards']"
@@ -19,7 +19,7 @@
             </div>
             
             <div class="row" data-aos="fade-up" data-aos-delay="1200" data-aos-duration="800">
-                <div class="col-md-9 col-md-offset-1">
+                <div class="col-md-9 col-md-offset-2">
                     <ul class="cards_tabs_nav" role="tablist">
                         <li role="presentation" class="active" @click="clearTab($event)"><a href="#cardtab1" role="tab" data-toggle="tab">Instrument</a></li>
                         <li role="presentation" @click="clearTab($event)"><a href="#cardtab2" role="tab" data-toggle="tab">POOL</a></li>
