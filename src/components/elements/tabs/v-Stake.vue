@@ -1,6 +1,6 @@
 <template>
     <div role="tabpanel" class="tab-pane fade" :class="{active}" :id="id">
-        <div class="row flex cards j-between">
+        <div class="row flex cards j-center">
             <div class="col-md-9 col-sm-9 col-xs-12">
                 <div class="flex mb-10 flex-row-2 flex j-between mb-10">
                     <div class="input-wrapp">
@@ -40,16 +40,22 @@
                         >&nbsp;MAX</span></div>
                     </div>
                 </div>
-                <div class="flex flex-row-2 justify-end">
-                    <p class="mb-0 mr-10">Rewards</p>
-                    <input 
-                        type="text" 
-                        value="" 
-                        placeholder="0.0000 UNSX"
-                        v-model="selectedItem.unisxRewardEarned"
-                        disabled
-                    >
-                    <p class="mb-0 ml-10">UNISX</p>
+                <div class="flex mb-10 flex-row-2 flex j-between mb-10">
+                    <div class="input-wrapp"></div>
+                    <div class="input-wrapp p-relative">
+                        <p class="mb-0 mr-10 abs-left">Rewards</p>
+                        <div class="flex align-center">
+                            <input 
+                                type="text" 
+                                value="" 
+                                placeholder="0.0000 UNSX"
+                                v-model="selectedItem.unisxRewardEarned"
+                                disabled
+                                style="max-width: 84%"
+                            >
+                            <p class="mb-0 ml-10">UNISX</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="input-wrapp hidden">
                     <div class="flex-collumn" id="stakeList" @click="handleSelectClick($event)">
@@ -385,5 +391,11 @@ export default {
 }
 .but_flex .orangebut {
     height: 50px;
+}
+.abs-left {
+  position: absolute;
+  left: -65px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 </style>

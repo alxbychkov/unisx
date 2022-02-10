@@ -16,8 +16,7 @@
                         @getTableItem="getTableItem"
                     />
                 </div>
-            </div>
-            
+            </div>     
             <div class="row" data-aos="fade-up" data-aos-delay="1200" data-aos-duration="800">
                 <div class="col-md-9 col-md-offset-2">
                     <ul class="cards_tabs_nav" role="tablist">
@@ -62,6 +61,13 @@
                     </div>
                 </div>
             </div>
+            <div class="row"  data-aos="fade-up" data-aos-delay="1400" data-aos-duration="800">
+                <div class="col-md-9 col-md-offset-2">
+                    <v-chart 
+                        :selectedItemLiquidPrice="selectedItemBalance.liquidationPrice"
+                    />
+                </div>
+            </div>
         </div>
     </section>
     <section v-else class="not-connected">
@@ -91,11 +97,12 @@ import vTable from '../../components/elements/v-table.vue';
 import vMint from '../../components/elements/tabs/v-Mint.vue'
 import vStake from '../../components/elements/tabs/v-Stake.vue';
 import vPool from '../../components/elements/tabs/v-Pool.vue';
+import vChart from '../../components/elements/v-chart.vue';
 
 export default {
   name: 'Actions',
   components: {
-      vTable, vMint, vStake, vPool, vAccount
+      vTable, vMint, vStake, vPool, vAccount, vChart
   },
   data(){
       return {
@@ -447,8 +454,8 @@ export default {
 
     clearTab(e) {
         if (!e.currentTarget.classList.contains('active')) {
-            this.selectedItemBalance = initialData.selectedItemBalance;
-            this.synthetic = initialData.synthetic;
+            this.selectedItemBalance = {...initialData.selectedItemBalance};
+            this.synthetic = {...initialData.synthetic};
             this.selectedItem = {};
             this.stakeProfile = {...initialData.stakeProfile};
             this.sushiswapPool = {...initialData.sushiswapPool};

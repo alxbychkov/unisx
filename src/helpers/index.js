@@ -124,3 +124,8 @@ export function truncate(number, digits) {
     var array = number.toString().match(reg_ex);
     return array ? parseFloat(array[1]) : number.valueOf()
 }
+
+export function euroDate(str) {
+    const temp = str.split('.');
+    return new Date(`${temp[1]}.${temp[0]}.${temp[2]}`);
+}

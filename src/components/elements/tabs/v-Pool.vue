@@ -1,6 +1,7 @@
 <template>
     <div role="tabpanel" class="tab-pane fade" :class="{active}" :id="id">
         <div class="row flex cards j-between">
+            <div class="col-md-2 col-sm-2 col-xs-12" style="height: 300px"></div>
             <div class="col-md-8 col-sm-8 col-xs-12 flex-collumn">
                 <div class="flex mb-10 flex-row-2 flex j-between mb-10">
                     <div class="input-wrapp">
@@ -77,7 +78,7 @@
                     <button class="blueb disabled" @click="pool" :disabled="!selectedItem.secondTokenAmount">Pool</button>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-4 col-xs-12" style="height: 300px"></div>
+            <div class="col-md-2 col-sm-2 col-xs-12" style="height: 300px"></div>
         </div>
     </div>
 </template>

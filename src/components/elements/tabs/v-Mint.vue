@@ -46,11 +46,11 @@
                     </div>
                 </div>
                 <div class="flex mb-10 flex-row-2 j-between align-center">
-                    <div class="w-45 flex j-between"></div>
                     <div class="w-45 flex j-between color-red">
                         <span>Liquidation Price:</span>
                         <span>{{ selectedItemBalance.liquidationPrice }}</span>
                     </div>
+                    <div class="w-45 flex j-between"></div>
                 </div>
                 <div class="flex mb-10 flex-row-2 flex j-between align-center color-red" style="height:40px"></div>       
                 <hr>
@@ -68,8 +68,8 @@
                 </div>
                 <hr>                                        
                 <div v-if="!synthetic.isExpired" class="but_flex mt-auto lr-auto">
-                    <button class="cancelbut disabled" @click="mint" :disabled="!synthetic.tokensAmount">Mint</button>
-                    <button class="blueb disabled" @click="burn" :disabled="!synthetic.collateralAmount">Burn</button>
+                    <button class="cancelbut disabled" @click="mint" ref="mintBtn" :disabled="!synthetic.tokensAmount">Mint</button>
+                    <button class="blueb disabled" @click="burn" ref="burnBtn" :disabled="!synthetic.collateralAmount">Burn</button>
                 </div>
                 <div v-if="synthetic.isOracle" class="but_flex mt-auto lr-auto">
                     <button class="blueb disabled" @click="setExpired">Settle Expired</button>
@@ -388,12 +388,16 @@ export default {
                     this.$refs.synt.value = this.synthetic.collateralAmount;
                     this.consider('collateralAmount');
                     this.$refs.coll.value = this.synthetic.tokensAmount;
+                    this.$refs.mintBtn.disabled = false;
+                    this.$refs.burnBtn.disabled = false;
                     break;
                 case 'coll':
                     this.synthetic.tokensAmount = this.selectedItemBalance.collateralBalanceFormatted;
                     this.$refs.coll.value = this.synthetic.tokensAmount;
                     this.consider('tokensAmount');
                     this.$refs.synt.value = this.synthetic.collateralAmount;
+                    this.$refs.mintBtn.disabled = false;
+                    this.$refs.burnBtn.disabled = false;
                     break;
             }
         },
