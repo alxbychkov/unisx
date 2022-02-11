@@ -121,7 +121,7 @@ export default {
                     "07.02.2022": 33.60,
                     "08.02.2022": 33.89,
                     "09.02.2022": 34.32,
-                    "10.02.2022": 34.42
+                    "10.02.2022": 34.10
                 }
             },
             filteredChart: {},
@@ -215,11 +215,10 @@ export default {
             if (range === 'w') {
                 const today = new Date();
                 const day = today.getDay();
-                const diff = today.getDate() - day + (day == 0 ? -6:1);
+                const diff = today.getDate() - day + (day == 0 ? -7:0);
                 const monday = new Date(today.setDate(diff));
-                const mondayTime = monday;
                 
-                const keys = Object.keys(this.chartValues.synt).filter(k => euroDate(k) >= mondayTime);
+                const keys = Object.keys(this.chartValues.synt).filter(k => euroDate(k) >= monday);
                 const sortedObj = Object.fromEntries(keys.map(key => [key, this.chartValues.synt[key]]));
                 this.filteredChart = {...sortedObj};
                 this.selectedRange = 'w';

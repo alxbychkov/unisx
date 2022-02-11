@@ -41,7 +41,7 @@
                     <div class="w-45 flex j-between"><span>Synt Price:</span><span>{{ synthetic.price }}</span></div>
                     <div class="w-45 flex j-between"><span>Synt Value:</span>
                         <span>
-                            {{ (+synthetic.price)*(selectedItemBalance.collateralAmountFormatted) || '0.0000' }}
+                            {{ ((+synthetic.price)*(selectedItemBalance.collateralAmountFormatted)).toFixed(5) || '0.0000' }}
                         </span>
                     </div>
                 </div>
@@ -74,14 +74,6 @@
                 <div v-if="synthetic.isOracle" class="but_flex mt-auto lr-auto">
                     <button class="blueb disabled" @click="setExpired">Settle Expired</button>
                 </div>
-            </div>
-            <div class="col-md-4 col-sm-4 col-xs-12 flex-collumn hidden">
-                <div data-type="widget" class="mb-auto hidden"></div>
-                <div class="description mb-10" v-if="selectedItem.Description">{{ selectedItem.Description }}</div>
-                <div class="flex mb-10 flex-row-2 flex j-center hidden">
-                    <input type="text" value="" placeholder="0.0000 UNSX" class="mb-10">
-                </div>
-                <button class="orangebut lr-auto hidden">Claim Rewards</button>
             </div>
             <div class="col-md-6 col-sm-6 col-xs-12 flex-collumn">
                 <h4>COLLATERAL</h4>
@@ -132,10 +124,9 @@
                     <span>{{ selectedItemBalance.collateralTokens }}</span>
                 </div>
                 <hr>
-                                                                                                                                                      
                 <div v-if="!synthetic.isExpired" class="but_flex lr-auto">
-                    <button class="cancelbut disabled" @click="deposit" :disabled="!selectedItem.Value">Supply</button>
-                    <button class="blueb disabled" @click="withdraw" :disabled="!selectedItem.Value">Withdraw</button>
+                    <button class="cancelbut disabled" @click="deposit" :disabled="!(+selectedItem.Number > 0) || !synthetic.tokensAmount">Supply</button>
+                    <button class="blueb disabled" @click="withdraw" :disabled="!(+selectedItem.Number > 0) || !synthetic.tokensAmount">Withdraw</button>
                 </div>
             </div>
         </div>
@@ -145,7 +136,7 @@
 import {mapActions, mapGetters} from 'vuex';
 
 // eslint-disable-next-line no-unused-vars
-import {round, toDote, COLLATERAL_PRICE} from '../../../helpers';
+import {round, toDote, COLLATERAL_PRICE, toFix} from '../../../helpers';
 
 // eslint-disable-next-line no-unused-vars
 import {collateralByTokenCurrency, createPosition, deposit, redeem, settleExpired, tokenCurrencyByCollateral, withdraw} from '../../../core/eth';
@@ -166,19 +157,19 @@ export default {
                 return 'cardtab1'
             }
         },
-        synthetic: {
+        syntheticIn: {
             type: Object,
             default() {
                 return {}
             }
         },
-        selectedItemBalance: {
+        selectedItemBalanceIn: {
             type: Object,
             default() {
                 return {}
             }
         },
-        selectedItem: {
+        selectedItemIn: {
             type: Object,
             default() {
                 return {}
@@ -208,7 +199,10 @@ export default {
         },
         message: function() {
             return this.msg;
-        }
+        },
+        synthetic: function() {return this.syntheticIn},
+        selectedItemBalance: function() {return this.selectedItemBalanceIn},
+        selectedItem: function() {return this.selectedItemIn},
     },
     methods: {
         ...mapActions([
@@ -293,7 +287,6 @@ export default {
                 const tokensAmount = toDote(this.synthetic.collateralAmount);
                 // const portfolioAmount = this.selectedItemBalance.tokenCurrencyBalance;
                 const portfolioAmount = this.selectedItemBalance.collateralAmountFormatted;
-                
                 if (+tokensAmount > +portfolioAmount) {
                     this.onMessage(errorStatus('burnTokensCount', portfolioAmount)); 
                     console.error(errorStatus('burnTokensCount'));
@@ -385,19 +378,19 @@ export default {
             switch (token) {
                 case 'synt':
                     this.synthetic.collateralAmount = this.selectedItemBalance.collateralAmountFormatted;
-                    this.$refs.synt.value = this.synthetic.collateralAmount;
+                    // this.$refs.synt.value = this.synthetic.collateralAmount;
                     this.consider('collateralAmount');
-                    this.$refs.coll.value = this.synthetic.tokensAmount;
-                    this.$refs.mintBtn.disabled = false;
-                    this.$refs.burnBtn.disabled = false;
+                    // this.$refs.coll.value = this.synthetic.tokensAmount;
+                    // this.$refs.mintBtn.disabled = '';
+                    // this.$refs.burnBtn.disabled = '';
                     break;
                 case 'coll':
                     this.synthetic.tokensAmount = this.selectedItemBalance.collateralBalanceFormatted;
-                    this.$refs.coll.value = this.synthetic.tokensAmount;
+                    // this.$refs.coll.value = this.synthetic.tokensAmount;
                     this.consider('tokensAmount');
-                    this.$refs.synt.value = this.synthetic.collateralAmount;
-                    this.$refs.mintBtn.disabled = false;
-                    this.$refs.burnBtn.disabled = false;
+                    // this.$refs.synt.value = this.synthetic.collateralAmount;
+                    // this.$refs.mintBtn.disabled = false;
+                    // this.$refs.burnBtn.disabled = false;
                     break;
             }
         },

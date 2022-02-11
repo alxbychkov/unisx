@@ -30,7 +30,7 @@ export default function errorStatus(error = '', value = '', token = '') {
             return {isError: false, text: 'Executed'};
         case 'failed':
             return {isError: true, text: 'Transaction failed'};
-        case 'Success':
+        case 'success':
             return {isError: false, text: 'success'};
         case 'mintCreate':
             return {isError: false, text: `You are created ${value} uSPAC10 syths!`};         

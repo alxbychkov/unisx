@@ -638,7 +638,7 @@ tr:hover {
 }
 .cards_tabs_nav {
   font-size: 0;
-  margin-top: 50px;
+  /* margin-top: 50px; */
 }
 .cards_tabs_nav li {
   display: inline-block;

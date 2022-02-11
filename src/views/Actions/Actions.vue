@@ -20,8 +20,8 @@
             <div class="row" data-aos="fade-up" data-aos-delay="1200" data-aos-duration="800">
                 <div class="col-md-9 col-md-offset-2">
                     <ul class="cards_tabs_nav" role="tablist">
-                        <li role="presentation" class="active" @click="clearTab($event)"><a href="#cardtab1" role="tab" data-toggle="tab">Instrument</a></li>
-                        <li role="presentation" @click="clearTab($event)"><a href="#cardtab2" role="tab" data-toggle="tab">POOL</a></li>
+                        <li role="presentation" class="active" @click="handleClickTab($event, 'mint')"><a href="#cardtab1" role="tab" data-toggle="tab">Instrument</a></li>
+                        <li role="presentation" @click="handleClickTab($event)"><a href="#cardtab2" role="tab" data-toggle="tab">POOL</a></li>
                         <li role="presentation" @click="handleClickTab($event)"><a href="#cardtab3" role="tab" data-toggle="tab">STAKE</a></li>
                     </ul>
                     <div class="cards_in_tab">
@@ -35,9 +35,9 @@
                             <v-mint
                                 active
                                 id="cardtab1"
-                                :synthetic="synthetic"
-                                :selectedItemBalance="selectedItemBalance"
-                                :selectedItem="selectedItem"
+                                :syntheticIn="synthetic"
+                                :selectedItemBalanceIn="selectedItemBalance"
+                                :selectedItemIn="selectedItem"
                                 :onMessage="handleShowMessage"
                                 :onAfterClickAction="handleUpdateAfterAction"
                                 :onSelectClick="getInstrumentItem"
@@ -63,7 +63,8 @@
             </div>
             <div class="row"  data-aos="fade-up" data-aos-delay="1400" data-aos-duration="800">
                 <div class="col-md-9 col-md-offset-2">
-                    <v-chart 
+                    <v-chart
+                        v-if="isChart" 
                         :selectedItemLiquidPrice="selectedItemBalance.liquidationPrice"
                     />
                 </div>
@@ -111,7 +112,8 @@ export default {
           synthetic: initialData.synthetic,
           sushiswapPool: initialData.sushiswapPool,
           stakeProfile: {...initialData.stakeProfile},
-          message: initialData.message
+          message: initialData.message,
+          isChart: true
       }
   },
   methods: {
@@ -335,6 +337,10 @@ export default {
         await ethPromise;
         const portfolio = await this.getPortfolioList();
         this.GET_PORTFOLIO_FROM_API(portfolio);
+        if (this.isChart) {
+            this.isChart = false;
+            this.isChart = true;
+        }
         await this.updateSelectedItemBalance(this.selectedItem);
         await this.updateStakeProfile(this.selectedItem);
         await this.$refs.dex.updateSelectedItem(this.selectedItem.Name);
@@ -466,8 +472,9 @@ export default {
         }
     },
 
-    async handleClickTab(e) {
+    async handleClickTab(e, tab = '') {
         this.clearTab(e);
+        this.isChart = (tab === 'mint') ? true : false;
     },
 
     handleShowMessage(message) {
