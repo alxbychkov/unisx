@@ -1,7 +1,7 @@
 <template>
     <div role="tabpanel" class="tab-pane fade" :class="{active}" :id="id">
         <div class="row flex cards j-between">
-            <div class="col-md-2 col-sm-2 col-xs-12" style="height: 300px"></div>
+            <div class="col-md-2 col-sm-2 col-xs-12"></div>
             <div class="col-md-8 col-sm-8 col-xs-12 flex-collumn">
                 <div class="flex mb-10 flex-row-2 flex j-between mb-10">
                     <div class="input-wrapp">
@@ -73,12 +73,12 @@
                         >&nbsp;MAX</span></div>
                     </div>
                 </div>                                    
-                <div class="but_flex mt-auto lr-auto">
+                <div class="but_flex lr-auto">
                     <button class="cancelbut disabled" @click="unPool" :disabled="!selectedItem.firstTokenAmount">unPool</button>
                     <button class="blueb disabled" @click="pool" :disabled="!selectedItem.secondTokenAmount">Pool</button>
                 </div>
             </div>
-            <div class="col-md-2 col-sm-2 col-xs-12" style="height: 300px"></div>
+            <div class="col-md-2 col-sm-2 col-xs-12"></div>
         </div>
     </div>
 </template>
@@ -248,10 +248,10 @@ export default {
         consider(e) {
             switch (e) {
                 case 'firstToken':
-                    this.selectedItem.secondTokenAmount = this.toPrice(e);
+                    this.selectedItem.secondTokenAmount = (this.toPrice(e) !== '0') ? this.toPrice(e) : '';
                     break;
                 case 'secondToken':
-                    this.selectedItem.firstTokenAmount = this.toPrice(e);
+                    this.selectedItem.firstTokenAmount = (this.toPrice(e) !== '0') ? this.toPrice(e) : '';
                     break;
             }
         },

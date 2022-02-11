@@ -106,7 +106,7 @@
                 <hr>
                 <div class="flex flex-row-2 flex j-between align-center">
                     <div class="w-45 flex j-between"><span>Rewards:</span><span>{{ synthetic.rewards }} UNISX</span></div>
-                    <div class="w-45 flex j-between"><span>APY:</span><span>0.00%</span></div>
+                    <div class="w-45 flex j-between"><span>APY:</span><span>{{selectedItemBalance.APY}}%</span></div>
                 </div>
                 <div class="flex mb-10 flex-row-2 flex j-between align-center color-red" style="height:30px"></div>
                 <div class="flex mb-10 flex-row-2 flex j-between align-center color-red" style="height:30px"></div>    
@@ -374,12 +374,13 @@ export default {
             console.log('settleExpired success!'); 
         },
 
-        handleMaxClick(token) {
+        async handleMaxClick(token) {
             switch (token) {
                 case 'synt':
                     this.synthetic.collateralAmount = this.selectedItemBalance.collateralAmountFormatted;
                     // this.$refs.synt.value = this.synthetic.collateralAmount;
                     this.consider('collateralAmount');
+                    this.$forceUpdate();
                     // this.$refs.coll.value = this.synthetic.tokensAmount;
                     // this.$refs.mintBtn.disabled = '';
                     // this.$refs.burnBtn.disabled = '';
@@ -388,6 +389,7 @@ export default {
                     this.synthetic.tokensAmount = this.selectedItemBalance.collateralBalanceFormatted;
                     // this.$refs.coll.value = this.synthetic.tokensAmount;
                     this.consider('tokensAmount');
+                    this.$forceUpdate();
                     // this.$refs.synt.value = this.synthetic.collateralAmount;
                     // this.$refs.mintBtn.disabled = false;
                     // this.$refs.burnBtn.disabled = false;
@@ -399,9 +401,11 @@ export default {
             switch (e) {
                 case 'collateralAmount':
                     this.synthetic.tokensAmount = (this.toPrice(e) !== '0') ? this.toPrice(e) : '';
+                    this.$forceUpdate();
                     break;
                 case 'tokensAmount':
                     this.synthetic.collateralAmount = this.toPrice(e);
+                    this.$forceUpdate();
                     break;
             }
         },

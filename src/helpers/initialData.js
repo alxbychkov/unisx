@@ -8,7 +8,8 @@ export const initialData = {
         cr: 1,
         liquidationPrice: '0.0000',
         tokenCurrencyBalance: '0.0000',
-        collateralAvailableForFastWithdrawal: '0.0000'
+        collateralAvailableForFastWithdrawal: '0.0000',
+        APY: '0.00'
     },
     synthetic: {
         name: '',

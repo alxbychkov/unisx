@@ -11,7 +11,7 @@
 <script>
 import {Chart} from 'highcharts-vue';
 import { ethPromise, getPosition } from '../../core/eth';
-import { euroDate } from '../../helpers';
+import { euroDate, getQuarterStartMonth } from '../../helpers';
 
 export default {
     name: 'Chart',
@@ -133,7 +133,7 @@ export default {
         chartOptions: function() {
             return {
                 chart: {
-                    type: 'spline'
+                    type: 'line'
                 },
                 title: {
                     text: 'Synt Price'
@@ -171,7 +171,7 @@ export default {
                 },
                 yAxis: {
                     title: {
-                        text: 'Prices'
+                        text: 'Price'
                     },
                     min: 20,
                     labels: {
@@ -224,12 +224,9 @@ export default {
                 this.selectedRange = 'w';
             }
             if (range === 'q') {
-                const fourMonthAgo = new Date(
-                    new Date().getFullYear(),
-                    new Date().getMonth() - 4, 
-                    new Date().getDate()
-                );
-                const keys = Object.keys(this.chartValues.synt).filter(k => euroDate(k) >= fourMonthAgo);
+                const startMonth = getQuarterStartMonth();
+                const startQuarter = new Date(new Date().getFullYear(), startMonth);
+                const keys = Object.keys(this.chartValues.synt).filter(k => euroDate(k) >= startQuarter);
                 const sortedObj = Object.fromEntries(keys.map(key => [key, this.chartValues.synt[key]]));
                 this.filteredChart = {...sortedObj};
                 this.selectedRange = 'q';

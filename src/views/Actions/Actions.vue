@@ -2,7 +2,7 @@
     <section v-if="isCONNECTED" class="operations_section">
         <div class="container">
             <div class="row" data-aos="fade-up" data-aos-delay="600" data-aos-duration="800">
-                <div class="col-md-12">
+                <div class="col-md-9 col-md-offset-2">
                     <v-account :onClickConnect="handleClickConnect" ref="wallet"/>
                 </div>
             </div>
@@ -107,10 +107,10 @@ export default {
   },
   data(){
       return {
-          selectedItem: initialData.selectedItem,
-          selectedItemBalance: initialData.selectedItemBalance,
-          synthetic: initialData.synthetic,
-          sushiswapPool: initialData.sushiswapPool,
+          selectedItem: {...initialData.selectedItem},
+          selectedItemBalance: {...initialData.selectedItemBalance},
+          synthetic: {...initialData.synthetic},
+          sushiswapPool: {...initialData.sushiswapPool},
           stakeProfile: {...initialData.stakeProfile},
           message: initialData.message,
           isChart: true
@@ -141,17 +141,17 @@ export default {
             this.selectedItem = item;
             await this.updateStakeProfile(item);
             await this.$refs.dex.updateSelectedItem(item.Name);
-            this.synthetic = initialData.synthetic;
-            this.selectedItemBalance = initialData.selectedItemBalance;
+            this.synthetic = {...initialData.synthetic};
+            this.selectedItemBalance = {...initialData.selectedItemBalance};
         } else if (['UNISX','xUNISX'].includes(item?.Name)){
             this.sushiswapPool = {...initialData.sushiswapPool};
             this.selectedItem = item;
             (item?.Name === 'xUNISX') ? await this.updateStakeProfile() : await this.updateStakeProfile(item);
-            this.synthetic = initialData.synthetic;
-            this.selectedItemBalance = initialData.selectedItemBalance;
+            this.synthetic = {...initialData.synthetic};
+            this.selectedItemBalance = {...initialData.selectedItemBalance};
         } else {
-            this.synthetic = initialData.synthetic;
-            this.selectedItemBalance = initialData.selectedItemBalance;
+            this.synthetic = {...initialData.synthetic};
+            this.selectedItemBalance = {...initialData.selectedItemBalance};
             this.stakeProfile = {...initialData.stakeProfile};
             this.sushiswapPool = {...initialData.sushiswapPool};
         }
@@ -339,7 +339,9 @@ export default {
         this.GET_PORTFOLIO_FROM_API(portfolio);
         if (this.isChart) {
             this.isChart = false;
-            this.isChart = true;
+            this.$nextTick(() => {
+                this.isChart = true;
+            });
         }
         await this.updateSelectedItemBalance(this.selectedItem);
         await this.updateStakeProfile(this.selectedItem);
@@ -350,7 +352,11 @@ export default {
         const collateralAmount = await getPosition();
         const collateralBalance = await getAccount();
         const contractProperties = await getFinancialContractProperties();
+        const poolProperties = await getPoolProperties();
         const collateralRatio = (+collateralAmount.collateralAmountFormatted)/((+collateralAmount.tokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
+
+        const minterRewardFormatted = await collateralAmount.minterRewardFormatted;
+        const priceAPY = (((+minterRewardFormatted)*(+poolProperties['UNISX'].price))/(+collateralAmount.collateralAmountFormatted))*100;
 
         console.log('collateralAmount: ', collateralAmount, 'collateralBalance: ', collateralBalance, 'contractProperties: ', contractProperties);
 
@@ -405,7 +411,8 @@ export default {
             collateralTokens: collateralAmount.collateralAmountFormatted,
             collateralRatio: collateralRatio ? collateralRatio : '0.0000',
             liquidationPrice: collateralAmount.liquidationPriceFormatted ? collateralAmount.liquidationPriceFormatted : '0.0000',
-            collateralAvailableForFastWithdrawal: collateralAmount.collateralAvailableForFastWithdrawalFormatted
+            collateralAvailableForFastWithdrawal: collateralAmount.collateralAvailableForFastWithdrawalFormatted,
+            APY: priceAPY ? priceAPY.toFixed(toFix).toString() : '0.00'
         }
 
     },
@@ -453,8 +460,8 @@ export default {
         this.synthetic.collateralAmount = '';
 
         if (portfolio) {
-            this.selectedItemBalance = initialData.selectedItemBalance;
-            this.selectedItem = initialData.selectedItem;
+            this.selectedItemBalance = {...initialData.selectedItemBalance};
+            this.selectedItem = {...initialData.selectedItem};
         }
     },
 

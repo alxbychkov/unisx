@@ -129,3 +129,22 @@ export function euroDate(str) {
     const temp = str.split('.');
     return new Date(`${temp[1]}.${temp[0]}.${temp[2]}`);
 }
+
+export function getQuarterStartMonth(){
+    const nowMonth = (new Date()).getMonth();
+    let quarterStartMonth = 0;
+       
+    if(nowMonth<3){   
+       quarterStartMonth = 0;   
+    }   
+    if(2<nowMonth && nowMonth<6){   
+       quarterStartMonth = 3;   
+    }   
+    if(5<nowMonth && nowMonth<9){   
+       quarterStartMonth = 6;   
+    }   
+    if(nowMonth>8){   
+       quarterStartMonth = 9;   
+    }   
+    return quarterStartMonth;   
+}
