@@ -33,7 +33,7 @@ export default function errorStatus(error = '', value = '', token = '') {
         case 'success':
             return {isError: false, text: 'success'};
         case 'mintCreate':
-            return {isError: false, text: `You are created ${value} uSPAC10 syths!`};         
+            return {isError: false, text: `You are created ${value} uSPAC10 synths!`};         
         default:
             return '';
     }
