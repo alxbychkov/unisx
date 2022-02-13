@@ -48,7 +48,7 @@
                                   <div class="hw_card_img" data-aos="fade-up" data-aos-delay="300" data-aos-duration="800">
                                       <img src="../assets/img/hw1.png" alt="">
                                       <p>Mint</p>
-                                      <span>Mint synthetic tokens and get sponsor revards in UNISX reward tokens. You can trade your tokens or deposit them to DEX liquidity pools.</span>
+                                      <span>Mint synthetic tokens and get sponsor rewards in UNISX reward tokens. You can trade your tokens or deposit them to DEX liquidity pools.</span>
                                   </div>
                                   
                                   <div class="hw_card_img" data-aos="fade-up" data-aos-delay="600" data-aos-duration="800"> 
@@ -61,7 +61,7 @@
                                   <div class="hw_card_img" data-aos="fade-up" data-aos-delay="900" data-aos-duration="800">
                                       <img src="../assets/img/hw2.png" alt="">
                                       <p>Pool</p>
-                                      <span>Deposit synthetic tokens in the liquidity pool to earn DEX commision.</span>
+                                      <span>Deposit synthetic tokens in the liquidity pool to earn DEX commission.</span>
                                   </div>
                                   
                                   <div class="hw_card_img" data-aos="fade-up" data-aos-delay="1200" data-aos-duration="800">
