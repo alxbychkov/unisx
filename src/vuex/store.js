@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { getHistoricalPrices } from '../core/price';
 import {getJSONdata, createPrice, getLocalStorage} from '../helpers';
 
 Vue.use(Vuex);
@@ -16,7 +17,8 @@ const store = new Vuex.Store({
         stablecoins: [],
         dexLP: [],
         defiTokens: [],
-        isMetamaskConnected: getLocalStorage('isMetamaskConnected') ? !!getLocalStorage('isMetamaskConnected') : false
+        isMetamaskConnected: getLocalStorage('isMetamaskConnected') ? !!getLocalStorage('isMetamaskConnected') : false,
+        historicalPrices: {}
     },
     mutations: {
         SET_INSTRUMENTS: (state, instruments) => {
@@ -49,6 +51,10 @@ const store = new Vuex.Store({
 
         SET_DEFI_TOKENS(state, defiTokens) {
             state.defiTokens = defiTokens;
+        },
+
+        SET_HISTORICAL_PRICES(state, historicalPrices) {
+            state.historicalPrices = historicalPrices;
         }
     },
     actions: {
@@ -90,8 +96,13 @@ const store = new Vuex.Store({
                                 16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,
                                 40,41,'Kovan Test Network: '];
             commit('SET_NETWORK_ID', chainType[chainId]);
-        }
+        },
 
+        async GET_HISTORICAL_PRICES({commit}) {
+            const historicalPrices = await getHistoricalPrices();
+            commit('SET_HISTORICAL_PRICES', historicalPrices);
+            return historicalPrices;
+        }
     },
     getters: {
         INSTRUMENTS(state) {
@@ -124,6 +135,10 @@ const store = new Vuex.Store({
 
         isCONNECTED(state) {
             return state.isMetamaskConnected;
+        },
+
+        HISTORICAL_PRICES(state) {
+            return state.historicalPrices;
         }
     }
 });

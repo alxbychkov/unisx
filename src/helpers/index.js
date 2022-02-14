@@ -126,8 +126,9 @@ export function truncate(number, digits) {
 }
 
 export function euroDate(str) {
-    const temp = str.split('.');
-    return new Date(`${temp[1]}.${temp[0]}.${temp[2]}`);
+    // const temp = str.split('.');
+    // return new Date(`${temp[1]}.${temp[0]}.${temp[2]}`);
+    return new Date(str);
 }
 
 export function getQuarterStartMonth(){

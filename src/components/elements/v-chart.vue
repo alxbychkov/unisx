@@ -12,6 +12,7 @@
 import {Chart} from 'highcharts-vue';
 import { ethPromise, getPosition } from '../../core/eth';
 import { euroDate, getQuarterStartMonth } from '../../helpers';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
     name: 'Chart',
@@ -124,12 +125,16 @@ export default {
                     "10.02.2022": 34.10
                 }
             },
-            filteredChart: {},
+            filteredChart: [],
             liquidPrice: '',
             selectedRange: ''
         }
     },
     computed: {
+        ...mapGetters([
+            'HISTORICAL_PRICES'
+        ]),
+
         chartOptions: function() {
             return {
                 chart: {
@@ -183,21 +188,27 @@ export default {
             }
         },
         syntChartValues: function() {
-            return [...Object.values(this.filteredChart)];
+            return this.filteredChart.length ? [...this.filteredChart.map(item => +item.price)] : [];
+            // return [...Object.values(this.filteredChart)];
         },
         syntChartKeys: function() {
-            return [...Object.keys(this.filteredChart)];
+            return this.filteredChart.length ? [...this.filteredChart.map(item => item.date)] : [];
+            // return [...Object.keys(this.filteredChart)];
         },
         liquidPriceValues: function() {
             const array = [];
-            const ln = Object.keys(this.filteredChart).length;
+            // const ln = Object.keys(this.filteredChart).length;
+            const ln = this.filteredChart.length;
             const price = this.liquidPrice ? +this.liquidPrice : 0;
             array[0] = [0,price];
             array[1] = [ln-1,price];
             return array;
-        },
+        }
     },
     methods: {
+        ...mapActions([
+            'GET_HISTORICAL_PRICES'
+        ]),
         async getLiquidationPrice() {
             await ethPromise;
             const collateralAmount = await getPosition();
@@ -209,7 +220,8 @@ export default {
 
         filteredChartValues(range = '') {
             if (!range) {
-                this.filteredChart = {...this.chartValues.synt};
+                // this.filteredChart = {...this.chartValues.synt};
+                this.filteredChart = [...this.HISTORICAL_PRICES];
                 this.selectedRange = '';
             }
             if (range === 'w') {
@@ -218,27 +230,32 @@ export default {
                 const diff = today.getDate() - day + (day == 0 ? -7:0);
                 const monday = new Date(today.setDate(diff));
                 
-                const keys = Object.keys(this.chartValues.synt).filter(k => euroDate(k) >= monday);
-                const sortedObj = Object.fromEntries(keys.map(key => [key, this.chartValues.synt[key]]));
-                this.filteredChart = {...sortedObj};
+                // const keys = Object.keys(this.chartValues.synt).filter(k => euroDate(k) >= monday);
+                // const sortedObj = Object.fromEntries(keys.map(key => [key, this.chartValues.synt[key]]));
+                // const keys = this.HISTORICAL_PRICES.filter(k => euroDate(k) >= monday);
+                const sortedObj = this.HISTORICAL_PRICES.filter(k => euroDate(k.date) >= monday);
+                this.filteredChart = [...sortedObj];
                 this.selectedRange = 'w';
             }
             if (range === 'q') {
                 const startMonth = getQuarterStartMonth();
                 const startQuarter = new Date(new Date().getFullYear(), startMonth);
-                const keys = Object.keys(this.chartValues.synt).filter(k => euroDate(k) >= startQuarter);
-                const sortedObj = Object.fromEntries(keys.map(key => [key, this.chartValues.synt[key]]));
-                this.filteredChart = {...sortedObj};
+                // const keys = Object.keys(this.chartValues.synt).filter(k => euroDate(k) >= startQuarter);
+                // const sortedObj = Object.fromEntries(keys.map(key => [key, this.chartValues.synt[key]]));
+                const sortedObj = this.HISTORICAL_PRICES.filter(k => euroDate(k.date) >= startQuarter);
+                this.filteredChart = [...sortedObj];
                 this.selectedRange = 'q';
             }
         }
     },
     created() {
-        this.filteredChart = {...this.chartValues.synt};
+        this.GET_HISTORICAL_PRICES().then(data => this.filteredChart = [...data]);
+        // this.filteredChart = {...this.chartValues.synt};
     },
     mounted() {
         this.getLiquidationPrice().then(price => this.liquidPrice = price);
-    }
+    },
+    updated() {}
 }
 </script>
 <style scoped>
