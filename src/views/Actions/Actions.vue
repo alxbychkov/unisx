@@ -87,7 +87,7 @@
 import './index.css';
 
 import {initialData} from '../../helpers/initialData';
-import {getUnicCoins, toFix, setLocalStorage, separate, defaultSelect, truncate} from '../../helpers';
+import {getUnicCoins, toFix, separate, defaultSelect} from '../../helpers';
 import errorStatus from '../../helpers/errors';
 import {mapActions, mapGetters} from 'vuex';
 
@@ -130,8 +130,6 @@ export default {
         this.message = {...initialData.message};
 
         if (['uSPAC5', 'uSPAC10', 'uSPAC10-test'].includes(item?.Name)) {
-            // this.stakeProfile = {...initialData.stakeProfile};
-            // await this.updateStakeProfile(item);
             this.sushiswapPool = {...initialData.sushiswapPool};
             this.selectedItem = item;
             this.synthetic.cr = item.CR ? +item.CR : 1;
@@ -155,8 +153,6 @@ export default {
             this.stakeProfile = {...initialData.stakeProfile};
             this.sushiswapPool = {...initialData.sushiswapPool};
         }
-
-        console.log('getTableItem: ', this.selectedItem);
 
         const selectInstrumentValue = document.querySelector(`#portfolioList .list [data-value="${item?.Name}"]`);
         const selectPoolValue = document.querySelector(`#poolList .list [data-value="${item?.Name}"]`);
@@ -234,24 +230,16 @@ export default {
                     });
         });
         
-        // const tokenAddress =  [...[{token: 'ETH',decimals: 18,address:walletAddress}], ...this.STABLECOINS, ...this.DEFI_TOKENS, ...this.DEX_LP, ...instumentsJSON];
-
         const tokenAddress =  [...instumentsJSON];
 
-        // Баланс токенов ERC20
         for (let i of tokenAddress) {
             const collateralAmount = await getAccount(walletAddress);
             const collateral = await getPosition();
             const rewards = await collateral.minterRewardFormatted;
-
-            // let balance = (+collateralAmount.tokenCurrencyBalanceFormatted).toFixed(toFix).toString();
-            // const value = i.price ? (balance * i.price).toFixed(toFix) : 0;
-
             
             let balance = (+collateralAmount.tokenCurrencyBalanceFormatted);
             const value = i.price ? (balance * i.price) : 0;
 
-            // Проверить статус - в кошельке, пул или стейк
             if (balance >= 0) {
                 portfolio.push({
                     Name: i.token,
@@ -356,7 +344,27 @@ export default {
         const collateralRatio = (+collateralAmount.collateralAmountFormatted)/((+collateralAmount.tokensOutstandingFormatted)*this.INSTRUMENTS[0].Price);
 
         const minterRewardFormatted = await collateralAmount.minterRewardFormatted;
-        const priceAPY = (((+minterRewardFormatted)*(+poolProperties['UNISX'].price))/(+collateralAmount.collateralAmountFormatted))*100;
+        const UNISXRewardEarned = collateralBalance.UNISXRewardEarnedFormatted;
+        const UNISXRewardPaid = collateralBalance.UNISXRewardPaidFormatted;
+        let stakingLPRewards = (+UNISXRewardEarned) + (+UNISXRewardPaid);
+
+        Object.values(poolProperties).forEach(value => {
+            stakingLPRewards += (+value.rewardPaidFormatted) + (+value.rewardEarnedFormatted);
+        });
+
+        const priceUNISX = (+poolProperties['UNISX'].price);
+        const syntValue = (+collateralAmount.collateralAmountFormatted);
+        const positionAgeSeconds = collateralAmount.positionAgeSeconds;
+        const positionAgeDays = positionAgeSeconds ? Math.floor(positionAgeSeconds / 86400) : 1;
+        let apyMint = 0;
+        let apyStake = 0;
+
+        if (syntValue && positionAgeDays) {
+            apyMint = (( (+minterRewardFormatted) * priceUNISX / syntValue * 1.5) / positionAgeDays) * 365 * 100;
+            apyStake = (( stakingLPRewards * priceUNISX / syntValue * 1.5) / positionAgeDays) * 365 * 100;
+        }
+        
+        const priceAPY = apyMint + apyStake;
 
         console.log('collateralAmount: ', collateralAmount, 'collateralBalance: ', collateralBalance, 'contractProperties: ', contractProperties);
 

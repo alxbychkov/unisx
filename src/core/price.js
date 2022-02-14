@@ -10,4 +10,3 @@ export async function getHistoricalPrices() {
   return await fetch(BASE_PATH + 'historicalPrices/uSPAC10')
     .then(resp => resp.json())
 }
-

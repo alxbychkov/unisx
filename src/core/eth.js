@@ -3,7 +3,7 @@ import EMP_ABI from './abi/EMP_ABI.js'
 import UniswapV2Router02_ABI from './abi/UniswapV2Router02.js'
 import UniswapV2Factory_ABI from './abi/UniswapV2Factory.js'
 import UniswapV2Pair_ABI from './abi/UniswapV2Pair.js'
-import UNISXStakingRewards_ABI from './abi/StakingRewards_ABI.js'
+import UNISXStakingRewards_ABI from './abi/UNISXStakingRewards.js'
 import LPStakingRewards_ABI from './abi/LPStakingRewards.js'
 import LPStakingRewardsFactory_ABI from './abi/LPStakingRewardsFactory.js'
 import ERC20 from './abi/ERC20_ABI.js'
@@ -14,7 +14,7 @@ import {CHAIN_CONFIG, USER_CR, PRICE_PRECISION, MINTER_REWARDS_PER_TOKEN_DAY} fr
 import {getPrice} from './price.js'
 import {getRewards} from './minter_rewards.js'
 
-const UNISWAP_DECIMALS = 18
+export const UNISWAP_DECIMALS = 18
 
 const formatUnits = ethers.utils.formatUnits.bind(ethers.utils)
 
@@ -156,6 +156,12 @@ async function getUNISXStaked(account) {
   )
 }
 
+async function getRewardPaid(account, stakingContract) {
+  const events = await stakingContract.queryFilter(
+    stakingContract.filters.RewardPaid(account)
+  )
+  return events.reduce((total, e) => total.add(e.args.reward), ethers.BigNumber.from(0))
+}
 
 export async function getAccount(account = window.ethereum.selectedAddress){
   const props = await promisedProperties({
@@ -166,7 +172,9 @@ export async function getAccount(account = window.ethereum.selectedAddress){
     xUNISXBalance: xUNISXToken.balanceOf(account),
     UNISXStaked: getUNISXStaked(account),
     UNISXRewardEarned: UNISXStakingRewards.callStatic.getReward({from: account}),
+    UNISXRewardPaid: getRewardPaid(account, UNISXStakingRewards),
   })
+
   return {...props,
     balanceFormatted: formatUnits(props.balance),
     collateralBalanceFormatted: formatUnits(props.collateralBalance, collateralTokenDecimals),
@@ -175,6 +183,7 @@ export async function getAccount(account = window.ethereum.selectedAddress){
     xUNISXBalanceFormatted: formatUnits(props.xUNISXBalance, xUNISXDecimals),
     UNISXStakedFormatted: formatUnits(props.UNISXStaked, UNISXDecimals),
     UNISXRewardEarnedFormatted: formatUnits(props.UNISXRewardEarned, UNISXDecimals),
+    UNISXRewardPaidFormatted: formatUnits(props.UNISXRewardPaid, UNISXDecimals),
   }
 }
 
@@ -241,13 +250,28 @@ export async function getFundingRateAppliedTokenDebt(rawDebt){
   return rawValue
 }
 
+async function getPositionCreationTime(address) {
+  const events = await financialContract.queryFilter(
+    financialContract.filters.NewSponsor(address)
+  )
+  if(events.length == 0) {
+    return null
+  } else {
+    return (await events[0].getBlock()).timestamp
+  }
+}
+
 export async function getPosition(address = window.ethereum.selectedAddress){
-  const pos = await promisedProperties({
-    collateralAmount: financialContract.getCollateral(address).then(({rawValue}) => rawValue),
-    tokensOutstanding: financialContract.positions(address).then(pos =>
-      pos.tokensOutstanding.rawValue
-    ),
-  })
+  const [pos, positionCreationTime, currentTime]  = await Promise.all([
+    promisedProperties({
+      collateralAmount: financialContract.getCollateral(address).then(({rawValue}) => rawValue),
+      tokensOutstanding: financialContract.positions(address).then(pos =>
+        pos.tokensOutstanding.rawValue
+      ),
+    }),
+    getPositionCreationTime(address),
+    (await provider.getBlock('latest')).timestamp,
+  ])
 
   let liquidationPrice
 
@@ -291,6 +315,9 @@ export async function getPosition(address = window.ethereum.selectedAddress){
     minterRewardFormatted: minterReward.then(reward => reward.rewardFormatted),
     collateralAvailableForFastWithdrawal,
     collateralAvailableForFastWithdrawalFormatted: formatUnits(collateralAvailableForFastWithdrawal, collateralTokenDecimals),
+    positionAgeSeconds: positionCreationTime == null
+      ? null
+      : currentTime - positionCreationTime,
   }
 }
 
@@ -458,6 +485,7 @@ async function getPairProperties(account, token, pair, stakingRewards) {
     USDCBalance,
     staked,
     rewardEarned,
+    rewardPaid,
   ] = await Promise.all([
     pair.token0(),
     pair.token1(),
@@ -470,6 +498,7 @@ async function getPairProperties(account, token, pair, stakingRewards) {
     USDC.balanceOf(account),
     stakingRewards._balances(account),
     stakingRewards.callStatic.getReward({from: account}),
+    getRewardPaid(account, stakingRewards),
   ])
 
   const [reserveUSDC, reserveToken] = token0 == USDC.address
@@ -524,6 +553,9 @@ async function getPairProperties(account, token, pair, stakingRewards) {
 
     rewardEarned,
     rewardEarnedFormatted: formatUnits(rewardEarned, UNISXDecimals),
+
+    rewardPaid,
+    rewardPaidFormatted: formatUnits(rewardPaid, UNISXDecimals),
   }
 }
 

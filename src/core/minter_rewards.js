@@ -1,3 +1,4 @@
+/* eslint-disable no-unreachable */
 /* eslint-disable no-unused-vars */
 import {tokenCurrencyDecimals, financialContract, provider, ethPromise} from '../core/eth.js'
 import {CHAIN_CONFIG} from '../core/config.js'
@@ -28,7 +29,6 @@ function cached(key, argCount, resultType, fn) {
       } else {
         throw new Error('illegal state')
       }
-      // eslint-disable-next-line no-unreachable
       return parseInt(value)
     } else {
       const result = await fn(...args)
