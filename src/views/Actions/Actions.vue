@@ -355,16 +355,16 @@ export default {
         });
 
         const priceUNISX = (+poolProperties['UNISX'].price);
-        const syntPrice = this.INSTRUMENTS.find(i => i.Name === item?.Name) ? this.INSTRUMENTS.find(i => i.Name === item?.Name).price : 0;
-        const syntValue = (+collateralAmount.collateralAmountFormatted) * (+syntPrice);
+        const syntPrice = this.INSTRUMENTS.find(i => i.Name === item?.Name) ? this.INSTRUMENTS.find(i => i.Name === item?.Name).Price : 0;
+        const syntValue = (+collateralAmount.tokensOutstandingFormatted)*(+syntPrice);
         const positionAgeSeconds = collateralAmount.positionAgeSeconds;
         const positionAgeDays = positionAgeSeconds ? Math.floor(positionAgeSeconds / 86400) : 0;
         let apyMint = 0;
         let apyStake = 0;
 
         if (syntValue && positionAgeDays) {
-            apyMint = (( (+minterRewardFormatted) * priceUNISX / syntValue * 1.5) / positionAgeDays) * 365 * 100;
-            apyStake = (( stakingLPRewards * priceUNISX / syntValue * 1.5) / positionAgeDays) * 365 * 100;
+            apyMint = ( ( ((+minterRewardFormatted) * priceUNISX) / (syntValue * 1.5) ) / positionAgeDays) * 365 * 100;
+            apyStake = ( ( (stakingLPRewards * priceUNISX) / (syntValue * 1.5)) / positionAgeDays) * 365 * 100;
         }
         
         const priceAPY = apyMint + apyStake;
