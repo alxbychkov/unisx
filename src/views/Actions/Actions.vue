@@ -347,15 +347,17 @@ export default {
         const UNISXRewardEarned = collateralBalance.UNISXRewardEarnedFormatted;
         const UNISXRewardPaid = collateralBalance.UNISXRewardPaidFormatted;
         let stakingLPRewards = (+UNISXRewardEarned) + (+UNISXRewardPaid);
+        let stLP = ``;
 
         Object.values(poolProperties).forEach(value => {
+            stLP += `${+value.rewardPaidFormatted}+${+value.rewardEarnedFormatted}+`;    
             stakingLPRewards += (+value.rewardPaidFormatted) + (+value.rewardEarnedFormatted);
         });
 
         const priceUNISX = (+poolProperties['UNISX'].price);
         const syntValue = (+collateralAmount.collateralAmountFormatted);
         const positionAgeSeconds = collateralAmount.positionAgeSeconds;
-        const positionAgeDays = positionAgeSeconds ? Math.floor(positionAgeSeconds / 86400) : 1;
+        const positionAgeDays = positionAgeSeconds ? Math.floor(positionAgeSeconds / 86400) : 0;
         let apyMint = 0;
         let apyStake = 0;
 
@@ -365,6 +367,20 @@ export default {
         }
         
         const priceAPY = apyMint + apyStake;
+
+        const consoleAPY = {
+            'minterRewardFormatted':+minterRewardFormatted,
+            'stakingLPRewards': stakingLPRewards,
+            'stakingLPRewardsSeparate': `${+UNISXRewardEarned}+${+UNISXRewardPaid}+${stLP}`.slice(0,-1),
+            'UNISX price': priceUNISX,
+            'Synt Value': syntValue,
+            'Days': positionAgeDays,
+            'apyMint': apyMint,
+            'apyStake': apyStake,
+            'APY': priceAPY
+        };
+
+        console.table(consoleAPY);
 
         console.log('collateralAmount: ', collateralAmount, 'collateralBalance: ', collateralBalance, 'contractProperties: ', contractProperties);
 
