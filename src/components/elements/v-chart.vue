@@ -178,7 +178,7 @@ export default {
                     title: {
                         text: 'Price'
                     },
-                    min: 20,
+                    min: 0,
                     labels: {
                         format: '{value:.2f}',
                         step: 1

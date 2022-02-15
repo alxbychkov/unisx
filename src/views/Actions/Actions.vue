@@ -362,9 +362,12 @@ export default {
         let apyMint = 0;
         let apyStake = 0;
 
+        const ONE_DAY_VALUE = 1;
+        const denominator = (((+minterRewardFormatted) / ONE_DAY_VALUE) / positionAgeDays) * 1.5 * (+syntPrice); // (syntValue * 1.5)
+
         if (syntValue && positionAgeDays) {
-            apyMint = ( ( ((+minterRewardFormatted) * priceUNISX) / (syntValue * 1.5) ) / positionAgeDays) * 365 * 100;
-            apyStake = ( ( (stakingLPRewards * priceUNISX) / (syntValue * 1.5)) / positionAgeDays) * 365 * 100;
+            apyMint = ( ( ((+minterRewardFormatted) * priceUNISX) / denominator ) / positionAgeDays) * 365 * 100;
+            apyStake = ( ( (stakingLPRewards * priceUNISX) / denominator ) / positionAgeDays) * 365 * 100;
         }
         
         const priceAPY = apyMint + apyStake;
