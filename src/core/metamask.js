@@ -30,6 +30,8 @@ export const accountPromise = new Promise(_accountPromiseResolver => {
   })
 
   onMetamaskLoad.then(async () => {
+    window.ethereum.on('chainChanged', () => window.location.reload());
+    window.ethereum.on('accountsChanged', () => window.location.reload());
     if(localStorage.isMetamaskConnected){
       try {
         await connectMetamask()

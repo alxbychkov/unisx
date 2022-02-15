@@ -7,14 +7,26 @@
                         <a href="" class="logo"><img src="../assets/img/logo.png" alt=""><span>Universal Synthetics</span></a>
                         <div class="top_list_wrp_all">
                             <ul class="top_list">
-                                <router-link :to="{ name: 'Home'}" tag="li" active-class="active" exact>
-                                    <a href="">home</a>
+                                <router-link 
+                                    to="/"
+                                    custom
+                                    v-slot="{ href, isActive, isExactActive, navigate }"
+                                >
+                                    <li :class="[isActive && 'router-link-active', isExactActive && 'active']">
+                                        <a :href="href" @click="navigate">home</a>
+                                    </li>
                                 </router-link>
-                                <router-link :to="{ name: 'Actions'}" tag="li" active-class="active">
-                                    <a href="">operations</a>
+                                <router-link
+                                    to="/actions"
+                                    custom
+                                    v-slot="{ href, isActive, navigate }"
+                                >
+                                    <li :class="[isActive && 'active']">
+                                        <a :href="href" @click="navigate">operations</a>
+                                    </li>
                                 </router-link>
-                                <li><a href="">Doc</a></li>
-                                <li><a href="">About</a></li>
+                                <li><a href=" https://welcome-3.gitbook.io/unisx-project/faq" target="_blank">Doc</a></li>
+                                <li><a href="https://welcome-3.gitbook.io/unisx-project/" target="_blank">About</a></li>
                             </ul>
                         </div>
                         <div class="open_nav"> <img src="../assets/img/menu.svg" alt=""> </div>
