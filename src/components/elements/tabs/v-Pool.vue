@@ -259,9 +259,11 @@ export default {
         toPrice(token) {
             switch (token) {
                 case 'firstToken':
-                    return round((toDote(this.selectedItem.firstTokenAmount) * this.selectedItem.tokenPrice), 4).toString();
+                    // return round((toDote(this.selectedItem.firstTokenAmount) * this.selectedItem.tokenPrice), 4).toString();
+                    return (+this.selectedItem.firstTokenAmount * this.selectedItem.tokenPrice).toString();
                 case 'secondToken':
-                    return round((toDote(this.selectedItem.secondTokenAmount) / this.selectedItem.tokenPrice), 4).toString();
+                    // return round((toDote(this.selectedItem.secondTokenAmount) / this.selectedItem.tokenPrice), 4).toString();
+                    return (+this.selectedItem.secondTokenAmount / this.selectedItem.tokenPrice).toString();
                 default:
                     return token;
             }
@@ -280,12 +282,12 @@ export default {
             this.selectedItem.secondToken = pair.secondToken;
             // this.selectedItem.firstTokenInWallet = (+selectedItemData.tokenBalanceFormatted).toFixed(toFix).toString();
             // this.selectedItem.secondTokenInWallet = (+selectedItemData.USDCBalanceFormatted).toFixed(toFix).toString();
-            this.selectedItem.firstTokenAmountInPool = (+selectedItemData.tokenAvailableToWithdrawFormatted).toFixed(toFix).toString();
-            this.selectedItem.secondTokenAmountInPool = (+selectedItemData.USDCAvailableToWithdrawFormatted).toFixed(toFix).toString();
+            // this.selectedItem.firstTokenAmountInPool = (+selectedItemData.tokenAvailableToWithdrawFormatted).toFixed(toFix).toString();
+            // this.selectedItem.secondTokenAmountInPool = (+selectedItemData.USDCAvailableToWithdrawFormatted).toFixed(toFix).toString();
             this.selectedItem.firstTokenInWallet = selectedItemData.tokenBalanceFormatted;
             this.selectedItem.secondTokenInWallet = selectedItemData.USDCBalanceFormatted;
-            // this.selectedItem.firstTokenAmountInPool = selectedItemData.tokenAvailableToWithdrawFormatted;
-            // this.selectedItem.secondTokenAmountInPool = selectedItemData.USDCAvailableToWithdrawFormatted;
+            this.selectedItem.firstTokenAmountInPool = selectedItemData.tokenAvailableToWithdrawFormatted;
+            this.selectedItem.secondTokenAmountInPool = selectedItemData.USDCAvailableToWithdrawFormatted;
             this.selectedItem.firstTokenAmount = '';
             this.selectedItem.secondTokenAmount = '';
             this.selectedItem.tokenPrice = (+selectedItemData.price);
