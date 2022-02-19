@@ -13,7 +13,7 @@
                             @input="consider('firstToken')"
                         >
                         <div class="flex j-between mb-0"><span>In the pool:</span>
-                        <span class="ml-a">{{ selectedItem.firstTokenAmountInPool }}</span>
+                        <span class="ml-a mw-70-ec">{{ selectedItem.firstTokenAmountInPool }}</span>
                         <span
                             v-if="+selectedItem.firstTokenAmountInPool > 0"
                             class="color-green cur-p"
@@ -51,7 +51,7 @@
                             @input="consider('secondToken')" 
                         >
                         <div class="flex j-between mb-0"><span>In the pool:</span>
-                        <span class="ml-a">{{ selectedItem.secondTokenAmountInPool }}</span>
+                        <span class="ml-a mw-70-ec">{{ selectedItem.secondTokenAmountInPool }}</span>
                         <span
                             v-if="+selectedItem.secondTokenAmountInPool > 0"
                             class="color-green cur-p"
