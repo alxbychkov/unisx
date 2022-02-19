@@ -85,7 +85,7 @@
 <script>
 import {mapActions, mapGetters} from 'vuex';
 // eslint-disable-next-line no-unused-vars
-import { addLiquidity, getAccount, getPoolProperties, removeLiquidity } from '../../../core/eth';
+import { addLiquidity, getAccount, getPoolProperties, removeAllLiquidity, removeLiquidity } from '../../../core/eth';
 
 // eslint-disable-next-line no-unused-vars
 import {round, separate, toDote, toFix} from '../../../helpers';
@@ -224,7 +224,14 @@ export default {
                 }
 
                 try {
-                    const pool = removeLiquidity(tokenCode, USDCAmount, tokenAmount);
+                    let pool;
+                    if (+this.selectedItem.firstTokenAmount === +this.selectedItem.firstTokenAmountInPool) {
+                        pool = removeAllLiquidity(tokenCode);
+                    } else {
+                        pool = removeLiquidity(tokenCode, USDCAmount, tokenAmount);
+                    }
+                    
+                    
                     this.onMessage(errorStatus('proccess'));
                     console.error(errorStatus('proccess'));
                     for await (let value of pool) {
@@ -241,6 +248,8 @@ export default {
                     console.error(e);
                     return
                 }
+
+
                 console.log('unPool success!'); 
             }
         },
