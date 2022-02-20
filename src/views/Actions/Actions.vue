@@ -372,20 +372,6 @@ export default {
         
         const priceAPY = apyMint + apyStake;
 
-        const consoleAPY = {
-            'minterRewardFormatted':+minterRewardFormatted,
-            'stakingLPRewards': stakingLPRewards,
-            'stakingLPRewardsSeparate': `${+UNISXRewardEarned}+${+UNISXRewardPaid}+${stLP}`.slice(0,-1),
-            'UNISX price': priceUNISX,
-            'Synt Value': syntValue,
-            'Days': positionAgeDays,
-            'apyMint': apyMint,
-            'apyStake': apyStake,
-            'APY': priceAPY
-        };
-
-        console.table(consoleAPY);
-
         console.log('collateralAmount: ', collateralAmount, 'collateralBalance: ', collateralBalance, 'contractProperties: ', contractProperties);
 
         if (item.Name && ['uSPAC5', 'uSPAC10', 'uSPAC10-test'].includes(item.Name)) {
