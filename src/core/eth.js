@@ -645,6 +645,50 @@ export async function* removeLiquidity(tokenCode, USDCAmount, tokenAmount, to = 
   await tx.wait()
 }
 
+export async function* removeAllLiquidity(tokenCode, to = window.ethereum.selectedAddress) {
+  yield {message: 'Preparing'}
+
+  const {token, pair} = LPPairs[tokenCode]
+  if(token == null) {
+    throw new Error('unknown token')
+  }
+
+  const current = (await provider.getBlock('latest')).timestamp
+
+  const [liquidity, reserves, token0, totalLiquidity] = await Promise.all(
+    [
+      pair.balanceOf(window.ethereum.selectedAddress), 
+      pair.getReserves(), 
+      pair.token0(), 
+      pair.totalSupply()
+    ]
+  )
+  const [reserveUSDC, reserveToken] = token0 == USDC.address
+  ? [reserves[0], reserves[1]]
+  : [reserves[1], reserves[0]]
+
+  const USDCAmount = reserveUSDC.mul(liquidity).div(totalLiquidity)
+  const tokenAmount = reserveToken.mul(liquidity).div(totalLiquidity)
+
+  yield* ensureAllowance(liquidity, pair, uniswapV2Router.address)
+
+  console.log('USDCAmount', USDCAmount.toString())
+  console.log('tokenAmount', tokenAmount.toString())
+
+  yield {message: 'Sending transaction'}
+  const tx = await uniswapV2Router.removeLiquidity(
+    USDC.address,
+    token.address,
+    liquidity,
+    amountMin(USDCAmount),
+    amountMin(tokenAmount),
+    to,
+    current + 30 * 60 // thirty minutes deadline, same as in sushiswap client
+  )
+  yield {message: 'Waiting for transaction', txHash: tx.hash}
+  await tx.wait()
+}
+
 export async function* LP_stake(tokenCode, amount) {
   amount = toBN(amount, UNISWAP_DECIMALS)
 

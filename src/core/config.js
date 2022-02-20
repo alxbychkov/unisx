@@ -11,6 +11,12 @@ export const CHAIN_CONFIG = {
   },
 }
 
+// eslint-disable-next-line no-undef
+export const MINTER_REWARD_RATE = Number(100_000n) * (Number(10n) ** Number(18n)) / Number(365n) / Number(24n) / Number(3600n);
+  // 100_000n * // 100_000 tokens to distribute per year
+  // (10n ** 18n) // decimals
+  // / 365n / 24n / 3600n // seconds per year
+
 export const USER_CR = '1.5'
 
 export const BASKET = ["DWAC", "IRDM", "PRIM", "TGLS", "MP", "LCID", "GDYN", "SMPL", "ENVX", "QS"]
