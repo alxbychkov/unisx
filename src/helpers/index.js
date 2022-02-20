@@ -2,7 +2,7 @@
 import axios from "axios";
 import {getPrice} from '../core/price';
 
-export const isDev = !(process.env.NODE_ENV === 'production');
+export const isDev = !(process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'global');
 export const toFix = isDev ? 5 : 4;
 export const COLLATERAL_PRICE = 1;
 
