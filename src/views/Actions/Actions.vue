@@ -201,6 +201,7 @@ export default {
 
     async handleClickConnect(account) {
         const portfolio = await this.getPortfolioList(account);
+        await this.getTableItem(portfolio[0]);
         this.GET_PORTFOLIO_FROM_API(portfolio);
     },
 
@@ -236,6 +237,8 @@ export default {
             const collateralAmount = await getAccount(walletAddress);
             const collateral = await getPosition();
             const rewards = await collateral.minterRewardFormatted;
+            const rewardPaid = collateral.minterRewardPaidFormatted;
+            const rewardWillPaid = ((+rewards) - (+rewardPaid)).toFixed(toFix).toString();
             
             let balance = (+collateralAmount.tokenCurrencyBalanceFormatted);
             const value = i.price ? (balance * i.price) : 0;
@@ -246,14 +249,14 @@ export default {
                     Status: "-",
                     Price: i.price, 
                     Number: balance.toString(),
-                    Value: value,
+                    Value: (+value).toFixed(toFix).toString(),
                     GT: 0,
                     UMA: 0,
                     Instrument: "",
                     CollateralName: i.collateral,
                     Description: i.description,
                     CR: i.cr,
-                    Rewards: rewards
+                    Rewards: `${(+rewards).toFixed(toFix).toString()} (Total) / ${rewardWillPaid} (Next payment)`
                 });
             }
 
@@ -261,8 +264,8 @@ export default {
                 Name: 'UNISX',
                 Status: "-",
                 Price: '', 
-                // Number: (+collateralAmount.UNISXBalanceFormatted).toFixed(toFix).toString(),
-                Number: collateralAmount.UNISXBalanceFormatted,
+                Number: (+collateralAmount.UNISXBalanceFormatted).toFixed(toFix).toString(),
+                // Number: collateralAmount.UNISXBalanceFormatted,
                 Value: '',
                 GT: 0,
                 UMA: 0,
@@ -271,7 +274,7 @@ export default {
                 Description: '',
                 CR: '',
                 // Rewards: `${(+collateralAmount.UNISXRewardEarnedFormatted).toFixed(toFix).toString()} (${(+collateralAmount.UNISXStakedFormatted).toFixed(toFix).toString()})`
-                Rewards: `${collateralAmount.UNISXRewardEarnedFormatted} (${collateralAmount.UNISXStakedFormatted})`
+                Rewards: `${(+collateralAmount.UNISXRewardEarnedFormatted).toFixed(toFix).toString()} (To Claim) / ${collateralAmount.UNISXStakedFormatted} (In the Stake)`
             }
 
             const xunisx = {
@@ -311,8 +314,8 @@ export default {
                     CollateralName: '',
                     Description: '',
                     CR: '',
-                    // Rewards: `${(+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString()} (${(poolProperties[key].stakedFormatted).toString()})`
-                    Rewards: `${poolProperties[key].rewardEarnedFormatted} (${poolProperties[key].stakedFormatted})`
+                    Rewards: `${(+poolProperties[key].rewardEarnedFormatted).toFixed(toFix).toString()} (To Claim) / ${(poolProperties[key].stakedFormatted).toString()} (In the Stake)`
+                    // Rewards: `${poolProperties[key].rewardEarnedFormatted} (${poolProperties[key].stakedFormatted})`
                 });
             }
         }
@@ -330,6 +333,7 @@ export default {
             this.$nextTick(() => {
                 this.isChart = true;
             });
+            await this.getTableItem(this.PORTFOLIO[0]);
         }
         await this.updateSelectedItemBalance(this.selectedItem);
         await this.updateStakeProfile(this.selectedItem);
@@ -496,6 +500,7 @@ export default {
     async handleClickTab(e, tab = '') {
         this.clearTab(e);
         this.isChart = (tab === 'mint') ? true : false;
+        if (tab === 'mint') await this.getTableItem(this.PORTFOLIO[0]);
     },
 
     handleShowMessage(message) {

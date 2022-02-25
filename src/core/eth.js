@@ -261,6 +261,13 @@ async function getPositionCreationTime(address) {
   }
 }
 
+async function getMinterRewardPaid(address) {
+  const events = await UNISXToken.queryFilter(
+    UNISXToken.filters.Transfer(getChainConfig().rewardPayer, address)
+  )
+  return events.reduce((total, e) => total.add(e.args.amount), ethers.BigNumber.from(0))
+}
+
 export async function getPosition(address = window.ethereum.selectedAddress){
   const [pos, positionCreationTime, currentTime]  = await Promise.all([
     promisedProperties({
@@ -268,6 +275,7 @@ export async function getPosition(address = window.ethereum.selectedAddress){
       tokensOutstanding: financialContract.positions(address).then(pos =>
         pos.tokensOutstanding.rawValue
       ),
+      minterRewardPaid: getMinterRewardPaid(address),
     }),
     getPositionCreationTime(address),
     (await provider.getBlock('latest')).timestamp,
@@ -315,9 +323,13 @@ export async function getPosition(address = window.ethereum.selectedAddress){
     minterRewardFormatted: minterReward.then(reward => reward.rewardFormatted),
     collateralAvailableForFastWithdrawal,
     collateralAvailableForFastWithdrawalFormatted: formatUnits(collateralAvailableForFastWithdrawal, collateralTokenDecimals),
+
     positionAgeSeconds: positionCreationTime == null
       ? null
       : currentTime - positionCreationTime,
+
+    minterRewardPaid: pos.minterRewardPaid,
+    minterRewardPaidFormatted: formatUnits(pos.minterRewardPaid, UNISXDecimals),
   }
 }
 

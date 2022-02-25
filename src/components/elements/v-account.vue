@@ -43,6 +43,7 @@ export default {
                 this.onClickConnect(this.USER_ACCOUNT);
             } catch(e) {
                 this.GET_isCONNECTED(false);
+                alert(e);
                 console.error(errorStatus('connect'));
             }
         },
