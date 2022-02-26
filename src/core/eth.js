@@ -343,9 +343,9 @@ export function toBN(val, decimals) {
     if(matches == null) {
       throw new Error('Invalid number: ' + val)
     }
-    const [_, whole, __, fractional = ''] = matches
+    let [_, whole, __, fractional = ''] = matches
     if (fractional.length > decimals) {
-      throw new Error(`Too many decimals, max is ${decimals}, in ${val}`)
+      fractional = fractional.slice(0, decimals)
     }
     return BN(whole + fractional)
       .mul(
