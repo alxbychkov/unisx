@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import axios from "axios";
+import { ethPromise, getFinancialContractProperties } from "../core/eth";
 import {getPrice} from '../core/price';
 
 export const isDev = !(process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'global');
@@ -53,8 +54,12 @@ export async function loadTradingWidget(element, link) {
 export async function createPrice(json) {
     if (typeof json !== 'object' && json.length) return false;
     const ln = json.length;
+    await ethPromise;
+    // const financialContractProperties = await getFinancialContractProperties();
+    // console.log('fin', financialContractProperties.priceFormatted);
     for (let i=0; i<ln; i++) {
         const price = await getPrice();
+        // const price = financialContractProperties.priceFormatted;
         json[i].Price = price ? price : 0;
     }
     return await json;

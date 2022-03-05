@@ -208,7 +208,6 @@ export default {
 
     async getPortfolioList(walletAddress = this.USER_ACCOUNT) {
         const portfolio = [];
-
         const instumentsJSON = this.INSTRUMENTS.map(instrument => {
             return {
                 token: instrument.Name, 
@@ -221,7 +220,7 @@ export default {
                 dex: instrument.DEX
             }
         });
-
+        
         const poolInstruments = instumentsJSON.map(instrument => {
             return instrument.dex.map(dex => {
                         return {
