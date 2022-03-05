@@ -54,7 +54,7 @@ export async function loadTradingWidget(element, link) {
 export async function createPrice(json) {
     if (typeof json !== 'object' && json.length) return false;
     const ln = json.length;
-    await ethPromise;
+    // await ethPromise;
     // const financialContractProperties = await getFinancialContractProperties();
     // console.log('fin', financialContractProperties.priceFormatted);
     for (let i=0; i<ln; i++) {
