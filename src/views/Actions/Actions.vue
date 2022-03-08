@@ -8,7 +8,11 @@
         data-aos-duration="800"
       >
         <div class="col-md-9 col-md-offset-2">
-          <v-account :onClickConnect="handleUpdatePortfolioList" ref="wallet" />
+          <v-account
+            :onClickConnect="handleUpdatePortfolioList"
+            :onMessage="handleShowMessage"
+            ref="wallet"
+          />
         </div>
       </div>
       <div
@@ -146,7 +150,7 @@ export default {
     vStake,
     vPool,
     vAccount,
-    vChart
+    vChart,
   },
   data() {
     return {
@@ -157,8 +161,8 @@ export default {
       stakeProfile: { ...initialData.stakeProfile },
       message: initialData.message,
       isChart: true,
-      minterReward: '-',
-      activeTab: 'mint'
+      minterReward: "-",
+      activeTab: "mint",
     };
   },
   methods: {
@@ -168,32 +172,41 @@ export default {
       "GET_POSITION",
       "GET_ACCOUNT",
       "GET_POOL_PROPERTIES",
-      "GET_FINANCIAL_CONTRACT_PROPERTIES"
+      "GET_FINANCIAL_CONTRACT_PROPERTIES",
     ]),
 
     async getTableItem(obj) {
-      let item = '';
+      let item = "";
 
       if (obj instanceof PointerEvent) {
         if (typeof obj.target !== "undefined") {
-            if (obj.target.tagName === "LI" && obj.target.classList.contains("option") && !obj.target.classList.contains("disabled") && !obj.target.classList.contains("selected")) {
-                const value = obj.target.innerText;
-                item = this.PORTFOLIO.find((i) => i.Name === value);
-            }
+          if (
+            obj.target.tagName === "LI" &&
+            obj.target.classList.contains("option") &&
+            !obj.target.classList.contains("disabled") &&
+            !obj.target.classList.contains("selected")
+          ) {
+            const value = obj.target.innerText;
+            item = this.PORTFOLIO.find((i) => i.Name === value);
+          }
         }
       } else {
-          item = obj;
+        item = obj;
       }
 
       this.message = { ...initialData.message };
 
-      if (["uSPAC5", "uSPAC10", "uSPAC10-test"].includes(item?.Name)) {
+      if (["uSPAC5", "uSPAC10"].includes(item?.Name)) {
         this.sushiswapPool = { ...initialData.sushiswapPool };
         this.selectedItem = item;
         this.synthetic.cr = item.CR ? +item.CR : 1;
         this.updateStakeProfile();
         this.updateSelectedItemBalance(item);
-      } else if (["Sushiswap uSPAC10-test/USDC", "Sushiswap UNISX/USDC"].includes(item?.Name)) {
+      } else if (
+        ["Sushiswap uSPAC10-test/USDC", "Sushiswap UNISX/USDC"].includes(
+          item?.Name
+        )
+      ) {
         this.selectedItem = item;
         this.updateStakeProfile(item);
         await this.$refs.dex.updateSelectedItem(item.Name);
@@ -202,7 +215,9 @@ export default {
       } else if (["UNISX", "xUNISX"].includes(item?.Name)) {
         this.sushiswapPool = { ...initialData.sushiswapPool };
         this.selectedItem = item;
-        item?.Name === "xUNISX" ? this.updateStakeProfile() : this.updateStakeProfile(item);
+        item?.Name === "xUNISX"
+          ? this.updateStakeProfile()
+          : this.updateStakeProfile(item);
         this.synthetic = { ...initialData.synthetic };
         this.selectedItemBalance = { ...initialData.selectedItemBalance };
       } else {
@@ -212,27 +227,39 @@ export default {
         this.sushiswapPool = { ...initialData.sushiswapPool };
       }
 
-    
-      const activeSelectValue = document.querySelector(`#${this.activeTab}List .list [data-value="${item?.Name}"]`);
-     
+      const activeSelectValue = document.querySelector(
+        `#${this.activeTab}List .list [data-value="${item?.Name}"]`
+      );
+
       if (activeSelectValue) {
-          activeSelectValue.classList.contains("selected") || activeSelectValue.classList.add("selected");
-        if (activeSelectValue.closest(".nice-select").querySelector(".current")) {
-          activeSelectValue.closest(".nice-select").querySelector(".current").innerText = item?.Name;
-        }  
+        activeSelectValue.classList.contains("selected") ||
+          activeSelectValue.classList.add("selected");
+        if (
+          activeSelectValue.closest(".nice-select").querySelector(".current")
+        ) {
+          activeSelectValue
+            .closest(".nice-select")
+            .querySelector(".current").innerText = item?.Name;
+        }
       } else {
-        defaultSelect(`#${this.activeTab}`);  
+        defaultSelect(`#${this.activeTab}`);
       }
     },
 
     async handleUpdatePortfolioList() {
       this.GET_PORTFOLIO_FROM_API(this.portfolioList);
+      if (this.isChart) {
+        await this.getTableItem(this.portfolioList[0]);
+      }
       this.minterReward = await this.POSITION.minterRewardFormatted;
     },
 
     async handleUpdateAfterAction() {
       await ethPromise;
-      await Promise.all([this.GET_POSITION(), this.GET_ACCOUNT(), this.GET_POOL_PROPERTIES()], this.GET_FINANCIAL_CONTRACT_PROPERTIES());
+      await Promise.all(
+        [this.GET_POSITION(), this.GET_ACCOUNT(), this.GET_POOL_PROPERTIES(),
+        this.GET_FINANCIAL_CONTRACT_PROPERTIES()]
+      );
       await this.handleUpdatePortfolioList();
       this.handleUpdateChart();
       this.updateSelectedItemBalance(this.selectedItem);
@@ -244,10 +271,14 @@ export default {
       const collateralAmount = this.POSITION;
       const collateralBalance = this.ACCOUNT;
       const contractProperties = this.FINANCIAL_CONTRACT_PROPERTIES;
+      const uSPAC10_PRICE = +contractProperties.priceFormatted ? +contractProperties.priceFormatted : 0;
       const poolProperties = this.POOL_PROPERTIES;
-      const collateralRatio = +collateralAmount.collateralAmountFormatted / (+collateralAmount.tokensOutstandingFormatted * this.INSTRUMENTS[0].Price);
+      const collateralRatio =
+        +collateralAmount.collateralAmountFormatted /
+        (+collateralAmount.tokensOutstandingFormatted *
+          uSPAC10_PRICE);
 
-      const minterRewardFormatted = this.minterReward;
+      const minterRewardFormatted = isNaN(this.minterReward) ? 0 : this.minterReward;
       const UNISXRewardEarned = collateralBalance.UNISXRewardEarnedFormatted;
       const UNISXRewardPaid = collateralBalance.UNISXRewardPaidFormatted;
       let stakingLPRewards = +UNISXRewardEarned + +UNISXRewardPaid;
@@ -260,11 +291,9 @@ export default {
       });
 
       const priceUNISX = +poolProperties["UNISX"].price;
-      const syntPrice = this.INSTRUMENTS.find((i) => i.Name === item?.Name)
-        ? this.INSTRUMENTS.find((i) => i.Name === item?.Name).Price
-        : 0;
+
       const syntValue =
-        +collateralAmount.tokensOutstandingFormatted * +syntPrice;
+        +collateralAmount.tokensOutstandingFormatted * uSPAC10_PRICE;
       const positionAgeSeconds = collateralAmount.positionAgeSeconds;
       const positionAgeDays = positionAgeSeconds
         ? Math.floor(positionAgeSeconds / 86400)
@@ -276,7 +305,7 @@ export default {
       const denominator =
         (+minterRewardFormatted / ONE_DAY_VALUE / positionAgeDays) *
         1.5 *
-        +syntPrice; // (syntValue * 1.5)
+        uSPAC10_PRICE; 
 
       if (syntValue && positionAgeDays) {
         apyMint =
@@ -293,30 +322,21 @@ export default {
 
       const priceAPY = apyMint + apyStake;
 
-      console.log(
-        "collateralAmount: ",
-        collateralAmount,
-        "collateralBalance: ",
-        collateralBalance,
-        "contractProperties: ",
-        contractProperties
-      );
-
       if (
         item.Name &&
-        ["uSPAC5", "uSPAC10", "uSPAC10-test"].includes(item.Name)
+        ["uSPAC5", "uSPAC10"].includes(item.Name)
       ) {
         const value = item.Name;
         const selectedValue = this.INSTRUMENTS.find((i) => i.Name === value);
         const globalCollateralRatio =
           +contractProperties.totalPositionCollateralFormatted /
           (+contractProperties.totalTokensOutstandingFormatted *
-            this.INSTRUMENTS[0].Price);
+            uSPAC10_PRICE);
 
         this.synthetic = {
           name: selectedValue.Name,
           cr: selectedValue.CR,
-          price: selectedValue.Price,
+          price: uSPAC10_PRICE,
           rewards: (+minterRewardFormatted).toFixed(toFix).toString(),
           totalSyntTokensOutstanding:
             contractProperties.totalTokensOutstandingFormatted,
@@ -329,8 +349,7 @@ export default {
 
         if (contractProperties.isExpired) {
           console.error(errorStatus("mintExpired"));
-          const getOracle = false;
-          this.synthetic.isOracle = getOracle;
+          this.synthetic.isOracle = contractProperties.isExpirationPriceReceived;
         }
       }
 
@@ -402,10 +421,15 @@ export default {
       }
     },
 
-    handleClickTab(e, tab = "") {
-      this.activeTab = tab;  
+    async handleClickTab(e, tab = "") {
+      this.activeTab = tab;
       this.clearTab(e, tab);
-      this.isChart = tab === "mint" ? true : false;
+      if (tab === "mint") {
+        this.isChart = true;
+        await this.getTableItem(this.portfolioList[0]);
+      } else {
+        this.isChart = false;
+      }
     },
 
     handleShowMessage(message) {
@@ -419,13 +443,16 @@ export default {
           this.isChart = true;
         });
       }
-    }
+    },
   },
 
   watch: {
-      minterReward: function() {
-          this.GET_PORTFOLIO_FROM_API(this.portfolioList);
+    minterReward: async function () {
+      this.GET_PORTFOLIO_FROM_API(this.portfolioList);
+      if (this.isChart) {
+        await this.getTableItem(this.portfolioList[0]);
       }
+    },
   },
 
   computed: {
@@ -433,18 +460,24 @@ export default {
       "INSTRUMENTS",
       "PORTFOLIO",
       "USER_ACCOUNT",
-      "isCONNECTED", "POSITION", "ACCOUNT", "POOL_PROPERTIES", "FINANCIAL_CONTRACT_PROPERTIES"
+      "isCONNECTED",
+      "POSITION",
+      "ACCOUNT",
+      "POOL_PROPERTIES",
+      "FINANCIAL_CONTRACT_PROPERTIES",
     ]),
 
-    portfolioList: function() {
+    portfolioList: function () {
       const portfolio = [];
+
+      const uSPAC10_PRICE = this.FINANCIAL_CONTRACT_PROPERTIES.priceFormatted ? this.FINANCIAL_CONTRACT_PROPERTIES.priceFormatted : 0;
 
       const instumentsJSON = this.INSTRUMENTS.map((instrument) => {
         return {
           token: instrument.Name,
           decimals: instrument.decimals,
           address: instrument.CollateralAddress,
-          price: instrument.Price,
+          price: uSPAC10_PRICE,
           collateral: instrument.CollateralName,
           description: instrument.Description,
           cr: instrument.CR,
@@ -469,20 +502,28 @@ export default {
         let balance = +collateralAmount.tokenCurrencyBalanceFormatted;
         const value = i.price ? balance * i.price : 0;
 
+        const rewards = !isNaN(this.minterReward)
+          ? (+this.minterReward).toFixed(toFix).toString()
+          : 0;
+        const rewardPaid = this.POSITION.minterRewardPaidFormatted;
+        const rewardWillPaid = !isNaN(this.minterReward)
+          ? (+this.minterReward - +rewardPaid).toFixed(toFix).toString()
+          : 0;
+
         if (balance >= 0) {
           portfolio.push({
             Name: i.token,
             Status: "-",
             Price: i.price,
             Number: balance.toString(),
-            Value: value,
+            Value: (+value).toFixed(toFix).toString(),
             GT: 0,
             UMA: 0,
             Instrument: "",
             CollateralName: i.collateral,
             Description: i.description,
             CR: i.cr,
-            Rewards: this.minterReward,
+            Rewards: `${rewards} (Total) / ${rewardWillPaid} (Next payment)`,
           });
         }
 
@@ -490,7 +531,9 @@ export default {
           Name: "UNISX",
           Status: "-",
           Price: "",
-          Number: collateralAmount.UNISXBalanceFormatted,
+          Number: (+collateralAmount.UNISXBalanceFormatted)
+            .toFixed(toFix)
+            .toString(),
           Value: "",
           GT: 0,
           UMA: 0,
@@ -498,7 +541,11 @@ export default {
           CollateralName: "",
           Description: "",
           CR: "",
-          Rewards: `${collateralAmount.UNISXRewardEarnedFormatted} (${collateralAmount.UNISXStakedFormatted})`,
+          Rewards: `${(+collateralAmount.UNISXRewardEarnedFormatted)
+            .toFixed(toFix)
+            .toString()} (To Claim) / ${(+collateralAmount.UNISXStakedFormatted)
+            .toFixed(toFix)
+            .toString()} (In the Stake)`,
         };
 
         const xunisx = {
@@ -542,13 +589,17 @@ export default {
             CollateralName: "",
             Description: "",
             CR: "",
-            Rewards: `${poolProperties[key].rewardEarnedFormatted} (${poolProperties[key].stakedFormatted})`,
+            Rewards: `${(+poolProperties[key].rewardEarnedFormatted)
+              .toFixed(toFix)
+              .toString()} (To Claim) / ${(+poolProperties[key].stakedFormatted)
+              .toFixed(toFix)
+              .toString()} (In the Stake)`,
           });
         }
       }
 
       return portfolio;
-    }
+    },
   },
 
   created() {},

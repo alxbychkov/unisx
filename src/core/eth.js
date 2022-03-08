@@ -11,7 +11,7 @@ import { ethers } from 'ethers'
 
 import {accountPromise} from './metamask.js'
 import {CHAIN_CONFIG, USER_CR, PRICE_PRECISION, MINTER_REWARDS_PER_TOKEN_DAY} from './config.js'
-import {getPrice} from './price.js'
+import {getPrice, getHistoricalPrice} from './price.js'
 import {getRewards} from './minter_rewards.js'
 
 export const UNISWAP_DECIMALS = 18
@@ -42,10 +42,7 @@ let LPPairs
 
 let price
 
-export const ethPromise = Promise.all([
-  accountPromise,
-  getPrice().then(_price => price = ethers.FixedNumber.from(_price)),
-]).then(async () => {
+export const ethPromise = accountPromise.then(async () => {
     provider = new ethers.providers.Web3Provider(window.ethereum)
     signer = provider.getSigner()
 
@@ -58,7 +55,20 @@ export const ethPromise = Promise.all([
     UNISXStakingRewards = new ethers.Contract(getChainConfig().UNISXStakingRewards, UNISXStakingRewards_ABI, signer)
     LPStakingRewardsFactory = new ethers.Contract(getChainConfig().LPStakingRewardsFactory, LPStakingRewardsFactory_ABI, signer)
 
+    // Initialize price
+    const pricePromise = Promise.all([
+      financialContract.expirationTimestamp().then(ts => ts.toNumber()),
+      provider.getBlock('latest').then(block => block.timestamp),
+    ]).then(async ([expirationTimestamp, currentTimestamp]) => {
+      if(expirationTimestamp > currentTimestamp) {
+        price = ethers.FixedNumber.from(await getPrice())
+      } else {
+        price = ethers.FixedNumber.from(await getHistoricalPrice(expirationTimestamp))
+      }
+    })
+
     await Promise.all([
+
 
       (async () => {
         UNISXDecimals = await UNISXToken.decimals()
@@ -79,11 +89,12 @@ export const ethPromise = Promise.all([
       })(),
 
       (async () => {
-        const [totalTokensOutstanding, totalPositionCollateral] = await Promise.all([
+        const [totalTokensOutstanding, totalPositionCollateral, _] = await Promise.all([
           financialContract.totalTokensOutstanding(),
           financialContract.totalPositionCollateral().then(
             ({rawValue}) => rawValue
           ),
+          pricePromise,
         ])
         GCR = 
           ethers.FixedNumber.from(totalPositionCollateral.toString())
@@ -200,8 +211,48 @@ function promisedProperties(object) {
     });
 }
 
+async function getExpirationState() {
+  const [expirationTimestamp, currentTimestamp, contractState] = await Promise.all([
+    financialContract.expirationTimestamp().then(ts => ts.toNumber()),
+    provider.getBlock('latest').then(block => block.timestamp),
+    financialContract.contractState(),
+  ])
+  if(expirationTimestamp > currentTimestamp) {
+    return {isExpired: false}
+  } else {
+    /* enum ContractState { Open, ExpiredPriceRequested, ExpiredPriceReceived } */
+    if(contractState == 2 /* ExpiredPriceReceived */) {
+      return {isExpired: true, isExpirationPriceReceived: true}
+    } else {
+      return {
+        isExpired: true, 
+        isExpirationPriceReceived: await isExpirationPriceReceived()
+      }
+    }
+  }
+}
+
+async function isExpirationPriceReceived() {
+  const finderAddress = await financialContract.finder()
+  const finderABI = ["function getImplementationAddress(bytes32 interfaceName) external view returns (address)"]
+  const finder = new ethers.Contract(finderAddress, finderABI, provider)
+  const optimisticOracleAddress = await finder.getImplementationAddress(ethers.utils.formatBytes32String("OptimisticOracle"))
+  const optimisticOracleABI = [
+    "function hasPrice(address requester, bytes32 identifier, uint256 timestamp, bytes memory ancillaryData) public view returns (bool)"
+  ]
+  const optimisticOracle = new ethers.Contract(optimisticOracleAddress, optimisticOracleABI, provider)
+  const args = await Promise.all([
+    financialContract.address,
+    financialContract.priceIdentifier(),
+    financialContract.expirationTimestamp(),
+    financialContract.tokenCurrency(),
+  ])
+  const hasPrice = await optimisticOracle.hasPrice(...args)
+  return hasPrice
+}
+
 export async function getFinancialContractProperties(){
-	const props = await promisedProperties({
+	const {expirationState, ...props} = await promisedProperties({
     financialContractAddress: getChainConfig().financialContractAddress,
     tokenCurrencyAddress,
     tokenCurrencyDecimals,
@@ -231,12 +282,16 @@ export async function getFinancialContractProperties(){
       (await financialContract.priceIdentifier()).slice(0, 32)
     ),
 
-    /* enum ContractState { Open, ExpiredPriceRequested, ExpiredPriceReceived } */
-    isExpired: (await financialContract.contractState()) != 0,
+    price,
 
+    priceFormatted: price.toString(),
+
+    expirationState: getExpirationState(),
 	})
 
   return {...props,
+    isExpired: expirationState.isExpired,
+    isExpirationPriceReceived: expirationState.isExpirationPriceReceived,
     totalTokensOutstandingFormatted: formatUnits(props.totalTokensOutstanding, props.tokenCurrencyDecimals),
     totalPositionCollateralFormatted: formatUnits(props.totalPositionCollateral, props.collateralTokenDecimals),
     minSponsorTokensFormatted: formatUnits(props.minSponsorTokens, props.collateralTokenDecimals),
@@ -261,6 +316,13 @@ async function getPositionCreationTime(address) {
   }
 }
 
+async function getMinterRewardPaid(address) {
+  const events = await UNISXToken.queryFilter(
+    UNISXToken.filters.Transfer(getChainConfig().rewardPayer, address)
+  )
+  return events.reduce((total, e) => total.add(e.args.amount), ethers.BigNumber.from(0))
+}
+
 export async function getPosition(address = window.ethereum.selectedAddress){
   const [pos, positionCreationTime, currentTime]  = await Promise.all([
     promisedProperties({
@@ -268,6 +330,7 @@ export async function getPosition(address = window.ethereum.selectedAddress){
       tokensOutstanding: financialContract.positions(address).then(pos =>
         pos.tokensOutstanding.rawValue
       ),
+      minterRewardPaid: getMinterRewardPaid(address),
     }),
     getPositionCreationTime(address),
     (await provider.getBlock('latest')).timestamp,
@@ -315,9 +378,13 @@ export async function getPosition(address = window.ethereum.selectedAddress){
     minterRewardFormatted: minterReward.then(reward => reward.rewardFormatted),
     collateralAvailableForFastWithdrawal,
     collateralAvailableForFastWithdrawalFormatted: formatUnits(collateralAvailableForFastWithdrawal, collateralTokenDecimals),
+
     positionAgeSeconds: positionCreationTime == null
       ? null
       : currentTime - positionCreationTime,
+
+    minterRewardPaid: pos.minterRewardPaid,
+    minterRewardPaidFormatted: formatUnits(pos.minterRewardPaid, UNISXDecimals),
   }
 }
 
@@ -331,9 +398,9 @@ export function toBN(val, decimals) {
     if(matches == null) {
       throw new Error('Invalid number: ' + val)
     }
-    const [_, whole, __, fractional = ''] = matches
+    let [_, whole, __, fractional = ''] = matches
     if (fractional.length > decimals) {
-      throw new Error(`Too many decimals, max is ${decimals}, in ${val}`)
+      fractional = fractional.slice(0, decimals)
     }
     return BN(whole + fractional)
       .mul(
@@ -671,9 +738,6 @@ export async function* removeAllLiquidity(tokenCode, to = window.ethereum.select
   const tokenAmount = reserveToken.mul(liquidity).div(totalLiquidity)
 
   yield* ensureAllowance(liquidity, pair, uniswapV2Router.address)
-
-  console.log('USDCAmount', USDCAmount.toString())
-  console.log('tokenAmount', tokenAmount.toString())
 
   yield {message: 'Sending transaction'}
   const tx = await uniswapV2Router.removeLiquidity(

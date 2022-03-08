@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 import axios from "axios";
-import {getPrice} from '../core/price';
 
-export const isDev = !(process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'global');
+export const routerMode = (process.env.NODE_ENV === 'production') ? 'history' : 'hash';
+export const isDev = !(process.env.NODE_ENV === 'production');
 export const toFix = isDev ? 5 : 4;
 export const COLLATERAL_PRICE = 1;
 
@@ -26,14 +26,14 @@ export async function getJSONdata(url, commit = {}, action = '') {
                     })
 }
 
-export async function createPrice(json) {
+export function createPrice(json) {
     if (typeof json !== 'object' && json.length) return false;
     const ln = json.length;
     for (let i=0; i<ln; i++) {
-        const price = await getPrice();
+        const price = 0;
         json[i].Price = price ? price : 0;
     }
-    return await json;
+    return json;
 }
 
 export function getUnicCoins(array, type) {

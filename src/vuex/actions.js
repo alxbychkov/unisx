@@ -5,7 +5,7 @@ import { CHAIN_TYPE, createPrice, getJSONdata } from "../helpers";
 export const actions = {
     async GET_INSTRUMENTS_FROM_API({commit}) {
         const instruments = await getJSONdata('./static/json/unisx_instruments.json');
-        await createPrice(instruments);
+        createPrice(instruments);
         commit('SET_INSTRUMENTS', instruments);
         return instruments;
     },
