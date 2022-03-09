@@ -60,7 +60,8 @@ export const ethPromise = accountPromise.then(async () => {
       financialContract.expirationTimestamp().then(ts => ts.toNumber()),
       provider.getBlock('latest').then(block => block.timestamp),
     ]).then(async ([expirationTimestamp, currentTimestamp]) => {
-      if(expirationTimestamp > currentTimestamp) {
+      // if(expirationTimestamp > currentTimestamp) {
+        if((expirationTimestamp > currentTimestamp) || sessionStorage.forceCurrentPrice) {
         price = ethers.FixedNumber.from(await getPrice())
       } else {
         price = ethers.FixedNumber.from(await getHistoricalPrice(expirationTimestamp))
