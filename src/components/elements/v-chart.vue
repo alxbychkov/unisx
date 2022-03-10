@@ -23,12 +23,14 @@ export default {
         return {
             filteredChart: [],
             liquidPrice: '',
-            selectedRange: ''
+            selectedRange: '',
+            historicalPrices: []
         }
     },
     computed: {
         ...mapGetters([
-            'HISTORICAL_PRICES'
+            'HISTORICAL_PRICES',
+            'FINANCIAL_CONTRACT_PROPERTIES'
         ]),
 
         chartOptions: function() {
@@ -96,6 +98,13 @@ export default {
             array[0] = [0,price];
             array[1] = [ln-1,price];
             return array;
+        },
+        todayPrice: function() {
+            return {
+                date: (new Date).toLocaleDateString().split('.').reverse().join('-'),
+                price: this.FINANCIAL_CONTRACT_PROPERTIES.priceFormatted ? this.FINANCIAL_CONTRACT_PROPERTIES.priceFormatted : '0',
+                timestamp: ''
+            }
         }
     },
     methods: {
@@ -113,7 +122,7 @@ export default {
 
         filteredChartValues(range = '') {
             if (!range) {
-                this.filteredChart = [...this.HISTORICAL_PRICES];
+                this.filteredChart = [...this.historicalPrices];
                 this.selectedRange = '';
             }
             if (range === 'w') {
@@ -121,21 +130,24 @@ export default {
                 const day = today.getDay();
                 const diff = today.getDate() - day + (day == 0 ? -7:0);
                 const monday = new Date(today.setDate(diff));
-                const sortedObj = this.HISTORICAL_PRICES.filter(k => euroDate(k.date) >= monday);
+                const sortedObj = this.historicalPrices.filter(k => euroDate(k.date) >= monday);
                 this.filteredChart = [...sortedObj];
                 this.selectedRange = 'w';
             }
             if (range === 'q') {
                 const startMonth = getQuarterStartMonth();
                 const startQuarter = new Date(new Date().getFullYear(), startMonth);
-                const sortedObj = this.HISTORICAL_PRICES.filter(k => euroDate(k.date) >= startQuarter);
+                const sortedObj = this.historicalPrices.filter(k => euroDate(k.date) >= startQuarter);
                 this.filteredChart = [...sortedObj];
                 this.selectedRange = 'q';
             }
         }
     },
     created() {
-        this.GET_HISTORICAL_PRICES().then(data => this.filteredChart = [...data]);
+        this.GET_HISTORICAL_PRICES().then(data => {
+            this.historicalPrices = [...data, this.todayPrice]
+            this.filteredChart = this.historicalPrices;
+        });
     },
     mounted() {
         this.getLiquidationPrice().then(price => this.liquidPrice = price);
