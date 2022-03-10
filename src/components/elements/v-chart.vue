@@ -10,7 +10,7 @@
 </template>
 <script>
 import {Chart} from 'highcharts-vue';
-import { ethPromise, getPosition } from '../../core/eth';
+import { ethPromise, getFinancialContractProperties, getPosition } from '../../core/eth';
 import { euroDate, getQuarterStartMonth } from '../../helpers';
 import { mapActions, mapGetters } from 'vuex';
 
@@ -24,13 +24,13 @@ export default {
             filteredChart: [],
             liquidPrice: '',
             selectedRange: '',
-            historicalPrices: []
+            historicalPrices: [],
+            todayPriceValue: ''
         }
     },
     computed: {
         ...mapGetters([
-            'HISTORICAL_PRICES',
-            'FINANCIAL_CONTRACT_PROPERTIES'
+            'HISTORICAL_PRICES'
         ]),
 
         chartOptions: function() {
@@ -102,7 +102,7 @@ export default {
         todayPrice: function() {
             return {
                 date: (new Date).toLocaleDateString().split('.').reverse().join('-'),
-                price: this.FINANCIAL_CONTRACT_PROPERTIES.priceFormatted ? this.FINANCIAL_CONTRACT_PROPERTIES.priceFormatted : '0',
+                price: this.todayPriceValue,
                 timestamp: ''
             }
         }
@@ -114,10 +114,13 @@ export default {
         async getLiquidationPrice() {
             await ethPromise;
             const collateralAmount = await getPosition();
-            if (collateralAmount) {
-                const liquidationPrice = collateralAmount.liquidationPriceFormatted ? collateralAmount.liquidationPriceFormatted : '0.0000';
-                return liquidationPrice;
-            }
+            const financialContractProperties = await getFinancialContractProperties();
+
+            this.todayPriceValue = financialContractProperties.priceFormatted ? financialContractProperties.priceFormatted : '1';
+            
+            const liquidationPrice = collateralAmount.liquidationPriceFormatted ? collateralAmount.liquidationPriceFormatted : '0.0000';
+
+            return liquidationPrice;
         },
 
         filteredChartValues(range = '') {
@@ -145,12 +148,18 @@ export default {
     },
     created() {
         this.GET_HISTORICAL_PRICES().then(data => {
-            this.historicalPrices = [...data, this.todayPrice]
-            this.filteredChart = this.historicalPrices;
+            this.historicalPrices = [...data];
+            this.filteredChart = [...data];
         });
     },
     mounted() {
         this.getLiquidationPrice().then(price => this.liquidPrice = price);
+    },
+    watch: {
+        todayPrice: function() {
+            this.historicalPrices = [...this.historicalPrices, this.todayPrice];
+            this.filteredChart = [...this.historicalPrices, this.todayPrice];
+        }
     },
     updated() {}
 }
