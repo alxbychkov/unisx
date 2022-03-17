@@ -162,7 +162,7 @@ async function getUNISXStaked(account) {
       ])
     )
   }
-  const INDEX = 10
+  const INDEX = 11
   return ethers.BigNumber.from(
     await provider.getStorageAt(UNISXStakingRewards.address, getStorageKey(INDEX, account))
   )
