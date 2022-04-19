@@ -349,9 +349,10 @@ export default {
         };
 
         if (contractProperties.isExpired) {
-          this.handleShowMessage(errorStatus("mintExpired"));
-          this.synthetic.isOracle =
-            contractProperties.isExpirationPriceReceived;
+          // if (!contractProperties.isExpirationPriceReceived) this.handleShowMessage(errorStatus("mintExpired"));
+          // this.synthetic.isOracle =
+          //   contractProperties.isExpirationPriceReceived;
+          this.synthetic.isOracle = true;
         }
       }
 
