@@ -18,6 +18,8 @@ export default function errorStatus(error = '', value = '', token = '') {
             return {isError: true, text: 'Contract in expiration. Waiting expiration price.'};
         case 'setExpired':
             return {isError: false, text: 'Contract in expiration. Press Settle Expired button.'};
+        case 'mintExpiredNoSynth':
+            return {isError: true, text: 'Contract in expiration.'};
         case 'poolTokensCount':
             return {isError: true, text: `The number of ${token} tokens exceeds the available ones in the wallet. Available ${value} ${token}`};
         case 'unPoolTokensCount':

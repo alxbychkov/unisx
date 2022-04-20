@@ -349,13 +349,16 @@ export default {
         };
 
         if (contractProperties.isExpired) {
-          // if (!contractProperties.isExpirationPriceReceived)
-          //   this.handleShowMessage(errorStatus("mintExpired"));
-          // else
-          this.handleShowMessage(errorStatus("setExpired"));
-          // this.synthetic.isOracle =
-          //   contractProperties.isExpirationPriceReceived;
-          this.synthetic.isOracle = true;
+          if (+this.synthetic.syntheticIntheWallet === 0) {
+            this.handleShowMessage(errorStatus("mintExpiredNoSynth"));
+          } else {
+            if (!contractProperties.isExpirationPriceReceived)
+              this.handleShowMessage(errorStatus("mintExpired"));
+            else this.handleShowMessage(errorStatus("setExpired"));
+
+            this.synthetic.isOracle =
+              contractProperties.isExpirationPriceReceived;
+          }
         }
       }
 

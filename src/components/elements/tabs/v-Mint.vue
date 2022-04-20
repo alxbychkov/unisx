@@ -190,7 +190,10 @@
           </button>
         </div>
       </div>
-      <div v-if="synthetic.isExpired" class="but_flex mt-20 lr-auto">
+      <div
+        v-if="synthetic.isExpired && +this.synthetic.syntheticIntheWallet !== 0"
+        class="but_flex mt-20 lr-auto"
+      >
         <button
           class="blueb disabled"
           @click="setExpired"
