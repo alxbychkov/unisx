@@ -191,10 +191,22 @@
         </div>
       </div>
       <div
-        v-if="synthetic.isExpired && +this.synthetic.syntheticIntheWallet !== 0"
+        v-if="
+          synthetic.isExpired &&
+          (+this.synthetic.syntheticIntheWallet !== 0 ||
+            +this.selectedItemBalance.collateralTokens !== 0)
+        "
         class="but_flex mt-20 lr-auto"
       >
         <button
+          v-if="synthetic.isOracle === undefined"
+          class="blueb disabled"
+          @click="expire"
+        >
+          Expire
+        </button>
+        <button
+          v-else
           class="blueb disabled"
           @click="setExpired"
           :disabled="!synthetic.isOracle"
@@ -465,6 +477,10 @@ export default {
         return;
       }
       console.log("settleExpired success!");
+    },
+
+    async expire() {
+      return;
     },
 
     async handleMaxClick(token) {

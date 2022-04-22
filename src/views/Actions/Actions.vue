@@ -133,7 +133,7 @@ import { toFix, separate, defaultSelect } from "../../helpers";
 import errorStatus from "../../helpers/errors";
 import { mapActions, mapGetters } from "vuex";
 
-import { ethPromise } from "../../core/eth";
+import { financialContract, ethPromise } from "../../core/eth";
 
 import vAccount from "../../components/elements/v-account.vue";
 import vTable from "../../components/elements/v-table.vue";
@@ -269,7 +269,7 @@ export default {
       await this.$refs.dex.updateSelectedItem(this.selectedItem.Name);
     },
 
-    updateSelectedItemBalance(item = {}) {
+    async updateSelectedItemBalance(item = {}) {
       const collateralAmount = this.POSITION;
       const collateralBalance = this.ACCOUNT;
       const contractProperties = this.FINANCIAL_CONTRACT_PROPERTIES;
@@ -349,15 +349,33 @@ export default {
         };
 
         if (contractProperties.isExpired) {
-          if (+this.synthetic.syntheticIntheWallet === 0) {
-            this.handleShowMessage(errorStatus("mintExpiredNoSynth"));
-          } else {
-            if (!contractProperties.isExpirationPriceReceived)
-              this.handleShowMessage(errorStatus("mintExpired"));
-            else this.handleShowMessage(errorStatus("setExpired"));
-
-            this.synthetic.isOracle =
-              contractProperties.isExpirationPriceReceived;
+          this.handleShowMessage(errorStatus("mintExpiredNoSynth"));
+          const contractState = await financialContract.contractState();
+          let T = "";
+          if (
+            +this.synthetic.syntheticIntheWallet > 0 ||
+            +collateralAmount.collateralAmountFormatted > 0
+          ) {
+            switch (contractState) {
+              case 0:
+                this.handleShowMessage(errorStatus("mintExpire"));
+                break;
+              case 1:
+                T = await financialContract
+                  .expirationTimestamp()
+                  .then((ts) => ts.toNumber());
+                T = new Date(T + 7200);
+                this.handleShowMessage(
+                  errorStatus("mintExpired", T.toLocaleString())
+                );
+                this.synthetic.isOracle = false;
+                break;
+              case 2:
+                this.handleShowMessage(errorStatus("setExpired"));
+                this.synthetic.isOracle =
+                  contractProperties.isExpirationPriceReceived;
+                break;
+            }
           }
         }
       }
