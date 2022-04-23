@@ -228,6 +228,7 @@ import {
   collateralByTokenCurrency,
   createPosition,
   deposit,
+  financialContract,
   redeem,
   settleExpired,
   tokenCurrencyByCollateral,
@@ -480,7 +481,16 @@ export default {
     },
 
     async expire() {
-      return;
+      try {
+        this.onMessage(errorStatus("proccess"));
+        await financialContract.expire();
+        this.onMessage(errorStatus("success"));
+        this.onAfterClickAction();
+      } catch (e) {
+        this.onMessage(errorStatus("failed"));
+        console.error(e);
+        return;
+      }
     },
 
     async handleMaxClick(token) {

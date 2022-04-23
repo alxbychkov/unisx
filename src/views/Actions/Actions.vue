@@ -352,13 +352,15 @@ export default {
           this.handleShowMessage(errorStatus("mintExpiredNoSynth"));
           const contractState = await financialContract.contractState();
           let T = "";
+
           if (
             +this.synthetic.syntheticIntheWallet > 0 ||
             +collateralAmount.collateralAmountFormatted > 0
           ) {
+           
             switch (contractState) {
               case 0:
-                this.handleShowMessage(errorStatus("mintExpire"));
+                this.handleShowMessage(errorStatus("setExpire"));
                 break;
               case 1:
                 T = await financialContract
