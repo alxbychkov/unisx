@@ -342,7 +342,9 @@ export default {
           totalSyntTokensOutstanding:
             contractProperties.totalTokensOutstandingFormatted,
           totalCollateral: contractProperties.totalPositionCollateralFormatted,
-          globalCollateralizationRation: globalCollateralRatio,
+          globalCollateralizationRation: globalCollateralRatio
+            ? globalCollateralRatio
+            : 0,
           syntheticIntheWallet: collateralBalance.tokenCurrencyBalanceFormatted,
           minSponsorTokens: contractProperties.minSponsorTokensFormatted,
           isExpired: contractProperties.isExpired,
@@ -357,7 +359,6 @@ export default {
             +this.synthetic.syntheticIntheWallet > 0 ||
             +collateralAmount.collateralAmountFormatted > 0
           ) {
-           
             switch (contractState) {
               case 0:
                 this.handleShowMessage(errorStatus("setExpire"));
@@ -598,6 +599,7 @@ export default {
       }
 
       const poolProperties = this.POOL_PROPERTIES;
+
       for (let i of poolInstruments[0]) {
         if (
           i.token.indexOf("Sushiswap UNISX") !== -1 ||
@@ -608,11 +610,23 @@ export default {
               ? separate(separate(i.token)[0], " ")[1]
               : "uSPAC10";
 
+          const rewardEarnedFormatted = poolProperties[key]
+            .rewardEarnedFormatted
+            ? +poolProperties[key].rewardEarnedFormatted
+            : 0;
+          const stakedFormatted = poolProperties[key].stakedFormatted
+            ? +poolProperties[key].stakedFormatted
+            : 0;
+
           portfolio.push({
             Name: i.token,
             Status: "-",
-            Price: (+poolProperties[key].price).toFixed(toFix) ?? 0,
-            Number: poolProperties[key].liquidityFormatted,
+            Price: poolProperties[key].price
+              ? (+poolProperties[key].price).toFixed(toFix) ?? 0
+              : 0,
+            Number: poolProperties[key].liquidityFormatted
+              ? poolProperties[key].liquidityFormatted
+              : 0,
             Value: "",
             GT: 0,
             UMA: 0,
@@ -620,9 +634,9 @@ export default {
             CollateralName: "",
             Description: "",
             CR: "",
-            Rewards: `${(+poolProperties[key].rewardEarnedFormatted)
+            Rewards: `${rewardEarnedFormatted
               .toFixed(toFix)
-              .toString()} (To Claim) / ${(+poolProperties[key].stakedFormatted)
+              .toString()} (To Claim) / ${stakedFormatted
               .toFixed(toFix)
               .toString()} (In the Stake)`,
           });

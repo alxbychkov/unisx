@@ -3,7 +3,7 @@ export const CHAIN_CONFIG = {
   42: {
     // financialContractAddress: '0x204A60b2d31e4795fbF031837D5dD210eb44263a',
     financialContractAddress: sessionStorage.financialContractAddress 
-    ?? '0x204A60b2d31e4795fbF031837D5dD210eb44263a',
+    ?? '0x94318ff5b4e86efac5e3fbee684688c91924d29a',
     UNISXToken: "0x0fd2dD751D4803EbE981CD39d8dcB0dB656F8D44",
     xUNISXToken: "0x29DEAB859E99A32083FEeeE870e6e3eb6403e21c",
     LPStakingRewardsFactory: "0xD99E5262090274468D6A9d91a290d35BC07aA4fD",

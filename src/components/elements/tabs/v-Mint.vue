@@ -319,6 +319,7 @@ export default {
           this.onMessage(errorStatus("mintTokensCount", syntheticInWallet));
           console.error(errorStatus("mintTokensCount"));
         } else if (+tokensAmount < +minSponsorTokens) {
+          console.log(tokensAmount, minSponsorTokens);
           this.onMessage(errorStatus("mintSponsorTokens", minSponsorTokens));
           console.error(errorStatus("mintSponsorTokens", minSponsorTokens));
         } else {
