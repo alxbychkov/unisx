@@ -22,7 +22,7 @@ export const MINTER_REWARD_RATE = Number(100_000n) * (Number(10n) ** Number(18n)
 
 export const USER_CR = '1.5'
 
-export const BASKET = ["DWAC", "IRDM", "PRIM", "TGLS", "MP", "LCID", "GDYN", "SMPL", "ENVX", "QS"]
+export const BASKET = ["DWAC", "IRDM", "MP", "PRIM", "WSC", "SMPL", "TGLS", "CERE", "KW", "ROIC"]
 
 export const CORRECTION_FACTOR = '1.0'
 
