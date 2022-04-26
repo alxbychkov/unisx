@@ -97,8 +97,8 @@ export const ethPromise = accountPromise.then(async () => {
           ),
           pricePromise,
         ])
-        // if (Number(totalTokensOutstanding) === 0)
-        //  totalTokensOutstanding = 1
+        if (Number(totalTokensOutstanding) === 0)
+         totalTokensOutstanding = 1
         GCR = 
           ethers.FixedNumber.from(totalPositionCollateral.toString())
           .divUnsafe(
