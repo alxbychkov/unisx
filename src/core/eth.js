@@ -138,7 +138,7 @@ export const ethPromise = accountPromise.then(async () => {
             )
             if (pairAddress !== '0x0000000000000000000000000000000000000000')
               return [tokenCode, {token, pair, stakingRewards}]
-            else return [tokenCode, {token, pair: {}, stakingRewards}]
+            else return [tokenCode, {token, pair: {}, stakingRewards: {}}]
           })
         ))
       }),
@@ -636,7 +636,7 @@ export async function getPoolProperties(account = window.ethereum.selectedAddres
     Object.fromEntries(
       Object.entries(LPPairs)
         .map(([key, {token, pair, stakingRewards}]) =>{
-          if ((pair instanceof Contract))
+          if ((pair instanceof Contract) && (stakingRewards.address !== '0x0000000000000000000000000000000000000000'))
             return [key, getPairProperties(account, token, pair, stakingRewards)]
           else 
             return [key, {}]
