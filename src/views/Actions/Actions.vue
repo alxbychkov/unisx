@@ -610,6 +610,8 @@ export default {
               ? separate(separate(i.token)[0], " ")[1]
               : "uSPAC10";
 
+          console.log(key, poolProperties[key]);
+
           const rewardEarnedFormatted = poolProperties[key]
             .rewardEarnedFormatted
             ? +poolProperties[key].rewardEarnedFormatted
